@@ -1,20 +1,24 @@
 # W4A - Wargaming for All
 
-A simple RL environment for tactical simulation. Gymnasium interface to BANE simulation engine.
+Reinforcement learning environment for tactical simulation. Gymnasium interface to BANE simulation engine.
 
-## Quick Start
+## Setup
+
+Requires Python 3.9 for SimulationInterface compatibility.
 
 ```bash
-# Create virtual environment
+# Create virtual environment (recommended)
 python -m venv venv
 source venv/bin/activate
 
-# Install
-pip install -e .
-
-# Run tests
-pytest
+# Run setup script
+./setup.sh
 ```
+
+The setup script installs:
+- SimulationInterface (compiled binaries)
+- w4a (editable mode)
+- Dependencies and runs tests
 
 ## What's Included
 

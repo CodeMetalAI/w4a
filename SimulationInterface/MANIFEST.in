@@ -1,0 +1,3 @@
+include SimulationInterface/*.pyd
+include SimulationInterface/*.so
+include SimulationInterface/*.dylib

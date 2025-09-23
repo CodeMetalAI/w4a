@@ -10,14 +10,20 @@ __version__ = "0.1.0"
 from .constants import *
 from .config import Config
 
-# TODO: Uncomment when ready
-# from .trident_island_env import TridentIslandEnv
-# from .wrapper import EnvWrapper  
-# from .replay import ReplayRecorder
-# from .evaluation import RandomAgent, evaluate
-# from .force_design_env import ForceDesignEnv
+from .envs.trident_island_env import TridentIslandEnv
+from .envs.force_design_env import ForceDesignEnv
+from .wrappers.wrapper import EnvWrapper  
+from .training.replay import ReplayRecorder
+from .training.evaluation import RandomAgent, evaluate
 
+# TODO: Decide public api
 __all__ = [
     "__version__",
     "Config",
+    "TridentIslandEnv",
+    "ForceDesignEnv", 
+    "EnvWrapper",
+    "ReplayRecorder",
+    "RandomAgent",
+    "evaluate",
 ]

@@ -9,7 +9,7 @@ from gymnasium import spaces
 import numpy as np
 from typing import Dict, Any, Optional, Tuple
 
-from .config import Config
+from ..config import Config
 
 import SimulationInterface
 from SimulationInterface import (
