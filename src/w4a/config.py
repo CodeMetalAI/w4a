@@ -26,6 +26,13 @@ class Config:
     
     # Environment setup (uses constants but can be overridden)
     map_size: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
+    grid_resolution_km: int = 50  # Discretized grid resolution in km
+    
+    # Action space parameters
+    max_entities: int = 50  # Maximum entities per side # TODO: Is this reasonable?
+    max_weapon_types: int = 8  # Maximum weapon types per entity # TODO: Is this reasonable?
+    max_patrol_axis_km: int = 30  # Maximum CAP route long axis length, discretized in 1km increments # TODO: Is this reasonable?
+    angle_resolution_degrees: int = 10  # Angle discretization
     
     # Runtime settings
     render_mode: str = "rgb_array"
