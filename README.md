@@ -15,33 +15,26 @@ source venv/bin/activate
 ./setup.sh
 ```
 
-The setup script installs:
-- SimulationInterface (compiled binaries)
-- w4a (editable mode)
-- Dependencies and runs tests
-
 ## What's Included
 
-1. **TridentIslandEnv** - Single-agent Gymnasium environment
-2. **EnvWrapper** - Wrapper for custom reward/action/obs
-3. **Replay system** - Record and visualize episodes  
-4. **RandomAgent** - Baseline for evaluation
+- **TridentIslandEnv** - Single-agent Gymnasium environment
+- **ForceDesignEnv** - Force composition environment skeleton
+- **EnvWrapper** - Hooks for custom reward/action/observation functions
+- **Replay system** - Episode recording with deterministic replay
+- **Scenario examples** - Force composition and laydown template JSONs
 
 ## Usage
 
 ```python
-from w4a import Config
-from w4a.trident_island_env import TridentIslandEnv
-from w4a.wrapper import EnvWrapper
+from w4a import TridentIslandEnv, EnvWrapper, Config
 
 # Basic environment
-config = Config()
-env = TridentIslandEnv(config=config)
+env = TridentIslandEnv()
 
-# With wrapper for customizing obs, action, reward, etc.
+# With custom reward function
 wrapped = EnvWrapper(
     env,
-    reward_fn=lambda obs, action, reward, info: reward * 2
+    reward_fn=lambda obs, action, reward, info: reward + 10
 )
 
 # Run episode
@@ -50,16 +43,28 @@ action = wrapped.action_space.sample()
 obs, reward, done, truncated, info = wrapped.step(action)
 ```
 
+## Customizing Scenarios
+
+Modify JSON files to customize force composition and deployment:
+
+```
+scenarios/
+├── force_composition/     # What units to spawn
+│   ├── LegacyEntityList.json    # Blue forces
+│   └── DynastyEntityList.json   # Red forces
+└── laydown/               # Where units spawn
+    ├── LegacyEntitySpawnData.json   # Blue deployment areas
+    └── DynastyEntitySpawnData.json  # Red deployment areas
+```
+
 ## Structure
 
 ```
-w4a/
-├── src/w4a/
-│   ├── trident_island_env.py    # Main environment
-│   ├── wrapper.py               # Simple wrapper
-│   ├── replay.py                # Replay system
-│   ├── evaluation.py            # Random agent + evaluate()
-│   ├── config.py                # Simple config
-│   └── constants.py             # Basic constants
-└── tests/                       # Tests
+src/w4a/
+├── envs/                  # Environment implementations
+├── wrappers/              # Environment wrappers
+├── training/              # Training utilities (evaluation, replay)
+├── scenarios/             # Force design and deployment examples
+├── config.py              # User configuration
+└── constants.py           # Game constants
 ```
