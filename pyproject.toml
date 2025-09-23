@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "w4a"
+version = "0.1.0"
+description = "Wargaming for AI - A reinforcement learning environment for wargaming simulation"
+readme = "README.md"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = [
+    "gymnasium>=0.29.0",
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "imageio>=2.22.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.20.0",
+]
+visualization = [
+    "plotly>=5.0.0",
+    "dash>=2.0.0",
+    "opencv-python>=4.5.0",
+]
+research = [
+    "stable-baselines3>=2.0.0",
+    "tensorboard>=2.10.0",
+    "wandb>=0.13.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[project.urls]
+Homepage = "https://war.game"
+Repository = "https://github.com/CodeMetalAI/w4a"
+Issues = "https://github.com/CodeMetalAI/w4a/issues"
