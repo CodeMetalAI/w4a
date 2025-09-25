@@ -17,6 +17,8 @@ from .wrappers.wrapper import EnvWrapper
 from .training.replay import ReplayRecorder
 from .training.evaluation import RandomAgent, evaluate
 
+from .entities import w4a_entities
+
 # TODO: Decide public api
 __all__ = [
     "__version__",

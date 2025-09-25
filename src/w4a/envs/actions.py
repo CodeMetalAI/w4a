@@ -11,7 +11,7 @@ import math
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
-    SetRadarFocus, ClearRadarFocus, SetRadarStrength,
+    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag,
     Vector3, Formation, ControllableEntity, EntityDomain,
 )
 
@@ -48,7 +48,7 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
         event = execute_set_radar_focus_action(entity_id, action, entities, config) # @Sanjna: we need the other ones here too.
         player_events.append(event)
     elif action_type == 4:  # Land
-        event = execute_land_action(entity_id, action, entities)
+        event = create_mission_event(entity_id, action, entities)
         player_events.append(event)
     elif action_type == 5:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
@@ -182,17 +182,21 @@ def execute_set_radar_strength_action(entity_id: int, action: Dict, entities: Di
     
     return event
 
-def execute_land_action(entity_id: int, action: Dict, entities: Dict):
+def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     """Execute land action - land at nearest friendly airbase"""
     entity = entities[entity_id]
+    flag = entities[action["flag_id"]]
+
+    event = CaptureFlag()
+    event.entity = entity
+    event.flag = flag
     
     # TODO: Create PlayerEventLand when available in FFSim
     # land_event = PlayerEventLand()
     # land_event.entity = entity
     
     # Placeholder for now
-    return None
-
+    return event
 
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
     """Execute RTB action - return to base"""
