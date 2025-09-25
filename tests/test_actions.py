@@ -11,15 +11,18 @@ from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 
 from SimulationInterface import (Vector3, Simulation, create_mock_entity)
-from w4a import (execute_move_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_set_radar_strength_action, execute_capture_action)
+from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_set_radar_strength_action, execute_capture_action, execute_refuel_action)
 
 from w4a import w4a_entities
 
 def create_test_entity():
-    return create_mock_entity(Simulation.create_mission_event(w4a_entities.get_entity("F-35C (Air Superiority)")))
+    return w4a_entities.create_mock_entity("F-35C (Air Superiority)")
+
+def create_refueling_entity():
+    return w4a_entities.create_mock_entity("KC-46")
 
 def create_flag():
-    return create_mock_entity(Simulation.create_mission_event(w4a_entities.get_entity("NeutralFlag")))
+    return w4a_entities.create_mock_entity("NeutralFlag")
 
 def test_move_action():
     """Test move action"""
@@ -41,9 +44,24 @@ def test_move_action():
 
     avg = sum(race_track, Vector3(0, 0, 0)) / len(race_track)
 
-    print(f"Average position {avg}")
+    #print(f"Average position {avg}")
 
     # Todo: not sure yet how to validate this any further
+
+def test_rtb_action():
+    """Test rtb action"""
+
+    entity = create_test_entity()
+    flag = create_flag()
+
+    entities = { 1: entity, 2: flag}
+
+    action = {"flag_id": 2 }
+
+    event = execute_rtb_action(1, action, entities)
+
+    assert event
+    assert event.flag == flag
 
 def test_set_radar_focus_action():
     """Test set radar focus action"""
@@ -99,4 +117,22 @@ def test_capture_action():
 
     assert event
     assert event.flag == flag
+
+def test_refuel_action():
+    """Test refuelk action"""
+
+    entity = create_test_entity()
+    refueling_entity = create_refueling_entity()
+
+    entities = { 1: entity, 2: refueling_entity}
+
+    action = {"refuel_target_id": 2 }
+
+    event = execute_refuel_action(1, action, entities)
+
+    assert event
+    assert event.component
+    assert event.component.entity == entity
+    assert event.refueling_entity == refueling_entity
+
 

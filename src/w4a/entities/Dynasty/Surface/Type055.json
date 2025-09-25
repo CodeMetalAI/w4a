@@ -1,0 +1,180 @@
+{
+    "EventName": "SimSpawnShip",
+    "EntityId": 0,
+    "Faction": 1,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 1,
+        "Domain": 3,
+        "Country": 45,
+        "Category": 3,
+        "SubCategory": 1,
+        "Specific": 0,
+        "Extra": 0
+    },
+    "SpawnComponents": [],
+    "Pos": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Rot": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+    },
+    "Controllable": true,
+    "FormationOffset": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Specifications": {
+        "CruisingSpeed": 8.0,
+        "MaxSpeed": 15.5,
+        "RadarCrossSection": 8000.0,
+        "FuelCapacity": 1500.0,
+        "RadarData": [
+            {
+                "RadarFOV": 1.5707963705062866,
+                "TransmitterPower": 50000.0,
+                "TransmitterGain": 10000.0,
+                "ReceiverGain": 316.0,
+                "SignalWavelength": 0.08500000089406967,
+                "MinimumSignalPower": 1.0000000036274937e-15,
+                "TransmitterLosses": 2.0,
+                "ReceiverLosses": 2.0,
+                "FilterBandwidth": 1000000000.0,
+                "NoiseFigure": 2.0,
+                "WorkingTemperature": 343.0,
+                "Rotates": false,
+                "RotationPeriod": 0.0,
+                "PositionAngle": 0.0,
+                "MemoryTime": 10.0,
+                "RotationRange": 0.0,
+                "FilterMethod": 1,
+                "FusionMethod": 1
+            }
+        ],
+        "JammerData": []
+    },
+    "Loadout": {
+        "Weapons": {
+            "/Game/Simulation/Projectiles/Dynasty/Sea/CJ-10.CJ-10": {
+                "Projectile": {
+                    "DISEntityType": {
+                        "Kind": 2,
+                        "Domain": 9,
+                        "Country": 45,
+                        "Category": 1,
+                        "SubCategory": 17,
+                        "Specific": 4,
+                        "Extra": 0
+                    },
+                    "Range": 1600000.0,
+                    "Damage": 100.0,
+                    "Speed": 270.0,
+                    "AutonomousDistance": 1400000.0,
+                    "BlastRadius": 100.0,
+                    "Accuracy": 0.949999988079071,
+                    "MaxAcceleration": 294.29998779296875,
+                    "RadarCrossSection": 0.5,
+                    "TargetDomains": 1
+                },
+                "Ammo": 24
+            },
+            "/Game/Simulation/Projectiles/Dynasty/Sea/HHQ-16.HHQ-16": {
+                "Projectile": {
+                    "DISEntityType": {
+                        "Kind": 2,
+                        "Domain": 1,
+                        "Country": 45,
+                        "Category": 1,
+                        "SubCategory": 26,
+                        "Specific": 1,
+                        "Extra": 0
+                    },
+                    "Range": 50000.0,
+                    "Damage": 100.0,
+                    "Speed": 1400.0,
+                    "AutonomousDistance": 20000.0,
+                    "BlastRadius": 8.0,
+                    "Accuracy": 0.8500000238418579,
+                    "MaxAcceleration": 4806.89990234375,
+                    "RadarCrossSection": 0.05000000074505806,
+                    "TargetDomains": 2
+                },
+                "Ammo": 32
+            },
+            "/Game/Simulation/Projectiles/Dynasty/Sea/HHQ-26.HHQ-26": {
+                "Projectile": {
+                    "DISEntityType": {
+                        "Kind": 2,
+                        "Domain": 1,
+                        "Country": 45,
+                        "Category": 1,
+                        "SubCategory": 37,
+                        "Specific": 1,
+                        "Extra": 0
+                    },
+                    "Range": 240000.0,
+                    "Damage": 100.0,
+                    "Speed": 1200.0,
+                    "AutonomousDistance": 100000.0,
+                    "BlastRadius": 35.0,
+                    "Accuracy": 0.8999999761581421,
+                    "MaxAcceleration": 2452.5,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "TargetDomains": 7
+                },
+                "Ammo": 32
+            },
+            "/Game/Simulation/Projectiles/Dynasty/Sea/HHQ-9.HHQ-9": {
+                "Projectile": {
+                    "DISEntityType": {
+                        "Kind": 2,
+                        "Domain": 1,
+                        "Country": 45,
+                        "Category": 1,
+                        "SubCategory": 19,
+                        "Specific": 1,
+                        "Extra": 0
+                    },
+                    "Range": 160000.0,
+                    "Damage": 100.0,
+                    "Speed": 1000.0,
+                    "AutonomousDistance": 80000.0,
+                    "BlastRadius": 30.0,
+                    "Accuracy": 0.8500000238418579,
+                    "MaxAcceleration": 2158.199951171875,
+                    "RadarCrossSection": 0.15000000596046448,
+                    "TargetDomains": 2
+                },
+                "Ammo": 24
+            }
+        }
+    },
+    "Vel": {
+        "X": 15.5,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "ShipSpecifications": {
+        "Mass": 9800000.0,
+        "EnginePower": 59656000.0,
+        "CrossSectionalArea": 5000.0,
+        "DragCoefficient": 0.3199999928474426,
+        "RudderLiftCoefficient": 5.0,
+        "MaxRudderAngle": 0.6108652353286743,
+        "RudderArea": 25.0,
+        "RudderRate": 0.05235987901687622,
+        "Length": 173.0,
+        "InertiaMoment": 99999997952.0,
+        "RudderCoMDistance": 60.0,
+        "LatDampingCoefficient": 0.5,
+        "RotDampingCoefficient": 0.25,
+        "MaxAngularSpeed": 0.0013962633674964309,
+        "BackwardSpeedFraction": 0.10000000149011612
+    }
+}

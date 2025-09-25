@@ -11,8 +11,9 @@ import math
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
-    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag,
-    Vector3, Formation, ControllableEntity, EntityDomain,
+    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag, Refuel,
+    RefuelComponent,
+    Vector3, Formation, ControllableEntity, EntityDomain, 
 )
 
 
@@ -106,17 +107,15 @@ def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Co
     long_axis_m = action["move_long_axis_km"] * 1000 #config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
     axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
     
-    # Create CAP route using FFSim pattern
     entity = entities[entity_id]
 
     center = Vector3(center_x, center_y, entity.pos.z)
-
     axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
 
-    cap_maneuver = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
-    cap_maneuver.entity = entity
+    event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+    event.entity = entity
 
-    return cap_maneuver
+    return event
 
 
 def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_groups: Dict):
@@ -190,24 +189,19 @@ def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     event = CaptureFlag()
     event.entity = entity
     event.flag = flag
-    
-    # TODO: Create PlayerEventLand when available in FFSim
-    # land_event = PlayerEventLand()
-    # land_event.entity = entity
-    
-    # Placeholder for now
+
     return event
 
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
     """Execute RTB action - return to base"""
     entity = entities[entity_id]
-    
-    rtb_maneuver = RTBManouver()
-    # TODO: Configure RTB maneuver with entity's home base
-    # rtb_maneuver.target_base = entity.home_base
-    
-    return rtb_maneuver
+    flag = entities[action["flag_id"]]
 
+    event = RTBManouver()
+    event.entity = entity
+    event.flag = flag
+    
+    return event
 
 def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     """Execute refuel action - refuel from another entity"""
@@ -215,15 +209,13 @@ def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     
     entity = entities[entity_id]
     refuel_target = entities[refuel_target_id]
-    
-    # TODO: Create PlayerEventRefuel when available in FFSim
-    # refuel_event = PlayerEventRefuel()
-    # refuel_event.entity = entity
-    # refuel_event.refuel_source = refuel_target
-    
-    # Placeholder for now
-    return None
 
+    event = Refuel()
+    event.component = entity.find_component_by_class(RefuelComponent)
+    event.entity = entity
+    event.refueling_entity = refuel_target
+    
+    return event
 
 # =============================================================================
 # ACTION VALIDATION FUNCTIONS
