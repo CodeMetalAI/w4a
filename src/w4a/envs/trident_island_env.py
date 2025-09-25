@@ -10,14 +10,13 @@ import numpy as np
 from typing import Dict, Any, Optional, Tuple, List
 
 from ..config import Config
+from . import actions
 
 import SimulationInterface
 from SimulationInterface import (
     SimulationConfig, SimulationData, Faction,
     EntitySpawned, Victory, AdversaryContact,
-    Entity, ControllableEntity, Unit,
-    PlayerEventCommit, MoveManouver, CAPManouver, RTBManouver,
-    Vector3, Formation
+    Entity, ControllableEntity, Unit
 )
 
 
@@ -132,7 +131,7 @@ class TridentIslandEnv(gym.Env):
         self.current_step += 1
         
         # Execute action based on type
-        player_events = self._execute_action(action)
+        player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
         # Prepare simulation step data
         sim_data = SimulationData()
@@ -193,39 +192,6 @@ class TridentIslandEnv(gym.Env):
         # - Victory/defeat conditions
         pass
     
-    def _execute_action(self, action: Dict):
-        """Execute hierarchical action and return player events"""
-        action_type = action["action_type"]
-        entity_id = action["entity_id"]
-        
-        # Filter for valid actions automatically
-        if not self._is_valid_action(action):
-            return []  # Invalid action, return empty events
-        
-        player_events = []
-        
-        if action_type == 0:  # No-op
-            pass
-        elif action_type == 1:  # Move
-            event = self._execute_move_action(entity_id, action)
-            player_events.append(event)
-        elif action_type == 2:  # Engage
-            event = self._execute_engage_action(entity_id, action)
-            player_events.append(event)
-        elif action_type == 3:  # Sense
-            event = self._execute_sense_action(entity_id, action)
-            player_events.append(event)
-        elif action_type == 4:  # Land
-            event = self._execute_land_action(entity_id, action)
-            player_events.append(event)
-        elif action_type == 5:  # RTB
-            event = self._execute_rtb_action(entity_id, action)
-            player_events.append(event)
-        elif action_type == 6:  # Refuel
-            event = self._execute_refuel_action(entity_id, action)
-            player_events.append(event)
-        
-        return player_events
     
     def render(self) -> Optional[np.ndarray]:
         # TODO: Should we implement rendering?
@@ -259,178 +225,22 @@ class TridentIslandEnv(gym.Env):
         # - Set up spawn area constraints for unit placement
         pass
     
-    def _is_valid_action(self, action: Dict) -> bool:
-        """Check if action is valid (automatic filtering)"""
-        # TODO: Implement action masking logic
-        # - Check entity exists and is controllable
-        # - Check entity has required capabilities for action type
-        # - Check targets are visible and in range for engage actions
-        # - Check domain compatibility
-        return True  # Placeholder - always valid for now
     
-    def _grid_to_position(self, grid_index: int) -> Tuple[float, float]:
-        """Convert grid index to world coordinates"""
-        grid_x = grid_index % self.grid_size
-        grid_y = grid_index // self.grid_size
-        
-        # Convert to world coordinates (meters)
-        world_x = (grid_x * self.config.grid_resolution_km * 1000) - (self.config.map_size[0] // 2)
-        world_y = (grid_y * self.config.grid_resolution_km * 1000) - (self.config.map_size[1] // 2)
-        
-        return world_x, world_y
     
-    def _select_weapons_from_available(self, available_weapons: Dict, selection_index: int) -> Dict:
-        """Select specific weapons from FFSim-compatible weapons using combinatorial selection.
-        
-        Args:
-            available_weapons: Dict from entity.select_weapons() containing compatible weapons
-            selection_index: Agent's weapon combination choice (0 to max_weapon_combinations-1)
-            
-        Returns:
-            Dict containing selected weapons
-        """
-        available_keys = list(available_weapons.keys())
-        
-        if len(available_keys) == 0:
-            return {}  # No compatible weapons available
-        
-        # Convert selection_index to binary combination
-        # selection_index 0 maps to combination 1 (first weapon only)
-        # selection_index 1 maps to combination 2 (second weapon only)  
-        # selection_index 2 maps to combination 3 (first + second weapons)
-        # etc.
-        num_available = len(available_keys)
-        max_combinations = (1 << num_available) - 1  # 2^n - 1
-        
-        # Ensure selection_index is valid and avoid empty selection
-        combination_index = (selection_index % max_combinations) + 1
-        
-        result = {}
-        for i, key in enumerate(available_keys):
-            if combination_index & (1 << i):  # Check if bit i is set
-                result[key] = available_weapons[key]
-        
-        return result
     
-    def _get_valid_weapon_combinations(self, available_weapons: Dict) -> List[int]:
-        """Get valid combination indices for current available weapons.
-        
-        Args:
-            available_weapons: Dict from entity.select_weapons() containing compatible weapons
-            
-        Returns:
-            List of valid selection_index values for current available weapons
-        """
-        num_available = len(available_weapons)
-        if num_available == 0:
-            return []
-        
-        # Valid combinations: 1 to 2^num_available - 1 (mapped to selection indices 0 to 2^n-2)
-        max_combinations = (1 << num_available) - 1  # 2^n - 1
-        return list(range(max_combinations))  # [0, 1, 2, ...] for selection indices
     
-    def _execute_move_action(self, entity_id: int, action: Dict):
-        """Execute move action - create CAP maneuver"""
-        center_x, center_y = self._grid_to_position(action["move_center_grid"])
-        short_angle = action["move_short_angle"] * self.config.angle_resolution_degrees
-        long_axis_km = self.config.min_patrol_axis_km + (action["move_long_axis_km"] * self.config.patrol_axis_increment_km)
-        axis_angle = action["move_axis_angle"] * self.config.angle_resolution_degrees
-        
-        # Create CAP route using FFSim pattern
-        entity = self.entities[entity_id]
-        
-        cap_maneuver = CAPManouver()
-        # TODO: Placeholder call for CAP route creation with center, angles, axis length
-        # cap_maneuver.create_from_parameters(center_x, center_y, short_angle, long_axis_km, axis_angle)
-        
-        return cap_maneuver
     
-    def _execute_engage_action(self, entity_id: int, action: Dict):
-        """Execute engage action - create combat commit"""
-        # TODO: Set weapon selection based on target entity sampled, max weapons 5 across all domains (in practice this should be 2)
-        # TODO: Check out of weapons
-        # TODO: Consider sample from valid target groups instead of target IDs
-        # TODO: We see a target group -- there is already a valid domain, so we know what weapons we can select from
-        target_group_id = action["target_group_id"]
-        weapon_selection = action["weapon_selection"]
-        weapon_usage = action["weapon_usage"]
-        weapon_engagement = action["weapon_engagement"]
-        
-        entity = self.entities[entity_id]
-        target_group = self.target_groups[target_group_id]  # Direct target group access
-        
-        # Get weapons compatible with target group
-        available_weapons = entity.select_weapons(target_group, False)
-        
-        # RL agent selects which compatible weapons to use
-        selected_weapons = self._select_weapons_from_available(available_weapons, weapon_selection)
-        
-        # TODO: Check if selected weapons have ammo available
-        
-        commit = PlayerEventCommit()
-        commit.entity = entity
-        commit.target_group = target_group
-        commit.manouver_data.throttle = 1.0  # Always max throttle
-        commit.manouver_data.engagement = weapon_engagement
-        commit.manouver_data.weapon_usage = weapon_usage  # 0=1/unit, 1=1/adversary, 2=2/adversary
-        commit.manouver_data.weapons = selected_weapons.keys()
-        commit.manouver_data.wez_scale = 1  # Always 1
-        
-        return commit
-    # TODO: Radar strength is on / off (0, 1) -- turn stealth on
-    # TODO: Point radar in a direction (can toggle on (default this forward) OR off (and select the point to toggle)) -- set direction to sense
-    def _execute_sense_action(self, entity_id: int, action: Dict):
-        """Execute sensing action"""
-
-        entity = self.entities[entity_id]
-        sense_x, sense_y = self._grid_to_position(action["sense_grid"])
-        radar_strength = action["radar_strength"]
-        
-        # TODO: Placeholder call for sensing action
-        # sensing_event = PlayerEventSense()
-        # sensing_event.entity = entity
-        # sensing_event.target_position = Vector3(sense_x, sense_y, 0)
-        # sensing_event.radar_strength = radar_strength
-        
-        return None  # TODO: Return sensing_event when implemented
     
-    def _execute_land_action(self, entity_id: int, action: Dict): # TODO: Change this to capture
-        """Execute land action"""
-        
-        entity = self.entities[entity_id]
-
-        # TODO: Placeholder call for land action
-        # land_event = PlayerEventLand()
-        # land_event.entity = entity
-        # land_event.target_position = self.center_island_position  # Fixed center island location
-        
-        return None  # TODO: Return land_event when implemented
     
-    def _execute_rtb_action(self, entity_id: int, action: Dict):
-        """Execute return to base action"""
-        
-        entity = self.entities[entity_id]
-        
-        rtb = RTBManouver()
-        # TODO: Set entity and create path to base
-        # rtb.entity = entity
-        # rtb.spline_points = [entity.pos, self.base_position]
-        
-        return rtb
     
-    def _execute_refuel_action(self, entity_id: int, action: Dict):
-        """Execute refuel action"""
-        entity = self.entities[entity_id] # This points to squadron ID
-        refuel_target_id = action["refuel_target_id"] # Refuel source? Maybe target isnt the correct term?
-        # TODO: Masking for entities that support refueling
-
-        
-        # TODO: Placeholder call for refuel action
-        # refuel_event = PlayerEventRefuel()
-        # refuel_event.entity = entity
-        # refuel_event.target_entity = refuel_target_id
-        
-        return None  # TODO: Return refuel_event when implemented
+    
+    
+    
+    
+    
+    
+    
+    
     
     def close(self):
         """Clean up"""

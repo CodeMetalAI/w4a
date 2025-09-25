@@ -33,6 +33,9 @@ class Config:
     max_target_groups: int = 20  # Maximum target groups in scenario # TODO: Is this reasonable?
     max_weapons: int = 5  # Maximum weapons any entity can have across all domains (typically 2)
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
+    
+    # Faction configuration
+    our_faction: int = 1  # 0=LEGACY, 1=DYNASTY # TODO: Make this configurable per scenario
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
     max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  
