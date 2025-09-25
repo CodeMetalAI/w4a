@@ -30,6 +30,7 @@ class Config:
     
     # Action space parameters
     max_entities: int = 50  # Maximum entities per side # TODO: Is this reasonable?
+    max_target_groups: int = 20  # Maximum target groups in scenario # TODO: Is this reasonable?
     max_weapon_types: int = 8  # Maximum weapon types per entity # TODO: Is this reasonable?
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length

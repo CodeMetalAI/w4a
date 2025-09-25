@@ -87,7 +87,7 @@ class TridentIslandEnv(gym.Env):
             "move_axis_angle": spaces.Discrete(angle_steps),   # Based on angle resolution
             
             # Engage action parameters
-            "target_entity_id": spaces.Discrete(self.config.max_entities),
+            "target_group_id": spaces.Discrete(self.config.max_target_groups),
             "weapon_selection": spaces.Discrete(self.config.max_weapon_types), # TODO: This depends on target (does this change in the game?)
             "weapon_usage": spaces.Discrete(3),       # 0=1 shot/unit, 1=1 shot/adversary, 2=2 shots/adversary
             "weapon_engagement": spaces.Discrete(4),  # 0=defensive, 1=cautious, 2=assertive, 3=offensive
@@ -111,6 +111,7 @@ class TridentIslandEnv(gym.Env):
         
         # Entity tracking
         self.entities = {}  # TODO: Populate during simulation setup
+        self.target_groups = {}  # TODO: Populate with target groups from simulation
         
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
         """Reset environment"""
@@ -300,14 +301,13 @@ class TridentIslandEnv(gym.Env):
         # TODO: Check out of weapons
         # TODO: Consider sample from valid target groups instead of target IDs
         # TODO: We see a target group -- there is already a valid domain, so we know what weapons we can select from
-        target_id = action["target_entity_id"]
+        target_group_id = action["target_group_id"]
         weapon_selection = action["weapon_selection"]
         weapon_usage = action["weapon_usage"]
         weapon_engagement = action["weapon_engagement"]
         
         entity = self.entities[entity_id]
-        target = self.entities[target_id]
-        target_group = target.get_target_group() # TODO: Get rid of this!
+        target_group = self.target_groups[target_group_id]  # Direct target group access
         
         # If entity.select_weapon is {}, no weapons
         # Learn which weapons to select, TODO: Add a mask for compatible weapons
