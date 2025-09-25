@@ -7,9 +7,11 @@ Pure functions with explicit dependencies for better testability and maintainabi
 from typing import Dict, List, Tuple
 from ..config import Config
 
+import math
+
 from SimulationInterface import (
-    PlayerEventCommit, MoveManouver, CAPManouver, RTBManouver,
-    Vector3, Formation, ControllableEntity, EntityDomain
+    PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
+    Vector3, Formation, ControllableEntity, EntityDomain,
 )
 
 
@@ -99,17 +101,19 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action - create CAP maneuver"""
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
-    short_angle = action["move_short_angle"] * config.angle_resolution_degrees
-    long_axis_km = config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km)
-    axis_angle = action["move_axis_angle"] * config.angle_resolution_degrees
+    short_axis_m = action["move_short_axis_km"] * 1000
+    long_axis_m = action["move_long_axis_km"] * 1000 #config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
+    axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
     
     # Create CAP route using FFSim pattern
     entity = entities[entity_id]
-    
-    cap_maneuver = CAPManouver()
-    # TODO: Placeholder call for CAP route creation with center, angles, axis length
-    # cap_maneuver.create_from_parameters(center_x, center_y, short_angle, long_axis_km, axis_angle)
-    
+
+    center = Vector3(center_x, center_y, entity.pos.z)
+
+    axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
+
+    cap_maneuver = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+
     return cap_maneuver
 
 
@@ -417,7 +421,8 @@ def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
 
 def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
     """Convert grid index to world coordinates"""
-    grid_size = int((config.map_size[0] / 1000) / config.grid_resolution_km)  # Grid size in cells
+
+    grid_size = int(config.map_size[0] / config.grid_resolution_km)  # Grid size in cells
     
     grid_x = grid_index % grid_size
     grid_y = grid_index // grid_size
