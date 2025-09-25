@@ -76,7 +76,7 @@ class TridentIslandEnv(gym.Env):
         
         # Hierarchical action space
         self.action_space = spaces.Dict({
-            "action_type": spaces.Discrete(7),  # 0=noop, 1=move, 2=engage, 3=sense, 4=land, 5=rtb, 6=refuel
+            "action_type": spaces.Discrete(8),  # 0=noop, 1=move, 2=engage, 3=stealth, 4=sense_direction, 5=land, 6=rtb, 7=refuel
             "entity_id": spaces.Discrete(self.config.max_entities),
             
             # Move action parameters
@@ -91,9 +91,11 @@ class TridentIslandEnv(gym.Env):
             "weapon_usage": spaces.Discrete(3),       # 0=1 shot/unit, 1=1 shot/adversary, 2=2 shots/adversary
             "weapon_engagement": spaces.Discrete(4),  # 0=defensive, 1=cautious, 2=assertive, 3=offensive
             
-            # Sensing action parameters
-            "sense_grid": spaces.Discrete(self.max_grid_positions),
-            "radar_strength": spaces.Discrete(2),     # 0=stealth, 1=max power
+            # Stealth action parameters
+            "stealth_enabled": spaces.Discrete(2),    # 0=off, 1=on
+            
+            # Sensing direction action parameters
+            "sensing_direction_grid": spaces.Discrete(self.max_grid_positions),
             
             # Refuel action parameters
             "refuel_target_id": spaces.Discrete(self.config.max_entities),

@@ -1,7 +1,5 @@
 """
 Action execution and validation functions for TridentIslandEnv.
-
-Pure functions with explicit dependencies for better testability and maintainability.
 """
 
 from typing import Dict, List, Tuple
@@ -41,16 +39,21 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     elif action_type == 2:  # Engage
         event = execute_engage_action(entity_id, action, entities, target_groups)
         player_events.append(event)
-    elif action_type == 3:  # Sense
-        event = execute_sense_action(entity_id, action, entities, config)
-        player_events.append(event)
-    elif action_type == 4:  # Land
+    elif action_type == 3:  # Stealth
+        event = execute_stealth_action(entity_id, action, entities)
+        if event:
+            player_events.append(event)
+    elif action_type == 4:  # Sensing Direction
+        event = execute_sensing_direction_action(entity_id, action, entities, config)
+        if event:
+            player_events.append(event)
+    elif action_type == 5:  # Land
         event = execute_land_action(entity_id, action, entities)
         player_events.append(event)
-    elif action_type == 5:  # RTB
+    elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
         player_events.append(event)
-    elif action_type == 6:  # Refuel
+    elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
         player_events.append(event)
     
@@ -80,21 +83,19 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_move_action(action, entities, config)
     elif action_type == 2:  # Engage
         return validate_engage_action(action, entities, target_groups)
-    elif action_type == 3:  # Sense
-        return validate_sense_action(action, entities, config)
-    elif action_type == 4:  # Land
+    elif action_type == 3:  # Stealth
+        return validate_stealth_action(action, entities)
+    elif action_type == 4:  # Sensing Direction
+        return validate_sensing_direction_action(action, entities, config)
+    elif action_type == 5:  # Land
         return validate_land_action(action, entities)
-    elif action_type == 5:  # RTB
+    elif action_type == 6:  # RTB
         return validate_rtb_action(action, entities)
-    elif action_type == 6:  # Refuel
+    elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
     
     return False
 
-
-# =============================================================================
-# ACTION EXECUTION FUNCTIONS
-# =============================================================================
 
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action - create CAP maneuver"""
@@ -143,18 +144,31 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     return commit
 
 
-def execute_sense_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute sense action - point radar at location"""
-    sense_x, sense_y = grid_to_position(action["sense_grid"], config)
-    radar_strength = action["radar_strength"]
+def execute_stealth_action(entity_id: int, action: Dict, entities: Dict):
+    """Execute stealth action - enable/disable stealth mode"""
+    stealth_enabled = action["stealth_enabled"]
     
     entity = entities[entity_id]
     
-    # TODO: Create PlayerEventSense when available in FFSim
-    # sense_event = PlayerEventSense()
-    # sense_event.entity = entity
-    # sense_event.position = Vector3(sense_x, sense_y, 0)
-    # sense_event.power_level = radar_strength
+    # TODO: Create PlayerEventStealth when available in FFSim
+    # stealth_event = PlayerEventStealth()
+    # stealth_event.entity = entity
+    # stealth_event.stealth_mode = bool(stealth_enabled)
+    
+    # Placeholder for now
+    return None
+
+
+def execute_sensing_direction_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute sensing direction action - point radar at grid location"""
+    sense_x, sense_y = grid_to_position(action["sensing_direction_grid"], config)
+    
+    entity = entities[entity_id]
+    
+    # TODO: Create PlayerEventSenseDirection when available in FFSim
+    # sense_direction_event = PlayerEventSenseDirection()
+    # sense_direction_event.entity = entity
+    # sense_direction_event.position = Vector3(sense_x, sense_y, 0)
     
     # Placeholder for now
     return None
@@ -198,10 +212,6 @@ def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     # Placeholder for now
     return None
 
-
-# =============================================================================
-# ACTION VALIDATION FUNCTIONS
-# =============================================================================
 
 def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate entity exists and is controllable."""
@@ -283,20 +293,31 @@ def validate_engage_action(action: Dict, entities: Dict, target_groups: Dict) ->
     return True
 
 
-def validate_sense_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate sense action parameters."""
+def validate_stealth_action(action: Dict, entities: Dict) -> bool:
+    """Validate stealth action parameters."""
     entity_id = action["entity_id"]
-    sense_grid = action["sense_grid"]
+    entity = entities[entity_id]
+    
+    if not entity.has_radar:
+        return False
+    
+    return True
+
+
+def validate_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
+    """Validate sensing direction action parameters."""
+    entity_id = action["entity_id"]
+    sensing_direction_grid = action["sensing_direction_grid"]
     
     entity = entities[entity_id]
     
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
-    if sense_grid >= max_grid_positions:
+    if sensing_direction_grid >= max_grid_positions:
         return False
     
     # Convert to world coordinates and check bounds
-    world_x, world_y = grid_to_position(sense_grid, config)
+    world_x, world_y = grid_to_position(sensing_direction_grid, config)
     if not position_in_bounds(world_x, world_y, config):
         return False
     
@@ -357,11 +378,6 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
         return False
     
     return True
-
-
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
 
 def select_weapons_from_available(available_weapons: Dict, selection_index: int) -> Dict:
     """Select specific weapons from FFSim-compatible weapons using combinatorial selection.
