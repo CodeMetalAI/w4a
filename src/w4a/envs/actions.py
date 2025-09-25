@@ -182,8 +182,6 @@ def execute_set_radar_strength_action(entity_id: int, action: Dict, entities: Di
     
     return event
 
-print("Bla", execute_set_radar_strength_action)
-
 def execute_land_action(entity_id: int, action: Dict, entities: Dict):
     """Execute land action - land at nearest friendly airbase"""
     entity = entities[entity_id]
