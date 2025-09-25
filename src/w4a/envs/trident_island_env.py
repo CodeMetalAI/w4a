@@ -73,6 +73,7 @@ class TridentIslandEnv(gym.Env):
         
         # Calculate action space parameters from config
         angle_steps = 360 // self.config.angle_resolution_degrees
+        patrol_steps = (self.config.max_patrol_axis_km - self.config.min_patrol_axis_km) // self.config.patrol_axis_increment_km + 1
         
         # Hierarchical action space
         self.action_space = spaces.Dict({
@@ -82,12 +83,12 @@ class TridentIslandEnv(gym.Env):
             # Move action parameters
             "move_center_grid": spaces.Discrete(self.max_grid_positions),
             "move_short_angle": spaces.Discrete(angle_steps),  # Based on angle resolution
-            "move_long_axis_km": spaces.Discrete(self.config.max_patrol_axis_km),
+            "move_long_axis_km": spaces.Discrete(patrol_steps),  # 100-1000km in 25km increments
             "move_axis_angle": spaces.Discrete(angle_steps),   # Based on angle resolution
             
             # Engage action parameters
             "target_entity_id": spaces.Discrete(self.config.max_entities),
-            "weapon_selection": spaces.Discrete(self.config.max_weapon_types),
+            "weapon_selection": spaces.Discrete(self.config.max_weapon_types), # TODO: This depends on target (does this change in the game?)
             "weapon_usage": spaces.Discrete(3),       # 0=1 shot/unit, 1=1 shot/adversary, 2=2 shots/adversary
             "weapon_engagement": spaces.Discrete(4),  # 0=defensive, 1=cautious, 2=assertive, 3=offensive
             
@@ -103,6 +104,7 @@ class TridentIslandEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=1, shape=(100,), dtype=np.float32
         )
+        # TODO: Weapons: Range
         
         self.current_step = 0
         self.simulation_events = []
@@ -280,7 +282,7 @@ class TridentIslandEnv(gym.Env):
         """Execute move action - create CAP maneuver"""
         center_x, center_y = self._grid_to_position(action["move_center_grid"])
         short_angle = action["move_short_angle"] * self.config.angle_resolution_degrees
-        long_axis_km = action["move_long_axis_km"] + 1  # 1 to max_patrol_axis_km
+        long_axis_km = self.config.min_patrol_axis_km + (action["move_long_axis_km"] * self.config.patrol_axis_increment_km)
         axis_angle = action["move_axis_angle"] * self.config.angle_resolution_degrees
         
         # Create CAP route using FFSim pattern
@@ -294,6 +296,10 @@ class TridentIslandEnv(gym.Env):
     
     def _execute_engage_action(self, entity_id: int, action: Dict):
         """Execute engage action - create combat commit"""
+        # TODO: Set weapon selection based on target entity sampled, max weapons 5 across all domains (in practice this should be 2)
+        # TODO: Check out of weapons
+        # TODO: Consider sample from valid target groups instead of target IDs
+        # TODO: We see a target group -- there is already a valid domain, so we know what weapons we can select from
         target_id = action["target_entity_id"]
         weapon_selection = action["weapon_selection"]
         weapon_usage = action["weapon_usage"]
@@ -301,8 +307,11 @@ class TridentIslandEnv(gym.Env):
         
         entity = self.entities[entity_id]
         target = self.entities[target_id]
-        target_group = target.get_target_group()
+        target_group = target.get_target_group() # TODO: Get rid of this!
         
+        # If entity.select_weapon is {}, no weapons
+        # Learn which weapons to select, TODO: Add a mask for compatible weapons
+        # TODO: Learn which weapons, and the number to sample
         selected_weapons = entity.select_weapons(target_group, False) # TODO: What is entity.select_weapons? Is this a decision for the agent to make or does the sim handle this?
         
         commit = PlayerEventCommit()
@@ -316,7 +325,8 @@ class TridentIslandEnv(gym.Env):
         commit.manouver_data.wez_scale = 1  # Always 1
         
         return commit
-    
+    # TODO: Radar strength is on / off (0, 1) -- turn stealth on
+    # TODO: Point radar in a direction (can toggle on (default this forward) OR off (and select the point to toggle)) -- set direction to sense
     def _execute_sense_action(self, entity_id: int, action: Dict):
         """Execute sensing action"""
 
@@ -332,7 +342,7 @@ class TridentIslandEnv(gym.Env):
         
         return None  # TODO: Return sensing_event when implemented
     
-    def _execute_land_action(self, entity_id: int, action: Dict):
+    def _execute_land_action(self, entity_id: int, action: Dict): # TODO: Change this to capture
         """Execute land action"""
         
         entity = self.entities[entity_id]
@@ -358,8 +368,10 @@ class TridentIslandEnv(gym.Env):
     
     def _execute_refuel_action(self, entity_id: int, action: Dict):
         """Execute refuel action"""
-        entity = self.entities[entity_id]
-        refuel_target_id = action["refuel_target_id"]
+        entity = self.entities[entity_id] # This points to squadron ID
+        refuel_target_id = action["refuel_target_id"] # Refuel source? Maybe target isnt the correct term?
+        # TODO: Masking for entities that support refueling
+
         
         # TODO: Placeholder call for refuel action
         # refuel_event = PlayerEventRefuel()

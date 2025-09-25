@@ -31,7 +31,10 @@ class Config:
     # Action space parameters
     max_entities: int = 50  # Maximum entities per side # TODO: Is this reasonable?
     max_weapon_types: int = 8  # Maximum weapon types per entity # TODO: Is this reasonable?
-    max_patrol_axis_km: int = 30  # Maximum CAP route long axis length, discretized in 1km increments # TODO: Is this reasonable?
+    # CAP route parameters
+    min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
+    max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  
+    patrol_axis_increment_km: int = 25  # CAP route discretization increment
     angle_resolution_degrees: int = 10  # Angle discretization
     
     # Runtime settings
