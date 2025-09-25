@@ -10,19 +10,14 @@ from w4a.wrappers.wrapper import EnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 
-from SimulationInterface import Vector3
-from w4a import execute_move_action
-
-
-class MockEntity:
-    def __init__(self):
-        self.pos = Vector3(0, 0, 0)
+from SimulationInterface import Vector3, create_mock_entity
+from w4a import (execute_move_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_set_radar_strength_action, execute_land_action)
 
 
 def test_move_action():
     """Test move action"""
 
-    entity = MockEntity()
+    entity = create_mock_entity()
 
     entities = { 1: entity}
 
@@ -42,3 +37,44 @@ def test_move_action():
     print(f"Average position {avg}")
 
     # Todo: not sure yet how to validate this any further
+
+def test_set_radar_focus_action():
+    """Test set radar focus action"""
+
+    entity = create_mock_entity()
+
+    entities = { 1: entity}
+
+    action = {"sense_grid": 10 }
+
+    event = execute_set_radar_focus_action(1, action, entities, Config())
+
+    assert event
+
+def test_clear_radar_focus_action():
+    """Test clear radar focus action"""
+
+    entity = create_mock_entity()
+
+    entities = { 1: entity}
+
+    action = {}
+
+    event = execute_clear_radar_focus_action(1, action, entities, Config())
+
+    assert event
+
+def test_set_radar_strength_action():
+    """Test set radar strength action"""
+
+    entity = create_mock_entity()
+
+    entities = { 1: entity}
+
+    action = {"radar_strength": 0.5 }
+
+    event = execute_set_radar_strength_action(1, action, entities, Config())
+
+    assert event
+    assert event.strength == 0.5
+

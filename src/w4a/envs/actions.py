@@ -11,6 +11,7 @@ import math
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
+    SetRadarFocus, ClearRadarFocus, SetRadarStrength,
     Vector3, Formation, ControllableEntity, EntityDomain,
 )
 
@@ -44,7 +45,7 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
         event = execute_engage_action(entity_id, action, entities, target_groups)
         player_events.append(event)
     elif action_type == 3:  # Sense
-        event = execute_sense_action(entity_id, action, entities, config)
+        event = execute_set_radar_focus_action(entity_id, action, entities, config) # @Sanjna: we need the other ones here too.
         player_events.append(event)
     elif action_type == 4:  # Land
         event = execute_land_action(entity_id, action, entities)
@@ -113,6 +114,7 @@ def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Co
     axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
 
     cap_maneuver = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+    cap_maneuver.entity = entity
 
     return cap_maneuver
 
@@ -146,23 +148,41 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     
     return commit
 
-
-def execute_sense_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute sense action - point radar at location"""
     sense_x, sense_y = grid_to_position(action["sense_grid"], config)
+    
+    entity = entities[entity_id]
+    
+    event = SetRadarFocus()
+    event.entity = entity
+    event.position = Vector3(sense_x, sense_y, entity.pos.z)
+    
+    return event
+
+def execute_clear_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute sense action - radar back to default"""
+
+    entity = entities[entity_id]
+    
+    event = ClearRadarFocus()
+    event.entity = entity
+
+    return event
+
+def execute_set_radar_strength_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute sense action - set radar strength"""
     radar_strength = action["radar_strength"]
     
     entity = entities[entity_id]
     
-    # TODO: Create PlayerEventSense when available in FFSim
-    # sense_event = PlayerEventSense()
-    # sense_event.entity = entity
-    # sense_event.position = Vector3(sense_x, sense_y, 0)
-    # sense_event.power_level = radar_strength
+    event = SetRadarStrength()
+    event.entity = entity
+    event.strength = radar_strength
     
-    # Placeholder for now
-    return None
+    return event
 
+print("Bla", execute_set_radar_strength_action)
 
 def execute_land_action(entity_id: int, action: Dict, entities: Dict):
     """Execute land action - land at nearest friendly airbase"""
