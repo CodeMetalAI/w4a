@@ -8,13 +8,14 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 from typing import Dict, Any, Optional, Tuple, List
-
+from pathlib import Path
 from ..config import Config
 from . import actions
+from . import simulation_utils
 
 import SimulationInterface
 from SimulationInterface import (
-    SimulationConfig, SimulationData, Faction,
+    SimulationConfig, SimulationData, Faction, ForceLaydown,
     EntitySpawned, Victory, AdversaryContact,
     Entity, ControllableEntity, Unit, EntityDomain
 )
@@ -29,41 +30,46 @@ class TridentIslandEnv(gym.Env):
     metadata = {"render_modes": ["rgb_array", "human"]}
     
     def __init__(self, config: Optional[Config] = None, render_mode: Optional[str] = None, 
-                 enable_replay: bool = False):
+                 enable_replay: bool = False, scenario_name: str = "TridentIsland",
+                 force_config_json: Optional[str] = None, spawn_config_json: Optional[str] = None):
         """Initialize environment"""
+        
+        super().__init__()
+
         self.config = config or Config()
         self.render_mode = render_mode
         self.enable_replay = enable_replay
+        self.scenario_name = scenario_name
         
-        # Initialize Bane simulation engine
+        # Set up paths
+        self.scenario_path = Path(__file__).parent / "scenarios"  
+        self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
+
+        # Initialize simulation interface once
         SimulationInterface.initialize()
         
-        # Create simulation with replay capability
-        sim_config = SimulationConfig()
-        sim_config.log_json = self.enable_replay  # Enable replay recording
-        sim_config.random_seed = self.config.seed or 42
-        sim_config.name = "TridentIsland"
+        # Simulation will be created in reset() method for proper Gymnasium compliance
+        self.simulation = None
         
-        # TODO: Load scenario data (similar to Bane's Mission class)
-        # scenario_path = Path(__file__).parent / "scenarios" / "trident_island"
+        # Initialize state tracking variables
+        self.current_step = 0
+        self.simulation_events = []
         
-        # TODO: Parse data from hte config and constants file as needed
-        # Load CONSTANT mission rules (objectives, victory conditions, map)
-        # mission_events = load_json(scenario_path / "MissionEvents.json")  # NEVER changes
-        
-        # Load VARIABLE entity forces (can change per episode for curriculum/auction/training)
-        # entity_spawn_data = self._generate_entity_forces()
-        
-        # Create simulation from scenario data
-        # self.simulation = SimulationInterface.create_simulation_from_data(scenario_json, True)
-        
-        # For now: basic simulation creation without scenario
-        self.simulation = SimulationInterface.create_simulation(sim_config)
+        # Set up simulation event handlers
+        self.simulation_event_handlers = {
+            EntitySpawned: self._entity_spawned,
+            Victory: self._victory,
+            AdversaryContact: self._adversary_contact
+        }
         
         # TODO: Set up scenario entities, objectives, victory conditions
         # - Spawn initial units for each faction
         # - Set victory conditions (e.g., capture flag, destroy targets)
         # - Initialize mission timeline and events
+        
+        # Entity tracking - stores ALL entities from ALL factions
+        self.entities = {}  # Dict[entity_id -> entity] for all entities in game
+        self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups 
         
         # Calculate grid dimensions for discretized positioning
         map_size_km = self.config.map_size[0] // 1000  # Convert meters to km
@@ -76,11 +82,11 @@ class TridentIslandEnv(gym.Env):
         
         # Hierarchical action space
         self.action_space = spaces.Dict({
-            "action_type": spaces.Discrete(8),  # 0=noop, 1=move, 2=engage, 3=stealth, 4=sense_direction, 5=land, 6=rtb, 7=refuel
-            "entity_id": spaces.Discrete(self.config.max_entities),
+            "action_type": spaces.Discrete(8),  # 0=noop, 1=move, 2=engage, 3=stealth, 4=sense_direction, 5=capture, 6=rtb, 7=refuel
+            "entity_id": spaces.Discrete(self.config.max_entities),  # Which controllable entity to command
             
             # Move action parameters
-            "move_center_grid": spaces.Discrete(self.max_grid_positions),
+            "move_center_grid": spaces.Discrete(self.max_grid_positions), # CAP route center position
             "move_short_angle": spaces.Discrete(angle_steps),  # Based on angle resolution
             "move_long_axis_km": spaces.Discrete(patrol_steps),  # 100-1000km in 25km increments
             "move_axis_angle": spaces.Discrete(angle_steps),   # Based on angle resolution
@@ -105,37 +111,87 @@ class TridentIslandEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=1, shape=(100,), dtype=np.float32
         )
-        # TODO: Weapons: Range
         
-        self.current_step = 0
-        self.simulation_events = []
-        
-        # Entity tracking - stores ALL entities from ALL factions
-        self.entities = {}  # Dict[entity_id -> entity] for all entities in game
-        self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups
+        # Initialize force configuration paths (will be set by wrapper)
+        self.force_config_paths = None
+
+    def set_force_config_paths(self, legacy_entity_list, dynasty_entity_list, 
+                              legacy_spawn_data, dynasty_spawn_data):
+        """Set the JSON file paths for force configuration"""
+        self.force_config_paths = {
+            'legacy_entity_list': legacy_entity_list,
+            'dynasty_entity_list': dynasty_entity_list,
+            'legacy_spawn_data': legacy_spawn_data,
+            'dynasty_spawn_data': dynasty_spawn_data
+        }
+
         
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
         """Reset environment"""
         super().reset(seed=seed)
         
-        # TODO: Reset scenario, respawn entities, set initial conditions
-        # For now just clear events
-        self.simulation_events = []
+        # Destroy existing simulation if it exists
+        # TODO: Do this at every reset?
+        if self.simulation:
+            SimulationInterface.destroy_simulation(self.simulation)
+            self.simulation = None
         
+        # Set up simulation using JSON files if available
+        if self.force_config_paths:
+            self.simulation = simulation_utils.setup_simulation_from_json(
+                self, 
+                self.force_config_paths['legacy_entity_list'],
+                self.force_config_paths['dynasty_entity_list'],
+                self.force_config_paths['legacy_spawn_data'],
+                self.force_config_paths['dynasty_spawn_data'],
+                seed=seed
+            )
+        else:
+            # Use default paths from scenario directory
+            legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
+            dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
+            legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
+            dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
+            
+            self.simulation = simulation_utils.setup_simulation_from_json(
+                self, 
+                str(legacy_entity_list),
+                str(dynasty_entity_list),
+                str(legacy_spawn_data),
+                str(dynasty_spawn_data),
+                seed=seed
+            )
+        
+        # Reset state tracking
         self.current_step = 0
+        self.simulation_events = []
+        self.entities.clear()
+        self.target_groups.clear()
         observation = self._get_observation()
-        info = {"step": self.current_step}
+        info = {
+            "step": self.current_step,
+            "valid_masks": {
+                "action_types": self._get_valid_action_types(),           
+                "controllable_entities": self._get_controllable_entities_set(),  
+                "detected_targets": self._get_detected_targets_set(),
+                "entity_target_matrix": self._get_entity_target_engagement_matrix()
+            }
+        }
         
         return observation, info
     
     def step(self, action: Dict) -> Tuple[np.ndarray, float, bool, bool, Dict]:
         """Execute hierarchical action"""
         self.current_step += 1
+        self.simulation_events = []  # Clear previous step's events
         
-        # Execute action based on type
+        # TODO: Reset frame-specific state if needed
+        # self.frame_index += self.frame_rate  # Advance simulation time
+        
+        # Execute action
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
-        # Prepare simulation step data
+        # Prepare simulation step data 
         sim_data = SimulationData()
         sim_data.player_events = player_events
         
@@ -147,16 +203,35 @@ class TridentIslandEnv(gym.Env):
         
         # Process simulation events (adjudication results)
         # TODO: Implement event processing
-        # self._process_simulation_events(self.simulation_events)
-        
+        simulation_utils.process_simulation_events(self, self.simulation_events)
+
+        # Get observation based on current sensing capabilities
         observation = self._get_observation()
+
+        # Compute step reward 
         reward = self._calculate_reward()
+        
+
+        self._update_dead_entities()
+        
+
         terminated = self._check_termination()
         truncated = self.current_step >= self.config.max_episode_steps
+
+        # Update terminal reward
         
         info = {
             "step": self.current_step,
-            "action_mask": self.get_action_mask()
+            "total_entities": len(self.entities),
+            "controllable_entities_count": len(self._get_controllable_entities_set()),
+            "detected_targets_count": len(self._get_detected_targets_set()),
+            "last_events_count": len(self.simulation_events),
+            "valid_masks": {
+                "action_types": self._get_valid_action_types(),           # What action types are possible 
+                "controllable_entities": self._get_controllable_entities_set(),  # Which entity IDs can be commanded
+                "detected_targets": self._get_detected_targets_set(),     # Which target group IDs are available
+                "entity_target_matrix": self._get_entity_target_engagement_matrix()  # Which entities can engage which targets
+            }
         }
         
         return observation, reward, terminated, truncated, info
@@ -179,6 +254,13 @@ class TridentIslandEnv(gym.Env):
         # - Step penalties (encourage efficient missions)
         return 0.0
     
+    def _update_dead_entities(self):
+        """Remove destroyed entities from tracking dictionaries"""
+
+        # TODO: Keep a set of dead entities
+        # TODO: Keep a set of dead target groups
+        # Make sure entity includes all total entities (dead and alive)
+    
     def _check_termination(self) -> bool:
         """Check if mission/episode should end"""
         # TODO: Check victory conditions from simulation
@@ -188,14 +270,6 @@ class TridentIslandEnv(gym.Env):
         # - Use constants.SIMULATION_VICTORY_THRESHOLD
         return False
     
-    def _process_simulation_events(self, events):
-        """Process events from simulation step"""
-        # TODO: Handle simulation events for observations and rewards
-        # - EntitySpawned, EntityKilled events
-        # - AdversaryContact (radar detections)
-        # - CombatShooting, ProjectileExploded events
-        # - Victory/defeat conditions
-        pass
     
     
     def render(self) -> Optional[np.ndarray]:
@@ -230,91 +304,112 @@ class TridentIslandEnv(gym.Env):
         # - Set up spawn area constraints for unit placement
         pass
     
+    def _is_controllable_entity(self, entity) -> bool:
+        """Check if entity is controllable by our faction"""
+        return (entity.is_controllable and entity.is_alive and 
+                entity.faction.value == self.config.our_faction)
     
+    def _entity_can_engage(self, entity) -> bool:
+        """Check if entity can engage targets (has weapons and valid targets exist)"""
+        # Check if entity has weapons # TODO: Is this correct check?
+        has_weapons = entity.has_weapons and len(entity.weapons) > 0
+        if not has_weapons:
+            return False
+
+        # Check if any detected targets are valid for this entity
+        # TODO: Is this correct check?
+        for target_group in self.target_groups.values():
+            is_enemy = target_group.faction.value != self.config.our_faction
+            if is_enemy:
+                available_weapons = entity.select_weapons(target_group, False)
+                if len(available_weapons) > 0:
+                    return True
+        return False
     
+    def _entity_can_capture(self, entity) -> bool:
+        """Check if entity can capture objectives (ground units near objectives)"""
+        # TODO: Check if its settler 
+        return entity.is_settler
     
+    def _get_valid_action_types(self) -> set:
+        """Get set of valid action types based on current entities"""
+        valid_actions = {0}  # noop always valid
+        
+        for entity in self.entities.values():
+            if not self._is_controllable_entity(entity):
+                continue
+                
+            if entity.domain == EntityDomain.AIR:
+                valid_actions.update({1, 6})  # move, rtb
+            if self._entity_can_engage(entity):
+                valid_actions.add(2)  # engage
+            if self._entity_can_capture(entity):
+                valid_actions.add(5)  # capture
+            if entity.has_radar:
+                valid_actions.update({3, 4})  # stealth, sense
+            if entity.has_fuel: # TODO: Can all air units refuel?
+                valid_actions.add(7)  # refuel
+        
+        return valid_actions
     
-    
-    
-    
-    def get_action_mask(self) -> Dict[str, np.ndarray]:
-        """Get action validity masks for dynamic parameters"""
+    def _get_controllable_entities_set(self) -> set:
+        """Get set of controllable entity IDs"""
         return {
-            "entity_id": self._get_entity_mask(),
-            "refuel_target_id": self._get_refuel_target_mask(),
-            # TODO: Add engagement masks when sensor model is clear
-            # "target_group_id": self._get_target_group_mask(),
-            # "weapon_selection": self._get_weapon_selection_mask(),
+            entity_id for entity_id, entity in self.entities.items()
+            if self._is_controllable_entity(entity)
         }
     
-    def _get_entity_mask(self) -> np.ndarray:
-        """Mask for entities that can perform actions"""
-        mask = np.zeros(self.config.max_entities, dtype=bool)
+    def _get_detected_targets_set(self) -> set:
+        """Get set of detected target group IDs"""
+        return {
+            tg_id for tg_id, target_group in self.target_groups.items()
+            if target_group.faction.value != self.config.our_faction
+        }
+    
+    def _get_entity_target_engagement_matrix(self) -> dict:
+        """Get matrix of which entities can engage which target groups"""
+        engagement_matrix = {}
         
         for entity_id, entity in self.entities.items():
-            if entity_id < self.config.max_entities:
-                # Our faction + controllable + alive
-                mask[entity_id] = (
-                    isinstance(entity, ControllableEntity) and
-                    entity.is_alive and
-                    entity.faction.value == self.config.our_faction
-                )
+            if not self._is_controllable_entity(entity):
+                continue
+                
+            # Get valid targets this entity can engage
+            valid_targets = set()
+            for tg_id, target_group in self.target_groups.items():
+                # Check if enemy faction
+                is_enemy = target_group.faction.value != self.config.our_faction
+                if not is_enemy:
+                    continue
+                    
+                # Check weapon compatibility
+                available_weapons = entity.select_weapons(target_group, False)
+                if len(available_weapons) > 0:
+                    valid_targets.add(tg_id)
+            
+            # Returns set of target group IDs that this entity can engage, empty set if none
+            engagement_matrix[entity_id] = valid_targets
+                
+        return engagement_matrix
+
         
-        return mask
-    
-    def _get_move_entity_mask(self) -> np.ndarray:
-        """Mask for entities that can perform move actions (air units with fuel)"""
-        mask = np.zeros(self.config.max_entities, dtype=bool)
+    def _entity_spawned(self, event):
+        """Handle entity spawned events"""
+        # TODO: Track spawned entities
+        pass
         
-        for entity_id, entity in self.entities.items():
-            if entity_id < self.config.max_entities:
-                # Our faction + controllable + alive + air unit + has fuel
-                mask[entity_id] = (
-                    isinstance(entity, ControllableEntity) and
-                    entity.is_alive and
-                    entity.faction.value == self.config.our_faction and
-                    entity.domain == EntityDomain.AIR and
-                    entity.has_fuel  # TODO: Check if this property exists in sim
-                )
+    def _victory(self, event):
+        """Handle victory events"""
+        # TODO: Handle victory conditions
+        pass
         
-        return mask
-    
-    def _get_refuel_target_mask(self) -> np.ndarray:
-        """Mask for entities that can provide refueling"""
-        mask = np.zeros(self.config.max_entities, dtype=bool)
-        
-        for entity_id, entity in self.entities.items():
-            if entity_id < self.config.max_entities:
-                # Our faction + controllable + alive + can refuel others
-                mask[entity_id] = (
-                    isinstance(entity, ControllableEntity) and
-                    entity.is_alive and
-                    entity.faction.value == self.config.our_faction and
-                    entity.can_refuel_others  # TODO: Check if this property exists in sim
-                )
-        
-        return mask
-    
-    def _get_target_group_mask(self) -> np.ndarray:
-        """Mask for valid engagement targets (placeholder)"""
-        # TODO: Implement when sensor model is clear
-        # Should mask for: enemy faction + detected + in range + valid weapons available
-        mask = np.zeros(self.config.max_target_groups, dtype=bool)
-        
-        for tg_id, target_group in self.target_groups.items():
-            if tg_id < self.config.max_target_groups:
-                # Enemy faction (simple version for now)
-                mask[tg_id] = (target_group.faction.value != self.config.our_faction)
-        
-        return mask
-    
-    def _get_weapon_selection_mask(self) -> np.ndarray:
-        """Mask for valid weapon combinations (placeholder)"""
-        # TODO: Implement entity+target dependent weapon masking
-        # Should mask for: compatible weapons + has ammo + in firing range
-        return np.ones(self.config.max_weapon_combinations, dtype=bool)
-    
+    def _adversary_contact(self, event):
+        """Handle adversary contact events"""
+        # TODO: Handle adversary detection
+        pass
+
     def close(self):
+        # TODO: To implement
         """Clean up"""
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
