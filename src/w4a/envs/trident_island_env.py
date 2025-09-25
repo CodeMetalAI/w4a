@@ -7,7 +7,7 @@ Single-agent Gymnasium environment for tactical simulation.
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 
 from ..config import Config
 
@@ -88,7 +88,7 @@ class TridentIslandEnv(gym.Env):
             
             # Engage action parameters
             "target_group_id": spaces.Discrete(self.config.max_target_groups),
-            "weapon_selection": spaces.Discrete(self.config.max_weapon_types), # TODO: This depends on target (does this change in the game?)
+            "weapon_selection": spaces.Discrete(self.config.max_weapon_combinations), # Combinatorial weapon selection
             "weapon_usage": spaces.Discrete(3),       # 0=1 shot/unit, 1=1 shot/adversary, 2=2 shots/adversary
             "weapon_engagement": spaces.Discrete(4),  # 0=defensive, 1=cautious, 2=assertive, 3=offensive
             
@@ -279,6 +279,56 @@ class TridentIslandEnv(gym.Env):
         
         return world_x, world_y
     
+    def _select_weapons_from_available(self, available_weapons: Dict, selection_index: int) -> Dict:
+        """Select specific weapons from FFSim-compatible weapons using combinatorial selection.
+        
+        Args:
+            available_weapons: Dict from entity.select_weapons() containing compatible weapons
+            selection_index: Agent's weapon combination choice (0 to max_weapon_combinations-1)
+            
+        Returns:
+            Dict containing selected weapons
+        """
+        available_keys = list(available_weapons.keys())
+        
+        if len(available_keys) == 0:
+            return {}  # No compatible weapons available
+        
+        # Convert selection_index to binary combination
+        # selection_index 0 maps to combination 1 (first weapon only)
+        # selection_index 1 maps to combination 2 (second weapon only)  
+        # selection_index 2 maps to combination 3 (first + second weapons)
+        # etc.
+        num_available = len(available_keys)
+        max_combinations = (1 << num_available) - 1  # 2^n - 1
+        
+        # Ensure selection_index is valid and avoid empty selection
+        combination_index = (selection_index % max_combinations) + 1
+        
+        result = {}
+        for i, key in enumerate(available_keys):
+            if combination_index & (1 << i):  # Check if bit i is set
+                result[key] = available_weapons[key]
+        
+        return result
+    
+    def _get_valid_weapon_combinations(self, available_weapons: Dict) -> List[int]:
+        """Get valid combination indices for current available weapons.
+        
+        Args:
+            available_weapons: Dict from entity.select_weapons() containing compatible weapons
+            
+        Returns:
+            List of valid selection_index values for current available weapons
+        """
+        num_available = len(available_weapons)
+        if num_available == 0:
+            return []
+        
+        # Valid combinations: 1 to 2^num_available - 1 (mapped to selection indices 0 to 2^n-2)
+        max_combinations = (1 << num_available) - 1  # 2^n - 1
+        return list(range(max_combinations))  # [0, 1, 2, ...] for selection indices
+    
     def _execute_move_action(self, entity_id: int, action: Dict):
         """Execute move action - create CAP maneuver"""
         center_x, center_y = self._grid_to_position(action["move_center_grid"])
@@ -309,10 +359,13 @@ class TridentIslandEnv(gym.Env):
         entity = self.entities[entity_id]
         target_group = self.target_groups[target_group_id]  # Direct target group access
         
-        # If entity.select_weapon is {}, no weapons
-        # Learn which weapons to select, TODO: Add a mask for compatible weapons
-        # TODO: Learn which weapons, and the number to sample
-        selected_weapons = entity.select_weapons(target_group, False) # TODO: What is entity.select_weapons? Is this a decision for the agent to make or does the sim handle this?
+        # Get weapons compatible with target group
+        available_weapons = entity.select_weapons(target_group, False)
+        
+        # RL agent selects which compatible weapons to use
+        selected_weapons = self._select_weapons_from_available(available_weapons, weapon_selection)
+        
+        # TODO: Check if selected weapons have ammo available
         
         commit = PlayerEventCommit()
         commit.entity = entity
@@ -320,7 +373,6 @@ class TridentIslandEnv(gym.Env):
         commit.manouver_data.throttle = 1.0  # Always max throttle
         commit.manouver_data.engagement = weapon_engagement
         commit.manouver_data.weapon_usage = weapon_usage  # 0=1/unit, 1=1/adversary, 2=2/adversary
-
         commit.manouver_data.weapons = selected_weapons.keys()
         commit.manouver_data.wez_scale = 1  # Always 1
         
