@@ -66,7 +66,7 @@ class TridentIslandEnv(gym.Env):
         # - Initialize mission timeline and events
         
         # Calculate grid dimensions for discretized positioning
-        map_size_km = self.config.map_size[0] // 1000  # Convert meters to km
+        map_size_km = self.config.map_size_km[0] // 1000  # Convert meters to km
         self.grid_size = map_size_km // self.config.grid_resolution_km
         self.max_grid_positions = self.grid_size * self.grid_size
         

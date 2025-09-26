@@ -33,33 +33,31 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     if not is_valid_action(action, entities, target_groups, config):
         return []
     
-    player_events = []  # @Sanjna: why is this a list? 
+    player_events = None
     
     if action_type == 0:  # No-op
         pass
     elif action_type == 1:  # Move
         event = execute_move_action(entity_id, action, entities, config)
-        player_events.append(event)
+        player_events = event
     elif action_type == 2:  # Engage
         event = execute_engage_action(entity_id, action, entities, target_groups)
-        player_events.append(event)
+        player_events = event
     elif action_type == 3:  # Stealth
         event = execute_stealth_action(entity_id, action, entities)
-        if event:
-            player_events.append(event)
+        player_events = event
     elif action_type == 4:  # Sensing Direction
         event = execute_sensing_direction_action(entity_id, action, entities, config)
-        if event:
-            player_events.append(event)
+        player_events = event
     elif action_type == 5:  # Land
         event = execute_land_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     
     return player_events
 
@@ -80,8 +78,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return False
     
     action_type = action["action_type"]
-    
-    # @Sanjna, why is this not a dictionary with an enum lookup?
+    # TODO: Make this dict mapping
     if action_type == 0:  # No-op
         return True
     elif action_type == 1:  # Move
@@ -98,6 +95,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_rtb_action(action, entities)
     elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
+    # TODO: Get rid of this
     elif action_type == 8:  # Clear Sensing Direction
         return validate_clear_sensing_direction_action(action, entities, config)
     
@@ -107,8 +105,9 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action - create CAP maneuver"""
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
+    # TODO: This breaks action space
     short_axis_m = action["move_short_axis_km"] * 1000
-    long_axis_m = action["move_long_axis_km"] * 1000 #config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
+    long_axis_m = action["move_long_axis_km"] * 1000 # config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
     axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
     
     entity = entities[entity_id]
@@ -163,6 +162,7 @@ def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict,
     
     return event
 
+# TODO: We dont want to make this a separate action, this can be a special case of the above
 def execute_clear_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute sense action - radar back to default"""
 
@@ -187,6 +187,7 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     """Execute land action - land at nearest friendly airbase"""
+    # TODO: The agent shouldnt learn flag_id? Does that change?
     entity = entities[entity_id]
     flag = entities[action["flag_id"]]
 
@@ -317,17 +318,17 @@ def validate_stealth_action(action: Dict, entities: Dict) -> bool:
 def validate_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate sensing direction action parameters."""
     entity_id = action["entity_id"]
-    sensing_direction_grid = action["sensing_direction_grid"]   # @Sanjna: it's not a direction, but a position
+    sensing_position_grid = action["sensing_position_grid"]
     
     entity = entities[entity_id]
     
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
-    if sensing_direction_grid >= max_grid_positions:
+    if sensing_position_grid >= max_grid_positions:
         return False
     
     # Convert to world coordinates and check bounds
-    world_x, world_y = grid_to_position(sensing_direction_grid, config)
+    world_x, world_y = grid_to_position(sensing_position_grid, config)
     if not position_in_bounds(world_x, world_y, config):
         return False
     
@@ -472,25 +473,25 @@ def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
 def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
     """Convert grid index to world coordinates"""
 
-    grid_size = int(config.map_size[0] / config.grid_resolution_km)  # Grid size in cells
+    grid_size = int(config.map_size_km[0] / config.grid_resolution_km)  # Grid size in cells
     
     grid_x = grid_index % grid_size
     grid_y = grid_index // grid_size
     
     # Convert to world coordinates (meters)
-    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size[0] // 2)
-    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size[1] // 2)
+    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] // 2)
+    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] // 2)
     
     return world_x, world_y
 
 
 def position_in_bounds(x: float, y: float, config: Config) -> bool:
     """Check if position is within map boundaries."""
-    half_map = config.map_size[0] * 1000 // 2
+    half_map = config.map_size_km[0] * 1000 // 2
     return abs(x) <= half_map and abs(y) <= half_map
 
 
 def calculate_max_grid_positions(config: Config) -> int:
     """Calculate maximum number of grid positions for the map."""
-    grid_size = int((config.map_size[0]) / config.grid_resolution_km)
+    grid_size = int((config.map_size_km[0]) / config.grid_resolution_km)
     return grid_size * grid_size

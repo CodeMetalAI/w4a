@@ -25,7 +25,7 @@ class Config:
     early_loss_threshold: float = 0.2  # End episode early if 80% own forces destroyed
     
     # Environment setup (uses constants but can be overridden)
-    map_size: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE # @Sanjna: maybe rename to map_size_km, since that it what it is.
+    map_size_km: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
     grid_resolution_km: int = 50  # Discretized grid resolution in km
     
     # Action space parameters
