@@ -11,7 +11,7 @@ from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag, Refuel,
     RefuelComponent,
-    Vector3, Formation, ControllableEntity, EntityDomain, 
+    Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
 
@@ -353,9 +353,16 @@ def validate_capture_action(action: Dict, entities: Dict) -> bool:
     """Validate capture action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
+
+    flag_id = action["flag_id"]
+    flag = entities[flag_id]
     
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
+        return False
+
+    # Check if flag is neutral
+    if flag.faction != Faction.NEUTRAL:
         return False
     
     # Check entity can capture
@@ -369,9 +376,16 @@ def validate_rtb_action(action: Dict, entities: Dict) -> bool:
     """Validate RTB action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
+
+    flag_id = action["flag_id"]
+    flag = entities[flag_id]
     
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
+        return False
+
+    # Check if flag faction is the same as the aircraft
+    if flag.faction != entity.faction:
         return False
     
     return True

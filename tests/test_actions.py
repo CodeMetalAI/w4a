@@ -26,7 +26,10 @@ def create_refueling_entity():
 def create_capture_entity():
     return w4a_entities.create_mock_entity("C-130")
 
-def create_flag():
+def create_player_flag():
+    return w4a_entities.create_mock_entity("LegacyFlag")
+
+def create_neutral_flag():
     return w4a_entities.create_mock_entity("NeutralFlag")
 
 def test_move_action():
@@ -59,7 +62,7 @@ def test_rtb_action():
     """Test rtb action"""
 
     entity = create_test_entity()
-    flag = create_flag()
+    flag = create_player_flag()
 
     entities = { 1: entity, 2: flag}
 
@@ -122,7 +125,7 @@ def test_capture_action():
     """Test capture action"""
 
     entity = create_capture_entity()
-    flag = create_flag()
+    flag = create_neutral_flag()
 
     entities = { 1: entity, 2: flag}
 
@@ -136,7 +139,7 @@ def test_capture_action():
     assert event.flag == flag
 
 def test_refuel_action():
-    """Test refuelk action"""
+    """Test refuel action"""
 
     entity = create_test_entity()
     refueling_entity = create_refueling_entity()
