@@ -33,7 +33,7 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     if not is_valid_action(action, entities, target_groups, config):
         return []
     
-    player_events = []
+    player_events = []  # @Sanjna: why is this a list? 
     
     if action_type == 0:  # No-op
         pass
@@ -81,6 +81,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
     
     action_type = action["action_type"]
     
+    # @Sanjna, why is this not a dictionary with an enum lookup?
     if action_type == 0:  # No-op
         return True
     elif action_type == 1:  # Move
@@ -91,12 +92,14 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_stealth_action(action, entities)
     elif action_type == 4:  # Sensing Direction
         return validate_sensing_direction_action(action, entities, config)
-    elif action_type == 5:  # Land
-        return validate_land_action(action, entities)
+    elif action_type == 5:  # Capture
+        return validate_capture_action(action, entities)
     elif action_type == 6:  # RTB
         return validate_rtb_action(action, entities)
     elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
+    elif action_type == 8:  # Clear Sensing Direction
+        return validate_clear_sensing_direction_action(action, entities, config)
     
     return False
 
@@ -150,7 +153,7 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
 
 def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute sense action - point radar at location"""
-    sense_x, sense_y = grid_to_position(action["sense_grid"], config)
+    sense_x, sense_y = grid_to_position(action["sensing_direction_grid"], config)
     
     entity = entities[entity_id]
     
@@ -249,17 +252,19 @@ def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
     center_grid = action["move_center_grid"]
     
     entity = entities[entity_id]
-    
+
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
+
     if center_grid >= max_grid_positions:
         return False
-    
+
     # Convert to world coordinates and check bounds
     world_x, world_y = grid_to_position(center_grid, config)
+
     if not position_in_bounds(world_x, world_y, config):
-        return False
-    
+        return False  
+
     # Check entity is capable of movement (air units for CAP)
     if entity.domain != EntityDomain.AIR:  # Only air units can do CAP
         return False
@@ -312,7 +317,7 @@ def validate_stealth_action(action: Dict, entities: Dict) -> bool:
 def validate_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate sensing direction action parameters."""
     entity_id = action["entity_id"]
-    sensing_direction_grid = action["sensing_direction_grid"]
+    sensing_direction_grid = action["sensing_direction_grid"]   # @Sanjna: it's not a direction, but a position
     
     entity = entities[entity_id]
     
@@ -332,9 +337,20 @@ def validate_sensing_direction_action(action: Dict, entities: Dict, config: Conf
     
     return True
 
+def validate_clear_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
+    """Validate sensing direction action parameters."""
+    entity_id = action["entity_id"]
+  
+    entity = entities[entity_id]
+    
+    # Check entity has radar/sensors
+    if not entity.has_radar:
+        return False
+    
+    return True
 
-def validate_land_action(action: Dict, entities: Dict) -> bool:
-    """Validate land action parameters."""
+def validate_capture_action(action: Dict, entities: Dict) -> bool:
+    """Validate capture action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
     
@@ -342,8 +358,8 @@ def validate_land_action(action: Dict, entities: Dict) -> bool:
     if entity.domain != EntityDomain.AIR:
         return False
     
-    # Check entity can land
-    if not entity.can_land:
+    # Check entity can capture
+    if not entity.can_capture:
         return False
     
     return True
@@ -377,9 +393,12 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
     # Check both entities are same faction
     if entity.faction.value != refuel_target.faction.value:
         return False
+
+    if not entity.can_refuel:
+        return False    
     
     # Check refuel target can provide fuel
-    if not refuel_target.can_refuel_others: # TODO: Check its a refuel unit
+    if not refuel_target.can_refuel_others:
         return False
     
     return True
@@ -453,11 +472,11 @@ def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
 
 def position_in_bounds(x: float, y: float, config: Config) -> bool:
     """Check if position is within map boundaries."""
-    half_map = config.map_size[0] // 2
+    half_map = config.map_size[0] * 1000 // 2
     return abs(x) <= half_map and abs(y) <= half_map
 
 
 def calculate_max_grid_positions(config: Config) -> int:
     """Calculate maximum number of grid positions for the map."""
-    grid_size = int((config.map_size[0] / 1000) / config.grid_resolution_km)
+    grid_size = int((config.map_size[0]) / config.grid_resolution_km)
     return grid_size * grid_size
