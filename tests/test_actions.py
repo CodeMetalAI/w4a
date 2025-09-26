@@ -11,7 +11,7 @@ from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 
 from SimulationInterface import (Vector3, Simulation, create_mock_entity)
-from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_set_radar_strength_action, execute_capture_action, execute_refuel_action)
+from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_stealth_action, execute_capture_action, execute_refuel_action)
 
 from w4a import w4a_entities
 
@@ -89,19 +89,19 @@ def test_clear_radar_focus_action():
 
     assert event
 
-def test_set_radar_strength_action():
+def test_stealth_action():
     """Test set radar strength action"""
 
     entity = create_test_entity()
 
     entities = { 1: entity}
 
-    action = {"radar_strength": 0.5 }
+    action = {"stealth_enabled": True }
 
-    event = execute_set_radar_strength_action(1, action, entities, Config())
+    event = execute_stealth_action(1, action, entities, Config())
 
     assert event
-    assert event.strength == 0.5
+    assert event.strength == 0
 
 def test_capture_action():
     """Test capture action"""

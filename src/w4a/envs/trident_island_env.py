@@ -16,7 +16,7 @@ import SimulationInterface
 from SimulationInterface import (
     SimulationConfig, SimulationData, Faction,
     EntitySpawned, Victory, AdversaryContact,
-    Entity, ControllableEntity, Unit
+    Entity, ControllableEntity, Unit, EntityDomain
 )
 
 
@@ -76,7 +76,7 @@ class TridentIslandEnv(gym.Env):
         
         # Hierarchical action space
         self.action_space = spaces.Dict({
-            "action_type": spaces.Discrete(7),  # 0=noop, 1=move, 2=engage, 3=sense, 4=land, 5=rtb, 6=refuel
+            "action_type": spaces.Discrete(8),  # 0=noop, 1=move, 2=engage, 3=stealth, 4=sense_direction, 5=land, 6=rtb, 7=refuel
             "entity_id": spaces.Discrete(self.config.max_entities),
             
             # Move action parameters
@@ -91,9 +91,11 @@ class TridentIslandEnv(gym.Env):
             "weapon_usage": spaces.Discrete(3),       # 0=1 shot/unit, 1=1 shot/adversary, 2=2 shots/adversary
             "weapon_engagement": spaces.Discrete(4),  # 0=defensive, 1=cautious, 2=assertive, 3=offensive
             
-            # Sensing action parameters
-            "sense_grid": spaces.Discrete(self.max_grid_positions),
-            "radar_strength": spaces.Discrete(2),     # 0=stealth, 1=max power
+            # Stealth action parameters
+            "stealth_enabled": spaces.Discrete(2),    # 0=off, 1=on
+            
+            # Sensing direction action parameters
+            "sensing_direction_grid": spaces.Discrete(self.max_grid_positions),
             
             # Refuel action parameters
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
@@ -108,9 +110,9 @@ class TridentIslandEnv(gym.Env):
         self.current_step = 0
         self.simulation_events = []
         
-        # Entity tracking
-        self.entities = {}  # TODO: Populate during simulation setup
-        self.target_groups = {}  # TODO: Populate with target groups from simulation
+        # Entity tracking - stores ALL entities from ALL factions
+        self.entities = {}  # Dict[entity_id -> entity] for all entities in game
+        self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups
         
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
         """Reset environment"""
@@ -152,7 +154,10 @@ class TridentIslandEnv(gym.Env):
         terminated = self._check_termination()
         truncated = self.current_step >= self.config.max_episode_steps
         
-        info = {"step": self.current_step}
+        info = {
+            "step": self.current_step,
+            "action_mask": self.get_action_mask()
+        }
         
         return observation, reward, terminated, truncated, info
     
@@ -232,15 +237,82 @@ class TridentIslandEnv(gym.Env):
     
     
     
+    def get_action_mask(self) -> Dict[str, np.ndarray]:
+        """Get action validity masks for dynamic parameters"""
+        return {
+            "entity_id": self._get_entity_mask(),
+            "refuel_target_id": self._get_refuel_target_mask(),
+            # TODO: Add engagement masks when sensor model is clear
+            # "target_group_id": self._get_target_group_mask(),
+            # "weapon_selection": self._get_weapon_selection_mask(),
+        }
     
+    def _get_entity_mask(self) -> np.ndarray:
+        """Mask for entities that can perform actions"""
+        mask = np.zeros(self.config.max_entities, dtype=bool)
+        
+        for entity_id, entity in self.entities.items():
+            if entity_id < self.config.max_entities:
+                # Our faction + controllable + alive
+                mask[entity_id] = (
+                    isinstance(entity, ControllableEntity) and
+                    entity.is_alive and
+                    entity.faction.value == self.config.our_faction
+                )
+        
+        return mask
     
+    def _get_move_entity_mask(self) -> np.ndarray:
+        """Mask for entities that can perform move actions (air units with fuel)"""
+        mask = np.zeros(self.config.max_entities, dtype=bool)
+        
+        for entity_id, entity in self.entities.items():
+            if entity_id < self.config.max_entities:
+                # Our faction + controllable + alive + air unit + has fuel
+                mask[entity_id] = (
+                    isinstance(entity, ControllableEntity) and
+                    entity.is_alive and
+                    entity.faction.value == self.config.our_faction and
+                    entity.domain == EntityDomain.AIR and
+                    entity.has_fuel  # TODO: Check if this property exists in sim
+                )
+        
+        return mask
     
+    def _get_refuel_target_mask(self) -> np.ndarray:
+        """Mask for entities that can provide refueling"""
+        mask = np.zeros(self.config.max_entities, dtype=bool)
+        
+        for entity_id, entity in self.entities.items():
+            if entity_id < self.config.max_entities:
+                # Our faction + controllable + alive + can refuel others
+                mask[entity_id] = (
+                    isinstance(entity, ControllableEntity) and
+                    entity.is_alive and
+                    entity.faction.value == self.config.our_faction and
+                    entity.can_refuel_others  # TODO: Check if this property exists in sim
+                )
+        
+        return mask
     
+    def _get_target_group_mask(self) -> np.ndarray:
+        """Mask for valid engagement targets (placeholder)"""
+        # TODO: Implement when sensor model is clear
+        # Should mask for: enemy faction + detected + in range + valid weapons available
+        mask = np.zeros(self.config.max_target_groups, dtype=bool)
+        
+        for tg_id, target_group in self.target_groups.items():
+            if tg_id < self.config.max_target_groups:
+                # Enemy faction (simple version for now)
+                mask[tg_id] = (target_group.faction.value != self.config.our_faction)
+        
+        return mask
     
-    
-    
-    
-    
+    def _get_weapon_selection_mask(self) -> np.ndarray:
+        """Mask for valid weapon combinations (placeholder)"""
+        # TODO: Implement entity+target dependent weapon masking
+        # Should mask for: compatible weapons + has ammo + in firing range
+        return np.ones(self.config.max_weapon_combinations, dtype=bool)
     
     def close(self):
         """Clean up"""

@@ -29,7 +29,7 @@ class Config:
     grid_resolution_km: int = 50  # Discretized grid resolution in km
     
     # Action space parameters
-    max_entities: int = 50  # Maximum entities per side # TODO: Is this reasonable?
+    max_entities: int = 50  # Maximum entities in the whole game (all factions) # TODO: Is this reasonable?
     max_target_groups: int = 20  # Maximum target groups in scenario # TODO: Is this reasonable?
     max_weapons: int = 5  # Maximum weapons any entity can have across all domains (typically 2)
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
