@@ -47,8 +47,8 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
         event = execute_sensing_direction_action(entity_id, action, entities, config)
         if event:
             player_events.append(event)
-    elif action_type == 5:  # Land
-        event = execute_land_action(entity_id, action, entities)
+    elif action_type == 5:  # Capture
+        event = execute_capture_action(entity_id, action, entities)
         player_events.append(event)
     elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
@@ -87,8 +87,8 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_stealth_action(action, entities)
     elif action_type == 4:  # Sensing Direction
         return validate_sensing_direction_action(action, entities, config)
-    elif action_type == 5:  # Land
-        return validate_land_action(action, entities)
+    elif action_type == 5:  # capture
+        return validate_capture_action(action, entities)
     elif action_type == 6:  # RTB
         return validate_rtb_action(action, entities)
     elif action_type == 7:  # Refuel
@@ -174,7 +174,7 @@ def execute_sensing_direction_action(entity_id: int, action: Dict, entities: Dic
     return None
 
 
-def execute_land_action(entity_id: int, action: Dict, entities: Dict):
+def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     """Execute land action - land at nearest friendly airbase"""
     entity = entities[entity_id]
     
@@ -328,8 +328,8 @@ def validate_sensing_direction_action(action: Dict, entities: Dict, config: Conf
     return True
 
 
-def validate_land_action(action: Dict, entities: Dict) -> bool:
-    """Validate land action parameters."""
+def validate_capture_action(action: Dict, entities: Dict) -> bool:
+    """Validate capture action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
     
@@ -337,8 +337,8 @@ def validate_land_action(action: Dict, entities: Dict) -> bool:
     if entity.domain != EntityDomain.AIR:
         return False
     
-    # Check entity can land
-    if not entity.can_land:
+    # Check entity can capture
+    if not entity.can_capture:
         return False
     
     return True

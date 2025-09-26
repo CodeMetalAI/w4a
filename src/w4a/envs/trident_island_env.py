@@ -12,6 +12,7 @@ from pathlib import Path
 from ..config import Config
 from . import actions
 from . import simulation_utils
+from . import observations
 
 import SimulationInterface
 from SimulationInterface import (
@@ -43,6 +44,7 @@ class TridentIslandEnv(gym.Env):
         
         # Set up paths
         self.scenario_path = Path(__file__).parent / "scenarios"  
+        # This is fixed for a single scenario, can be configured for running multiple mission types
         self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
 
         # Initialize simulation interface once
@@ -53,6 +55,9 @@ class TridentIslandEnv(gym.Env):
         
         # Initialize state tracking variables
         self.current_step = 0
+        self.frame_rate = 600
+        self.FrameIndex = 0
+
         self.simulation_events = []
         
         # Set up simulation event handlers
@@ -107,10 +112,8 @@ class TridentIslandEnv(gym.Env):
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
         })
         
-        # Observation space: TODO: to implement, placeholder for entity positions, health, etc.
-        self.observation_space = spaces.Box(
-            low=0, high=1, shape=(100,), dtype=np.float32
-        )
+        # Observation space (globals-only for now)
+        self.observation_space = observations.build_observation_space(self.config)
         
         # Initialize force configuration paths (will be set by wrapper)
         self.force_config_paths = None
@@ -167,6 +170,14 @@ class TridentIslandEnv(gym.Env):
         self.simulation_events = []
         self.entities.clear()
         self.target_groups.clear()
+        
+        # Global state placeholders (kills, capture, contest)
+        self.friendly_kills = 0
+        self.enemy_kills = 0
+        self.capture_timer_remaining = 0.0
+        self.island_contested = False
+        self.capture_possible = True
+
         observation = self._get_observation()
         info = {
             "step": self.current_step,
@@ -183,6 +194,8 @@ class TridentIslandEnv(gym.Env):
     def step(self, action: Dict) -> Tuple[np.ndarray, float, bool, bool, Dict]:
         """Execute hierarchical action"""
         self.current_step += 1
+        self.FrameIndex += self.frame_rate  # Advance simulation time
+
         self.simulation_events = []  # Clear previous step's events
         
         # TODO: Reset frame-specific state if needed
@@ -196,14 +209,8 @@ class TridentIslandEnv(gym.Env):
         sim_data.player_events = player_events
         
         # Execute simulation step
-        # TODO: Parameters for simulation step
-        # self.simulation_events = SimulationInterface.tick_simulation(
-        #     self.simulation, sim_data, 1  # 1 simulation step
-        # )
-        
-        # Process simulation events (adjudication results)
         # TODO: Implement event processing
-        simulation_utils.process_simulation_events(self, self.simulation_events)
+        simulation_utils.tick_simulation(self)
 
         # Get observation based on current sensing capabilities
         observation = self._get_observation()
@@ -237,13 +244,10 @@ class TridentIslandEnv(gym.Env):
         return observation, reward, terminated, truncated, info
     
     def _get_observation(self) -> np.ndarray:
-        """Extract observation from simulation state"""
-        # TODO: Implement observation extraction
-        # - Get all entities from simulation
-        # - Extract positions, health, weapon status, sensor data
-        # - Apply fog of war / sensor limitations
-        # - Convert to fixed-size observation vector
-        return np.zeros(self.observation_space.shape, dtype=np.float32)
+        """Extract observation from simulation state (globals-only for now)."""
+        # Update globals that depend on per-step conditions
+        self._update_global_flags()
+        return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:
         """Calculate reward from simulation events"""
@@ -256,11 +260,34 @@ class TridentIslandEnv(gym.Env):
     
     def _update_dead_entities(self):
         """Remove destroyed entities from tracking dictionaries"""
+        # TODO: Implement tracking of dead entities and update self.kills_for / self.kills_against accordingly.
+
+    def _update_global_flags(self):
+        """Update global flags for each step."""
+        settler_entities = self._get_settler_entities()
+        self.capture_possible = True if e.is_alive (for e in settler_entities) else False
 
         # TODO: Keep a set of dead entities
         # TODO: Keep a set of dead target groups
         # Make sure entity includes all total entities (dead and alive)
     
+
+    def _get_settler_entities(self) -> List:
+        """Return our faction's entities that can capture (settler-capable).
+
+        Uses entity.can_capture to identify candidates.
+        """
+        # TODO: Placeholder
+        our_faction = self.config.our_faction
+        result = []
+        for entity in self.entities.values():
+            if entity.domain == EntityDomain.AIR and entity.faction.value == our_faction and entity.can_capture:
+                result.append(entity)
+            else:
+                continue
+        return result
+
+
     def _check_termination(self) -> bool:
         """Check if mission/episode should end"""
         # TODO: Check victory conditions from simulation

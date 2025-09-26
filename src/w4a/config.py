@@ -8,7 +8,7 @@ These can be changed without affecting the core simulation.
 from dataclasses import dataclass
 from typing import Optional
 
-from .constants import TRIDENT_ISLAND_MAP_SIZE
+from .constants import *
 
 
 @dataclass
@@ -17,13 +17,15 @@ class Config:
     
     # Training parameters
     max_episode_steps: int = 1000 # TODO: This is a placeholder
+    capture_required_seconds: float = CAPTURE_REQUIRED_SECONDS
     # TODO: Add time steps to simulation (10sec is fine)
     
     # Early termination for training efficiency (optional)
     early_termination_enabled: bool = False
     early_win_threshold: float = 0.8  # End episode early if 80% enemies destroyed
     early_loss_threshold: float = 0.2  # End episode early if 80% own forces destroyed
-    
+    early_termination_capture_seconds: float = 600.0  # Capture time in seconds
+
     # Environment setup (uses constants but can be overridden)
     map_size: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
     grid_resolution_km: int = 50  # Discretized grid resolution in km

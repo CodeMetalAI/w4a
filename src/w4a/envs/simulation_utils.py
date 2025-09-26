@@ -119,3 +119,30 @@ def process_simulation_events(env, events):
             # Uncomment for debugging:
             # print(f"Frame {getattr(env.simulation, 'frame_index', 0)}: Unhandled {event.__class__.__name__}")
             pass
+
+
+def tick_simulation(env):
+    """
+    Advance simulation by one time step and process resulting events.
+    
+    Executes queued player events, advances simulation physics, and processes
+    any events generated (entity spawns, deaths, victories, etc.).
+    
+    Args:
+        env: Environment instance with simulation handle and event data
+        
+    Side Effects:
+        - Advances simulation state by env.frame_rate time units
+        - Processes all generated events through event handlers
+        - Resets env.sim_data for next frame's events
+    """
+
+    sim_data = env.sim_data
+
+    env.simulation_handle.tick(sim_data, env.frame_rate)
+
+    # Set up the simulation data for the next frame
+    env.sim_data = SimulationData()
+
+    # Process all events the simulation generated
+    process_simulation_events(env, sim_data.simulation_events)
