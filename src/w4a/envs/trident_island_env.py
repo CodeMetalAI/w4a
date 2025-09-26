@@ -13,6 +13,8 @@ from ..config import Config
 from . import actions
 from . import simulation_utils
 from . import observations
+from . import mission_metrics
+from .utils import get_time_elapsed
 
 import SimulationInterface
 from SimulationInterface import (
@@ -57,6 +59,7 @@ class TridentIslandEnv(gym.Env):
         self.current_step = 0
         self.frame_rate = 600
         self.FrameIndex = 0
+        self.time_elapsed = 0.0  # Mission time in seconds
 
         self.simulation_events = []
         
@@ -167,16 +170,17 @@ class TridentIslandEnv(gym.Env):
         
         # Reset state tracking
         self.current_step = 0
+        self.FrameIndex = 0
+        self.time_elapsed = 0.0
         self.simulation_events = []
         self.entities.clear()
         self.target_groups.clear()
         
-        # Global state placeholders (kills, capture, contest)
-        self.friendly_kills = 0
-        self.enemy_kills = 0
-        self.capture_timer_remaining = 0.0
-        self.island_contested = False
-        self.capture_possible = True
+        # Initialize enemy sensing data tracking
+        self.enemy_sensing_data = {}  # Dict[int, EnemySensingData]
+        
+        # Reset mission metrics to track fresh mission progress
+        mission_metrics.reset_mission_metrics(self)
 
         observation = self._get_observation()
         info = {
@@ -195,6 +199,7 @@ class TridentIslandEnv(gym.Env):
         """Execute hierarchical action"""
         self.current_step += 1
         self.FrameIndex += self.frame_rate  # Advance simulation time
+        self.time_elapsed = get_time_elapsed(self.FrameIndex)  # Update mission time
 
         self.simulation_events = []  # Clear previous step's events
         
@@ -212,6 +217,9 @@ class TridentIslandEnv(gym.Env):
         # TODO: Implement event processing
         simulation_utils.tick_simulation(self)
 
+        # Update sensing information for enemy target groups
+        self._update_enemy_sensing_data()
+
         # Get observation based on current sensing capabilities
         observation = self._get_observation()
 
@@ -219,16 +227,19 @@ class TridentIslandEnv(gym.Env):
         reward = self._calculate_reward()
         
 
-        self._update_dead_entities()
-        
+        # Update all mission progress metrics
+        mission_metrics.update_all_mission_metrics(self)
 
         terminated = self._check_termination()
-        truncated = self.current_step >= self.config.max_episode_steps
+        
+        # Truncate on time limit 
+        truncated = self.time_elapsed >= self.config.max_game_time
 
         # Update terminal reward
         
         info = {
             "step": self.current_step,
+            "time_elapsed": self.time_elapsed,
             "total_entities": len(self.entities),
             "controllable_entities_count": len(self._get_controllable_entities_set()),
             "detected_targets_count": len(self._get_detected_targets_set()),
@@ -257,35 +268,6 @@ class TridentIslandEnv(gym.Env):
         # - Tactical performance (effective engagement ranges, formations)
         # - Step penalties (encourage efficient missions)
         return 0.0
-    
-    def _update_dead_entities(self):
-        """Remove destroyed entities from tracking dictionaries"""
-        # TODO: Implement tracking of dead entities and update self.kills_for / self.kills_against accordingly.
-
-    def _update_global_flags(self):
-        """Update global flags for each step."""
-        settler_entities = self._get_settler_entities()
-        self.capture_possible = True if e.is_alive (for e in settler_entities) else False
-
-        # TODO: Keep a set of dead entities
-        # TODO: Keep a set of dead target groups
-        # Make sure entity includes all total entities (dead and alive)
-    
-
-    def _get_settler_entities(self) -> List:
-        """Return our faction's entities that can capture (settler-capable).
-
-        Uses entity.can_capture to identify candidates.
-        """
-        # TODO: Placeholder
-        our_faction = self.config.our_faction
-        result = []
-        for entity in self.entities.values():
-            if entity.domain == EntityDomain.AIR and entity.faction.value == our_faction and entity.can_capture:
-                result.append(entity)
-            else:
-                continue
-        return result
 
 
     def _check_termination(self) -> bool:
@@ -434,6 +416,118 @@ class TridentIslandEnv(gym.Env):
         """Handle adversary contact events"""
         # TODO: Handle adversary detection
         pass
+
+    def _update_enemy_sensing_data(self):
+        """Update sensing information for all enemy target groups.
+        
+        This method should be called every step to update what we know about enemy forces
+        based on our current sensor coverage and capabilities.
+        """
+        # TODO: Implement sensing update logic
+        # 
+        # Do something like: 
+        # 1. Get all friendly sensor platforms (radars, AWACS, etc.)
+        # friendly_sensors = [entity for entity in self.entities.values() 
+        #                    if entity.faction.value == self.config.our_faction 
+        #                    and entity.is_alive and entity.has_sensor_capability]
+        # 
+        # 2. For each enemy target group:
+        # for group_id, target_group in self.target_groups.items():
+        #     if target_group.faction.value == self.config.our_faction:
+        #         continue  # Skip friendly groups
+        #     
+        #     # Calculate sensing capability for this group
+        #     sensing_tier, confidence = self._calculate_sensing_tier(target_group, friendly_sensors)
+        #     
+        #     # Update or create sensing data entry
+        #     if group_id not in self.enemy_sensing_data:
+        #         self.enemy_sensing_data[group_id] = EnemySensingData()
+        #     
+        #     sensing_data = self.enemy_sensing_data[group_id]
+        #     
+        #     if sensing_tier > 0:
+        #         # We can detect this group
+        #         sensing_data.is_detected = True
+        #         sensing_data.tier = sensing_tier
+        #         sensing_data.confidence = confidence
+        #         sensing_data.last_contact_time = self.time_elapsed
+        #         
+        #         # Update information based on sensing tier
+        #         if sensing_tier >= 1:
+        #             # Tier 1: Domain detection
+        #             sensing_data.domain = target_group.get_primary_domain()
+        #             sensing_data.estimated_unit_count = target_group.get_estimated_count()
+        #             sensing_data.approximate_position = target_group.get_center_position()
+        #         
+        #         if sensing_tier >= 2:
+        #             # Tier 2: Individual unit identification
+        #             sensing_data.individual_positions = target_group.get_unit_positions()
+        #             sensing_data.unit_types = target_group.get_unit_types()
+        #             sensing_data.average_heading = target_group.get_average_heading()
+        #             sensing_data.average_speed = target_group.get_average_speed()
+        #         
+        #         if sensing_tier >= 3:
+        #             # Tier 3: Detailed weapon intelligence
+        #             sensing_data.weapon_capabilities = target_group.get_weapon_capabilities()
+        #             sensing_data.estimated_weapon_count = target_group.get_weapon_count()
+        #             sensing_data.ammunition_status = target_group.get_ammo_status()
+        #     
+        #     else:
+        #         # Lost contact or never detected
+        #         sensing_data.is_detected = False
+        #         # Keep historical data but mark as stale
+        pass
+
+    def _calculate_sensing_tier(self, target_group, friendly_sensors):
+        """Calculate sensing tier and confidence for a target group.
+        
+        Args:
+            target_group: Enemy target group to assess
+            friendly_sensors: List of friendly sensor platforms
+            
+        Returns:
+            tuple: (sensing_tier, confidence) where tier is 0-3 and confidence is 0.0-1.0
+        """
+        # TODO: Implement sensing tier calculation
+        # 
+        # Factors to consider:
+        # - Range to target group from nearest sensor
+        # - Sensor type and capability (radar, visual, ESM)
+        # - Environmental conditions (weather, terrain masking)
+        # - Target group stealth/ECM capabilities
+        # - Sensor platform status (damaged, jammed, etc.)
+        # 
+        # Example logic:
+        # max_tier = 0
+        # best_confidence = 0.0
+        # 
+        # for sensor in friendly_sensors:
+        #     range_to_target = calculate_distance(sensor.position, target_group.center)
+        #     
+        #     # Determine sensing capability based on range and sensor type
+        #     if range_to_target <= sensor.tier3_range and sensor.has_detailed_capability:
+        #         tier = 3
+        #         confidence = 0.9 * sensor.reliability
+        #     elif range_to_target <= sensor.tier2_range and sensor.has_identification_capability:
+        #         tier = 2  
+        #         confidence = 0.7 * sensor.reliability
+        #     elif range_to_target <= sensor.tier1_range:
+        #         tier = 1
+        #         confidence = 0.5 * sensor.reliability
+        #     else:
+        #         tier = 0
+        #         confidence = 0.0
+        #     
+        #     # Apply environmental and stealth modifiers
+        #     confidence *= self._get_environmental_modifier(sensor, target_group)
+        #     confidence *= (1.0 - target_group.stealth_factor)
+        #     
+        #     if tier > max_tier or (tier == max_tier and confidence > best_confidence):
+        #         max_tier = tier
+        #         best_confidence = confidence
+        # 
+        # return max_tier, best_confidence
+        return 0, 0.0  # Placeholder
 
     def close(self):
         # TODO: To implement

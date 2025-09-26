@@ -15,11 +15,10 @@ from .constants import *
 class Config:
     """User-configurable settings for W4A environment"""
     
-    # Training parameters
-    max_episode_steps: int = 1000 # TODO: This is a placeholder
+    # Training parameters  
+    max_game_time: float = 9000.0  # Maximum mission time in seconds (2.5 hours)
     capture_required_seconds: float = CAPTURE_REQUIRED_SECONDS
-    # TODO: Add time steps to simulation (10sec is fine)
-    
+
     # Early termination for training efficiency (optional)
     early_termination_enabled: bool = False
     early_win_threshold: float = 0.8  # End episode early if 80% enemies destroyed
@@ -53,3 +52,8 @@ class Config:
     reward_scale: float = 1.0
     normalize_observations: bool = True
     enable_curriculum: bool = False
+    
+    @property
+    def max_episode_steps(self) -> int:
+        """Derive max episode steps from max game time (10 seconds per step)"""
+        return int(self.max_game_time / 10)
