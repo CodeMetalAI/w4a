@@ -47,10 +47,10 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
         event = execute_stealth_action(entity_id, action, entities)
         player_events = event
     elif action_type == 4:  # Sensing Direction
-        event = execute_sensing_direction_action(entity_id, action, entities, config)
+        event = execute_set_radar_focus_action(entity_id, action, entities, config)
         player_events = event
-    elif action_type == 5:  # Land
-        event = execute_land_action(entity_id, action, entities)
+    elif action_type == 5:  # Capture
+        event = execute_capture_action(entity_id, action, entities)
         player_events = event
     elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
@@ -87,17 +87,14 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_engage_action(action, entities, target_groups)
     elif action_type == 3:  # Stealth
         return validate_stealth_action(action, entities)
-    elif action_type == 4:  # Sensing Direction
-        return validate_sensing_direction_action(action, entities, config)
+    elif action_type == 4:  # Sensing Position
+        return validate_sensing_position_action(action, entities, config)
     elif action_type == 5:  # Capture
         return validate_capture_action(action, entities)
     elif action_type == 6:  # RTB
         return validate_rtb_action(action, entities)
     elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
-    # TODO: Get rid of this
-    elif action_type == 8:  # Clear Sensing Direction
-        return validate_clear_sensing_direction_action(action, entities, config)
     
     return False
 
@@ -152,6 +149,16 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
 
 def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute sense action - point radar at location"""
+
+    max_grid_positions = calculate_max_grid_positions(config)
+    if action["sensing_position_grid"] == max_grid_positions: # Default sensing (forward)
+        entity = entities[entity_id]
+        
+        event = ClearRadarFocus()
+        event.entity = entity
+
+        return event
+
     sense_x, sense_y = grid_to_position(action["sensing_direction_grid"], config)
     
     entity = entities[entity_id]
@@ -160,17 +167,6 @@ def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict,
     event.entity = entity
     event.position = Vector3(sense_x, sense_y, entity.pos.z)
     
-    return event
-
-# TODO: We dont want to make this a separate action, this can be a special case of the above
-def execute_clear_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute sense action - radar back to default"""
-
-    entity = entities[entity_id]
-    
-    event = ClearRadarFocus()
-    event.entity = entity
-
     return event
 
 def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config: Config):
@@ -315,8 +311,8 @@ def validate_stealth_action(action: Dict, entities: Dict) -> bool:
     return True
 
 
-def validate_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate sensing direction action parameters."""
+def validate_sensing_position_action(action: Dict, entities: Dict, config: Config) -> bool:
+    """Validate sensing position action parameters."""
     entity_id = action["entity_id"]
     sensing_position_grid = action["sensing_position_grid"]
     
@@ -324,25 +320,16 @@ def validate_sensing_direction_action(action: Dict, entities: Dict, config: Conf
     
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
-    if sensing_position_grid >= max_grid_positions:
+    if sensing_position_grid > max_grid_positions:
         return False
     
+    if sensing_position_grid == max_grid_positions:
+        return True  # Default sensing (forward)
+
     # Convert to world coordinates and check bounds
     world_x, world_y = grid_to_position(sensing_position_grid, config)
     if not position_in_bounds(world_x, world_y, config):
         return False
-    
-    # Check entity has radar/sensors
-    if not entity.has_radar:
-        return False
-    
-    return True
-
-def validate_clear_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate sensing direction action parameters."""
-    entity_id = action["entity_id"]
-  
-    entity = entities[entity_id]
     
     # Check entity has radar/sensors
     if not entity.has_radar:

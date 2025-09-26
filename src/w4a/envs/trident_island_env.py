@@ -95,7 +95,7 @@ class TridentIslandEnv(gym.Env):
             "stealth_enabled": spaces.Discrete(2),    # 0=off, 1=on
             
             # Sensing direction action parameters
-            "sensing_direction_grid": spaces.Discrete(self.max_grid_positions),
+            "sensing_position_grid": spaces.Discrete(self.max_grid_positions + 1), # +1 for default sensing (forward)
             
             # Refuel action parameters
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
