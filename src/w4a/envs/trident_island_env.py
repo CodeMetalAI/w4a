@@ -9,14 +9,20 @@ from gymnasium import spaces
 import numpy as np
 from typing import Dict, Any, Optional, Tuple, List
 
+from .simple_agent import SimpleAgent
+
 from ..config import Config
 from . import actions
+from ..entities import w4a_entities
+
+from pathlib import Path
 
 import SimulationInterface
 from SimulationInterface import (
-    SimulationConfig, SimulationData, Faction,
+    Simulation, SimulationConfig, SimulationData, Faction,
     EntitySpawned, Victory, AdversaryContact,
-    Entity, ControllableEntity, Unit, EntityDomain
+    Entity, ControllableEntity, Unit, EntityDomain,
+    EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
 
 
@@ -38,35 +44,36 @@ class TridentIslandEnv(gym.Env):
         # Initialize Bane simulation engine
         SimulationInterface.initialize()
         
-        # Create simulation with replay capability
-        sim_config = SimulationConfig()
-        sim_config.log_json = self.enable_replay  # Enable replay recording
-        sim_config.random_seed = self.config.seed or 42
-        sim_config.name = "TridentIsland"
-        
-        # TODO: Load scenario data (similar to Bane's Mission class)
-        # scenario_path = Path(__file__).parent / "scenarios" / "trident_island"
-        
-        # TODO: Parse data from hte config and constants file as needed
+        # Load scenario data 
+        scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"
+
+        # Parse data from the config and constants file as needed
         # Load CONSTANT mission rules (objectives, victory conditions, map)
-        # mission_events = load_json(scenario_path / "MissionEvents.json")  # NEVER changes
-        
-        # Load VARIABLE entity forces (can change per episode for curriculum/auction/training)
-        # entity_spawn_data = self._generate_entity_forces()
-        
-        # Create simulation from scenario data
-        # self.simulation = SimulationInterface.create_simulation_from_data(scenario_json, True)
-        
-        # For now: basic simulation creation without scenario
-        self.simulation = SimulationInterface.create_simulation(sim_config)
-        
-        # TODO: Set up scenario entities, objectives, victory conditions
-        # - Spawn initial units for each faction
-        # - Set victory conditions (e.g., capture flag, destroy targets)
-        # - Initialize mission timeline and events
+        with open(scenario_path / "MissionEvents.json") as f:
+            self.mission_events = Simulation.create_mission_events(f.read())
+
+        # Load the spawn data
+        self.faction_entity_spawn_data = {}
+
+        with open(scenario_path / "LegacyEntitySpawnData.json") as f:
+            self.faction_entity_spawn_data[Faction.LEGACY] = EntitySpawnData.import_json(f.read())
+
+        with open(scenario_path / "DynastyEntitySpawnData.json") as f:
+            self.faction_entity_spawn_data[Faction.DYNASTY] = EntitySpawnData.import_json(f.read())
+
+        # Load the entity data. This is the outcome of the auction that takes place prior to the simulation
+        entity_lists_path = Path(__file__).parent.parent / "entity_lists"
+
+        self.faction_entity_data = {}
+
+        with open(entity_lists_path / "LegacyEntityList.json") as f:
+            self.faction_entity_data[Faction.LEGACY] = EntityList().load_json(f.read())
+
+        with open(entity_lists_path / "DynastyEntityList.json") as f:
+            self.faction_entity_data[Faction.DYNASTY] = EntityList().load_json(f.read())
         
         # Calculate grid dimensions for discretized positioning
-        map_size_km = self.config.map_size_km[0] // 1000  # Convert meters to km
+        map_size_km = self.config.map_size_km[0]
         self.grid_size = map_size_km // self.config.grid_resolution_km
         self.max_grid_positions = self.grid_size * self.grid_size
         
@@ -117,8 +124,41 @@ class TridentIslandEnv(gym.Env):
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
         """Reset environment"""
         super().reset(seed=seed)
+
+        # Create simulation with replay capability
+        sim_config = SimulationConfig()
+        sim_config.log_json = self.enable_replay  # Enable replay recording
+        sim_config.random_seed = self.config.seed or 42
+        sim_config.name = "TridentIsland"
         
-        # TODO: Reset scenario, respawn entities, set initial conditions
+        # Create simulation from scenario data
+        # self.simulation = SimulationInterface.create_simulation_from_data(scenario_json, True)
+        
+        # For now: basic simulation creation without scenario
+        self.simulation = SimulationInterface.create_simulation(sim_config)
+
+        # TODO: @Sanjna initialize the actual RL agents here
+        self.simulation.add_agent(SimpleAgent(Faction.LEGACY))
+        self.simulation.add_agent(SimpleAgent(Faction.DYNASTY))
+
+        sim_data = SimulationData()
+        sim_data.add_mission_events(self.mission_events)    # Don't think this holds up the second time. We might need to recrete them from json every time
+
+        force_laydowns = {}
+        for faction in [Faction.LEGACY, Faction.DYNASTY]:
+            force_laydown = ForceLaydown()
+            force_laydown.entity_spawn_data = self.faction_entity_spawn_data[faction]
+            force_laydown.entity_data = FactionConfiguration().create_entities(self.faction_entity_data[faction], lambda type: self.simulation.create_mission_event(w4a_entities.get_entity(type)))
+
+            force_laydowns[faction] = force_laydown
+
+        # Process the mission setup
+        self.simulation.start_force_laydown(force_laydowns)
+        self.simulation.finalize_force_laydown(sim_data)
+
+        # Process all events coming out of this
+        self._process_simulation_events(sim_data.simulation_events)
+
         # For now just clear events
         self.simulation_events = []
         

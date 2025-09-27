@@ -24,7 +24,6 @@ def test_config():
     assert config.max_episode_steps > 0
 
 
-@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_env_creation():
     """Test environment creation"""
     env = TridentIslandEnv()
@@ -32,11 +31,17 @@ def test_env_creation():
     env_replay = TridentIslandEnv(enable_replay=True)
     assert env_replay.enable_replay is True
 
-@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
+def test_env_reset():
+    """Test environment creation"""
+    env = TridentIslandEnv(enable_replay=True)
+
+    env.reset()
+
 def test_simulation_interface_integration():
     """Test that SimulationInterface integration works or fails gracefully"""
     try:
         env = TridentIslandEnv()
+        env.reset()
         # If SimulationInterface is available, simulation should be created
         assert env.simulation is not None
         print("SimulationInterface available and working")
@@ -47,7 +52,6 @@ def test_simulation_interface_integration():
         pytest.fail(f"Unexpected error in environment creation: {e}")
 
 
-@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_env_reset_step_cycle():
     """Test complete environment usage cycle"""
     env = TridentIslandEnv()
@@ -225,6 +229,6 @@ if __name__ == "__main__":
     # Run basic smoke test
     print("Running basic smoke tests...")
     test_config()
-    #test_env_creation()
-    #test_env_reset_step_cycle()
+    test_env_creation()
+    test_env_reset_step_cycle()
     print("Basic tests passed")

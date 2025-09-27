@@ -1,0 +1,22 @@
+{
+  "Entities": [
+    {
+      "Type": "J-20",
+      "Amount": 2,
+      "Identifiers": ["DRAGON1", "DRAGON2"],
+      "SpawnLocation": "DynastyBase"
+    },
+    {
+      "Type": "J-16",
+      "Amount": 1,
+      "Identifiers": ["LESSER DRAGON"],
+      "SpawnLocation": "DynastyBase"
+    },
+    {
+      "Type": "J-10C (Strike)",
+      "Amount": 1,
+      "Identifiers": ["PUNY DRAGON"],
+      "SpawnLocation": "DynastyBase"
+    }
+  ]
+}
