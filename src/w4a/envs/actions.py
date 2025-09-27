@@ -159,7 +159,7 @@ def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict,
 
         return event
 
-    sense_x, sense_y = grid_to_position(action["sensing_direction_grid"], config)
+    sense_x, sense_y = grid_to_position(action["sensing_position_grid"], config)
     
     entity = entities[entity_id]
     

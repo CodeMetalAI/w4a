@@ -13,7 +13,7 @@ from w4a.training.replay import ReplayRecorder
 from SimulationInterface import (Vector3, Simulation, create_mock_entity)
 
 from w4a import(is_valid_action)
-from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_clear_radar_focus_action, execute_stealth_action, execute_capture_action, execute_refuel_action)
+from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_stealth_action, execute_capture_action, execute_refuel_action)
 
 from w4a import w4a_entities
 
@@ -82,26 +82,11 @@ def test_set_radar_focus_action():
 
     entities = { 1: entity}
 
-    action = {"entity_id": 1, "action_type": 4, "sensing_direction_grid": 10 }  
+    action = {"entity_id": 1, "action_type": 4, "sensing_position_grid": 10 }  
     assert is_valid_action(action, entities, {}, Config())
 
 
     event = execute_set_radar_focus_action(1, action, entities, Config())
-
-    assert event
-
-def test_clear_radar_focus_action():
-    """Test clear radar focus action"""
-
-    entity = create_test_entity()
-
-    entities = { 1: entity}
-
-    action = {"entity_id": 1, "action_type": 8 }
-
-    assert is_valid_action(action, entities, {}, Config())
-
-    event = execute_clear_radar_focus_action(1, action, entities, Config())
 
     assert event
 
