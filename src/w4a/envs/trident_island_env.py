@@ -168,7 +168,7 @@ class TridentIslandEnv(gym.Env):
             legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
             dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
             
-            self.simulation = simulation_utils.setup_simulation_from_json(
+            simulation_utils.setup_simulation_from_json(
                 self, 
                 str(legacy_entity_list),
                 str(dynasty_entity_list),

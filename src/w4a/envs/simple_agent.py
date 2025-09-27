@@ -96,6 +96,7 @@ class SimpleAgent(Agent, LoggingMixin):
 		return entities	# We create no packages at the moment, but just place stuff on the map as is.
 
 	def pre_simulation_tick(self, simulation_data):
+		self.log("Received pre_simulation_tick")
 		self.player_events = []
 
 		self.__process_simulation_events(simulation_data.simulation_events)
@@ -103,6 +104,8 @@ class SimpleAgent(Agent, LoggingMixin):
 		simulation_data.player_events = self.player_events
 
 	def tick(self, simulation_data):
+		self.log("Received tick")
+		
 		self.player_events = []
 
 		self.__process_simulation_events(simulation_data.simulation_events)
