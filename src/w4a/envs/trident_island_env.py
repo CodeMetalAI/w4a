@@ -51,7 +51,7 @@ class TridentIslandEnv(gym.Env):
         self.scenario_name = scenario_name
         
         # Set up paths
-        self.scenario_path = Path(__file__).parent / "scenarios"  
+        self.scenario_path = Path(__file__).parent.parent / "scenarios"  
         # This is fixed for a single scenario, can be configured for running multiple mission types
         self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
 
@@ -83,29 +83,10 @@ class TridentIslandEnv(gym.Env):
             Victory: self._victory,
             AdversaryContact: self._adversary_contact
         }
-        # Load the spawn data
-        self.faction_entity_spawn_data = {}
-
-        with open(scenario_path / "LegacyEntitySpawnData.json") as f:
-            self.faction_entity_spawn_data[Faction.LEGACY] = EntitySpawnData.import_json(f.read())
-
-        with open(scenario_path / "DynastyEntitySpawnData.json") as f:
-            self.faction_entity_spawn_data[Faction.DYNASTY] = EntitySpawnData.import_json(f.read())
-
-        # Load the entity data. This is the outcome of the auction that takes place prior to the simulation
-        entity_lists_path = Path(__file__).parent.parent / "entity_lists"
 
         # Entity tracking - stores ALL entities from ALL factions
         self.entities = {}  # Dict[entity_id -> entity] for all entities in game
         self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups 
-        
-        self.faction_entity_data = {}
-
-        with open(entity_lists_path / "LegacyEntityList.json") as f:
-            self.faction_entity_data[Faction.LEGACY] = EntityList().load_json(f.read())
-
-        with open(entity_lists_path / "DynastyEntityList.json") as f:
-            self.faction_entity_data[Faction.DYNASTY] = EntityList().load_json(f.read())
         
         # Calculate grid dimensions for discretized positioning
         map_size_km = self.config.map_size_km[0]
@@ -169,12 +150,7 @@ class TridentIslandEnv(gym.Env):
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
-        # Create simulation with replay capability
-        sim_config = SimulationConfig()
-        sim_config.log_json = self.enable_replay  # Enable replay recording
-        sim_config.random_seed = self.config.seed or 42
-        sim_config.name = "TridentIsland"
-        
+
         # Set up simulation using JSON files if available
         if self.force_config_paths:
             self.simulation = simulation_utils.setup_simulation_from_json(
@@ -205,34 +181,6 @@ class TridentIslandEnv(gym.Env):
         self.current_step = 0
         self.FrameIndex = 0
         self.time_elapsed = 0.0
-        
-        # Create simulation from scenario data
-        # self.simulation = SimulationInterface.create_simulation_from_data(scenario_json, True)
-        
-        # For now: basic simulation creation without scenario
-        self.simulation = SimulationInterface.create_simulation(sim_config)
-
-        # TODO: @Sanjna initialize the actual RL agents here
-        self.simulation.add_agent(SimpleAgent(Faction.LEGACY))
-        self.simulation.add_agent(SimpleAgent(Faction.DYNASTY))
-
-        sim_data = SimulationData()
-        sim_data.add_mission_events(self.mission_events)    # Don't think this holds up the second time. We might need to recrete them from json every time
-
-        force_laydowns = {}
-        for faction in [Faction.LEGACY, Faction.DYNASTY]:
-            force_laydown = ForceLaydown()
-            force_laydown.entity_spawn_data = self.faction_entity_spawn_data[faction]
-            force_laydown.entity_data = FactionConfiguration().create_entities(self.faction_entity_data[faction], lambda type: self.simulation.create_mission_event(w4a_entities.get_entity(type)))
-
-            force_laydowns[faction] = force_laydown
-
-        # Process the mission setup
-        self.simulation.start_force_laydown(force_laydowns)
-        self.simulation.finalize_force_laydown(sim_data)
-
-        # Process all events coming out of this
-        self._process_simulation_events(sim_data.simulation_events)
 
         # For now just clear events
         self.simulation_events = []
@@ -320,7 +268,7 @@ class TridentIslandEnv(gym.Env):
     def _get_observation(self) -> np.ndarray:
         """Extract observation from simulation state (globals-only for now)."""
         # Update globals that depend on per-step conditions
-        self._update_global_flags()
+        #self._update_global_flags()
         return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:

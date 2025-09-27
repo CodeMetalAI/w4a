@@ -82,7 +82,7 @@ def _compute_global_features(env: Any) -> np.ndarray:
     time_remaining_norm = float(time_remaining) / float(env.config.max_game_time)
 
     # Kill tallies normalized by max_entities
-    denom = float(max(1, len(env.config.max_entities)))
+    denom = float(max(1, env.config.max_entities))
     friendly_kills = float(len(env.friendly_kills))
     enemy_kills = float(len(env.enemy_kills))
     friendly_kills_norm = np.clip(friendly_kills / denom, 0.0, 1.0)
