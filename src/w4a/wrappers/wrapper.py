@@ -1,108 +1,145 @@
 """
-Environment Wrapper
+RL wrappers:
 
-A wrapper for custom rewards, actions, and observations.
+- RLAgent: minimal simulation Agent (passive for training)
+- RLEnvWrapper: user-facing wrapper with overridable obs/action/reward methods and adversary toggle
 """
 
 import gymnasium as gym
-import numpy as np
-from typing import Optional, Callable, Dict, Any
-from pathlib import Path
+from typing import Optional
+
+from SimulationInterface import Agent as SimAgent
+from SimulationInterface import Faction
+
+# Simple built-in adversary
+from .simple_agent import SimpleAgent
 
 
-class EnvWrapper(gym.Wrapper):
+class RLAgent(SimAgent):
     """
-    Wrapper for customizing reward, action, observation, and optionally overriding force configurations.
-    
+    Minimal simulation Agent for RL integration.
+
+    - Inherits SimulationInterface.Agent
+    - Sets faction from Config (or explicit)
+    - Passive during training (no PlayerEvents)
+    """
+
+    def __init__(self, config, faction: Optional[Faction] = None):
+        super().__init__()
+        self.config = config
+        if faction is None:
+            self.faction = Faction.DYNASTY if getattr(config, "our_faction", 0) == 1 else Faction.LEGACY
+        else:
+            self.faction = faction
+
+    def pre_simulation_tick(self, simulation_data):
+        # Passive during training; in eval/competition this can compile PlayerEvents from policy
+        # actions to coordinate multiple agents inside the simulation loop.
+        simulation_data.player_events = []
+
+
+class RLEnvWrapper(gym.Wrapper):
+    """
+    RL Environment Wrapper
+
+    - Lets users customize observation, action, reward
+    - Installs real simulation Agents before reset
+      • Student side: provided `agent` or a passive RLAgent
+      • Opponent side: SimpleAgent if `enable_adversary`, else a passive RLAgent
+    - Optional: override force composition/spawn JSONs
+
     Usage:
+        from w4a.envs.trident_island_env import TridentIslandEnv
+
         env = TridentIslandEnv()
-        wrapped = EnvWrapper(
+        wrapped = RLEnvWrapper(
             env,
-            reward_fn=lambda obs, action, reward, info: reward * 2,  # Custom reward
-            obs_fn=lambda obs: obs[:10],  # Custom observation
-            action_fn=lambda action: action + 1  # Custom action
+            agent=None,                # or RLAgent(env.config)
+            enable_adversary=True      # toggle SimpleAgent opponent
         )
-        
-    Can also specify custom force configurations:
-        env = TridentIslandEnv()
-        wrapped = EnvWrapper(
-            env,
-            legacy_entity_list_path="my_custom/LegacyEntityList.json",
-            dynasty_entity_list_path="my_custom/DynastyEntityList.json", 
-            legacy_spawn_data_path="my_custom/LegacyEntitySpawnData.json",
-            dynasty_spawn_data_path="my_custom/DynastyEntitySpawnData.json",
-            reward_fn=lambda obs, action, reward, info: reward * 2
-        )
+        # Train with any RL library (e.g., Ray RLlib, SB3 PPO, etc.)
     """
-    
+
     def __init__(
         self,
         env: gym.Env,
+        *,
+        agent: Optional[SimAgent] = None,
+        enable_adversary: bool = True,
         legacy_entity_list_path: Optional[str] = None,
         dynasty_entity_list_path: Optional[str] = None,
         legacy_spawn_data_path: Optional[str] = None,
         dynasty_spawn_data_path: Optional[str] = None,
-        reward_fn: Optional[Callable] = None,
-        obs_fn: Optional[Callable] = None,
-        action_fn: Optional[Callable] = None
     ):
-        """
-        Initialize wrapper.
-        
-        Args:
-            env: Environment to wrap
-            legacy_entity_list_path: Path to Legacy faction entity composition JSON
-            dynasty_entity_list_path: Path to Dynasty faction entity composition JSON
-            legacy_spawn_data_path: Path to Legacy faction spawn areas JSON 
-            dynasty_spawn_data_path: Path to Dynasty faction spawn areas JSON
-            reward_fn: Function to modify rewards: (obs, action, reward, info) -> new_reward
-            obs_fn: Function to modify observations: (obs) -> new_obs
-            action_fn: Function to modify actions: (action) -> new_action
-        """
         super().__init__(env)
-        
-        # Store JSON file paths for force configuration
+
+        self.agent = agent
+        self.enable_adversary = enable_adversary
+
+        # Optional force configuration JSONs
         self.legacy_entity_list_path = legacy_entity_list_path
         self.dynasty_entity_list_path = dynasty_entity_list_path
         self.legacy_spawn_data_path = legacy_spawn_data_path
         self.dynasty_spawn_data_path = dynasty_spawn_data_path
-            
-        self.reward_fn = reward_fn
-        self.obs_fn = obs_fn
-        self.action_fn = action_fn
-        
-        # Pass the JSON paths to the environment
-        if all([legacy_entity_list_path, dynasty_entity_list_path, 
-                legacy_spawn_data_path, dynasty_spawn_data_path]):
+
+        if all([
+            legacy_entity_list_path,
+            dynasty_entity_list_path,
+            legacy_spawn_data_path,
+            dynasty_spawn_data_path,
+        ]):
             self.env.set_force_config_paths(
-                legacy_entity_list_path, dynasty_entity_list_path,
-                legacy_spawn_data_path, dynasty_spawn_data_path
+                legacy_entity_list_path,
+                dynasty_entity_list_path,
+                legacy_spawn_data_path,
+                dynasty_spawn_data_path,
             )
-    
+
+    def _setup_agents(self):
+
+        is_legacy = getattr(self.env.config, "our_faction", 0) == 1
+        user_faction = Faction.LEGACY if is_legacy else Faction.DYNASTY
+        opponent_faction = Faction.DYNASTY if not is_legacy else Faction.LEGACY
+
+        # User agent: provided or passive RLAgent
+        user_agent = self.agent or RLAgent(self.env.config, faction=user_faction)
+
+        # Opponent agent: SimpleAgent or passive RLAgent (to keep sim happy)
+        if self.enable_adversary:
+            opponent_agent = SimpleAgent(opponent_faction)
+        else:
+            opponent_agent = RLAgent(self.env.config, faction=opponent_faction)
+
+        if is_legacy:
+            self.env.legacy_agent = user_agent
+            self.env.dynasty_agent = opponent_agent
+        else:
+            self.env.legacy_agent = opponent_agent
+            self.env.dynasty_agent = user_agent
+
     def reset(self, **kwargs):
-        """Reset with optional observation transform"""
+        # Setup simulation Agents before creating/initializing the sim
+        self._setup_agents()
+
         obs, info = self.env.reset(**kwargs)
-        
-        if self.obs_fn:
-            obs = self.obs_fn(obs)
-            
+        obs = self.obs_fn(obs)
         return obs, info
-    
+
     def step(self, action):
-        """Step with custom transforms"""
-        # Transform action if needed
-        if self.action_fn:
-            action = self.action_fn(action)
-        
-        # Step environment
+        action = self.action_fn(action)
+
         obs, reward, terminated, truncated, info = self.env.step(action)
-        
-        # Transform observation if needed
-        if self.obs_fn:
-            obs = self.obs_fn(obs)
-        
-        # Transform reward if needed
-        if self.reward_fn:
-            reward = self.reward_fn(obs, action, reward, info)
-        
+
+        obs = self.obs_fn(obs)
+        reward = self.reward_fn(obs, action, reward, info)
+
         return obs, reward, terminated, truncated, info
+
+    def obs_fn(self, obs):
+        return obs
+
+    def action_fn(self, action):
+        return action
+
+    def reward_fn(self, obs, action, reward, info):
+        return reward
