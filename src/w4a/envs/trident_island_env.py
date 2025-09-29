@@ -279,16 +279,12 @@ class TridentIslandEnv(gym.Env):
         # - Use constants.SIMULATION_VICTORY_THRESHOLD
         return False
     
-    
-    
     def render(self) -> Optional[np.ndarray]:
         # TODO: Should we implement rendering?
         """Render environment"""
         if self.render_mode == "rgb_array":
-            # TODO: Generate visualization from simulation
             return np.zeros((400, 600, 3), dtype=np.uint8)
         elif self.render_mode == "human":
-            # TODO: Display visualization
             print(f"Step {self.current_step}")
     
     def get_simulation_handle(self):
