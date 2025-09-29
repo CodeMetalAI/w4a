@@ -188,16 +188,13 @@ class TridentIslandEnv(gym.Env):
         # Reset mission metrics to track fresh mission progress
         mission_metrics.reset_mission_metrics(self)
 
+        # Initialize per-episode tracking for info/debugging
+        self.last_action_by_entity = {}
+        self.last_commit_by_entity = {}
+        self.committed_this_step = set()
+
         observation = self._get_observation()
-        info = {
-            "step": self.current_step,
-            "valid_masks": {
-                "action_types": self._get_valid_action_types(),           
-                "controllable_entities": self._get_controllable_entities_set(),  
-                "detected_targets": self._get_detected_targets_set(),
-                "entity_target_matrix": self._get_entity_target_engagement_matrix()
-            }
-        }
+        info = self._build_info()
         
         return observation, info
     
@@ -209,6 +206,10 @@ class TridentIslandEnv(gym.Env):
         
         self.simulation_events = []  # Clear previous step's events
         
+        # Track action intent for info/debugging
+        self._record_last_action(action)
+        self.committed_this_step = set()
+
         # Execute action
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
@@ -237,21 +238,8 @@ class TridentIslandEnv(gym.Env):
         # Truncate on time limit 
         truncated = self.time_elapsed >= self.config.max_game_time
 
-        # Update terminal reward
-        info = {
-            "step": self.current_step,
-            "time_elapsed": self.time_elapsed,
-            "total_entities": len(self.entities),
-            "controllable_entities_count": len(self._get_controllable_entities_set()),
-            "detected_targets_count": len(self._get_detected_targets_set()),
-            "last_events_count": len(self.simulation_events),
-            "valid_masks": {
-                "action_types": self._get_valid_action_types(),           # What action types are possible 
-                "controllable_entities": self._get_controllable_entities_set(),  # Which entity IDs can be commanded
-                "detected_targets": self._get_detected_targets_set(),     # Which target group IDs are available
-                "entity_target_matrix": self._get_entity_target_engagement_matrix()  # Which entities can engage which targets
-        }
-        }
+        # Build enriched info
+        info = self._build_info()
         
         return observation, reward, terminated, truncated, info
     
@@ -355,6 +343,7 @@ class TridentIslandEnv(gym.Env):
         
     def _get_entity_target_engagement_matrix(self) -> dict:
         """Get matrix of which entities can engage which target groups"""
+        # TODO: Is this correct?
         engagement_matrix = {}
         
         for entity_id, entity in self.entities.items():
@@ -378,7 +367,88 @@ class TridentIslandEnv(gym.Env):
             engagement_matrix[entity_id] = valid_targets
         
         return engagement_matrix
+
+    def _build_info(self) -> Dict:
+        """Build a comprehensive info dict for agents and debugging."""
+        controllable = self._get_controllable_entities_set()
+        detected = self._get_detected_targets_set()
+        return {
+            "step": self.current_step,
+            "time_elapsed": self.time_elapsed,
+            "time_remaining": max(0.0, float(self.config.max_game_time - self.time_elapsed)),
+            "total_entities": len(self.entities),
+            "controllable_entities_count": len(controllable),
+            "detected_targets_count": len(detected),
+            "last_events_count": len(self.simulation_events),
+            "valid_masks": {
+                "action_types": self._get_valid_action_types(),
+                "controllable_entities": controllable,
+                "visible_targets": detected,
+                "entity_target_matrix": self._get_entity_target_engagement_matrix()
+            },
+            "controllable_entities": list(controllable),
+            "refuel": {
+                "receivers": list(self._get_refuel_receivers_set()),
+                "providers": list(self._get_refuel_providers_set())
+            },
+            "committing_entities": list(self.committed_this_step),
+            "last_action_by_entity": self.last_action_by_entity,
+            "last_commit_by_entity": self.last_commit_by_entity,
+            "mission": {
+                "friendly_kills": len(self.friendly_kills),
+                "enemy_kills": len(self.enemy_kills),
+                "kill_ratio": self._compute_kill_ratio(),
+                "capture_progress": float(self.capture_timer_progress),
+                "capture_possible": bool(self.capture_possible),
+                "island_contested": bool(self.island_contested)
+            }
+        }
     
+    def _get_refuel_receivers_set(self) -> set:
+        """Entities in our faction that can receive fuel and are alive."""
+        receivers = set()
+        # TODO: Is this correct?
+        for entity_id, entity in self.entities.items():
+            if (entity.is_alive and entity.faction.value == self.config.our_faction and entity.can_refuel):
+                receivers.add(entity_id)
+        return receivers
+
+    def _get_refuel_providers_set(self) -> set:
+        # TODO: Is this correct?
+        """Entities in our faction that can refuel others and are alive."""
+        providers = set()
+        for entity_id, entity in self.entities.items():
+            if (entity.is_alive and entity.faction.value == self.config.our_faction and entity.can_refuel_others):
+                providers.add(entity_id)
+        return providers
+
+    def _record_last_action(self, action: Dict) -> None:
+        """Record last action issued per entity and track commit intents for info.
+        """
+        entity_id = action["entity_id"]
+        self.last_action_by_entity[str(entity_id)] = {
+            "action_type": int(action["action_type"]),
+            "time": float(self.time_elapsed)
+        }
+
+        # Track commit intents for convenience
+        if int(action["action_type"]) == 2:  # Engage/Commit
+            target_group_id = int(action["target_group_id"])
+            self.committed_this_step.add(entity_id)
+            self.last_commit_by_entity[str(entity_id)] = {
+                "target_group_id": target_group_id,
+                "time": float(self.time_elapsed)
+            }
+
+    def _compute_kill_ratio(self) -> float:
+        """Compute friendly kill ratio; safe division.
+        Returns enemy_kills / max(1, friendly_losses) as a simple proxy.
+        """
+        friendly_losses = len(self.friendly_kills)
+        enemy_losses = len(self.enemy_kills)
+        denom = max(1, friendly_losses)
+        return float(enemy_losses) / float(denom)
+
         
     def _entity_spawned(self, event):
         """Handle entity spawned events"""
