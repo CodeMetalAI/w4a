@@ -238,6 +238,13 @@ class TridentIslandEnv(gym.Env):
         # Truncate on time limit 
         truncated = self.time_elapsed >= self.config.max_game_time
 
+        # Terminal reward on termination or truncation
+        if terminated or truncated:
+            if self._did_win():
+                reward += 100.0
+            elif self._did_lose():
+                reward -= 100.0
+
         # Build enriched info
         info = self._build_info()
         
@@ -260,12 +267,9 @@ class TridentIslandEnv(gym.Env):
 
     def _check_termination(self) -> bool:
         """Check if mission/episode should end"""
-        # TODO: Check victory conditions from simulation
-        # - Mission objectives achieved (victory)
-        # - Critical units destroyed (defeat)
-        # - Time limits exceeded
-        # - Use constants.SIMULATION_VICTORY_THRESHOLD
-        return False
+        # Terminate early when win or loss conditions are met
+        outcome = self._evaluate_outcome()
+        return outcome in ("win", "loss")
     
     def render(self) -> Optional[np.ndarray]:
         # TODO: Should we implement rendering?
@@ -448,6 +452,33 @@ class TridentIslandEnv(gym.Env):
         enemy_losses = len(self.enemy_kills)
         denom = max(1, friendly_losses)
         return float(enemy_losses) / float(denom)
+
+    def _evaluate_outcome(self) -> str:
+        """Evaluate current mission outcome.
+        Returns one of: "win", "loss", "ongoing".
+        """
+        # Win conditions
+        capture_win = self.capture_timer_progress >= self.config.capture_required_seconds and self.capture_possible
+        kill_ratio = self._compute_kill_ratio()
+        kill_ratio_win = kill_ratio >= self.config.kill_ratio_threshold
+
+        if capture_win or kill_ratio_win:
+            return "win"
+
+        # Loss conditions
+        no_capture_path = (not self.capture_possible)
+        inverse_threshold = 1.0 / max(1e-6, self.config.kill_ratio_threshold)
+        kill_ratio_loss = kill_ratio <= inverse_threshold
+        if no_capture_path and kill_ratio_loss:
+            return "loss"
+
+        return "ongoing"
+
+    def _did_win(self) -> bool:
+        return self._evaluate_outcome() == "win"
+
+    def _did_lose(self) -> bool:
+        return self._evaluate_outcome() == "loss"
 
         
     def _entity_spawned(self, event):
