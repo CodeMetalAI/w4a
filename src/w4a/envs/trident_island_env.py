@@ -54,10 +54,9 @@ class TridentIslandEnv(gym.Env):
         # This is fixed for a single scenario, can be configured for running multiple mission types
         self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
 
-        # Initialize simulation interface once
+        # Initialize simulation interface 
         SimulationInterface.initialize()
         
-        # Simulation will be created in reset() method for proper Gymnasium compliance
         self.simulation = None
         
         # Load scenario data 
@@ -72,7 +71,7 @@ class TridentIslandEnv(gym.Env):
         self.simulation_events = []
         
         # Parse data from the config and constants file as needed
-        # Load CONSTANT mission rules (objectives, victory conditions, map)
+        # Load constant mission rules (objectives, victory conditions, map)
         with open(scenario_path / "MissionEvents.json") as f:
             self.mission_events = Simulation.create_mission_events(f.read())
 
@@ -103,7 +102,7 @@ class TridentIslandEnv(gym.Env):
             
             # Move action parameters
             "move_center_grid": spaces.Discrete(self.max_grid_positions), # CAP route center position
-            "move_short_angle": spaces.Discrete(angle_steps),  # Based on angle resolution
+            "move_short_axis_km": spaces.Discrete(patrol_steps),  # 100-1000km in 25km increments
             "move_long_axis_km": spaces.Discrete(patrol_steps),  # 100-1000km in 25km increments
             "move_axis_angle": spaces.Discrete(angle_steps),   # Based on angle resolution
             
@@ -144,8 +143,6 @@ class TridentIslandEnv(gym.Env):
         """Reset environment"""
         super().reset(seed=seed)
 
-        # Destroy existing simulation if it exists
-        # TODO: Do this at every reset?
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
@@ -181,7 +178,6 @@ class TridentIslandEnv(gym.Env):
         self.FrameIndex = 0
         self.time_elapsed = 0.0
 
-        # For now just clear events
         self.simulation_events = []
         self.entities.clear()
         self.target_groups.clear()
@@ -213,9 +209,6 @@ class TridentIslandEnv(gym.Env):
         
         self.simulation_events = []  # Clear previous step's events
         
-        # TODO: Reset frame-specific state if needed
-        # self.frame_index += self.frame_rate  # Advance simulation time
-        
         # Execute action
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
@@ -224,7 +217,6 @@ class TridentIslandEnv(gym.Env):
         sim_data.player_events = player_events
         
         # Execute simulation step
-        # TODO: Implement event processing
         simulation_utils.tick_simulation(self)
         
         # Update sensing information for enemy target groups
@@ -246,7 +238,6 @@ class TridentIslandEnv(gym.Env):
         truncated = self.time_elapsed >= self.config.max_game_time
 
         # Update terminal reward
-        
         info = {
             "step": self.current_step,
             "time_elapsed": self.time_elapsed,
@@ -267,7 +258,6 @@ class TridentIslandEnv(gym.Env):
     def _get_observation(self) -> np.ndarray:
         """Extract observation from simulation state (globals-only for now)."""
         # Update globals that depend on per-step conditions
-        #self._update_global_flags()
         return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:
@@ -304,24 +294,6 @@ class TridentIslandEnv(gym.Env):
     def get_simulation_handle(self):
         """Provide access to simulation for replay recording"""
         return self.simulation if self.enable_replay else None
-    
-    def load_force_config(self, force_config_path: str, spawn_areas_path: str = None):
-        """Load force configuration and spawn areas from JSON files"""
-        # TODO: Implement force configuration loading
-        # This should load JSON and set up force laydown similar to bane_environment.py
-        # - Load MissionEvents.json from FFSim scenarios
-        # - Load EntitySpawnData.json for spawn areas from spawn_areas_path
-        # - Load user-specified entity composition from force_config_path
-        # - Set up simulation with agents and force laydown
-        pass
-    
-    def load_spawn_areas(self, spawn_areas_path: str):
-        """Load spawn areas configuration from JSON file"""
-        # TODO: Implement spawn areas loading
-        # This should load the EntitySpawnData.json format files
-        # - Parse spawn area polygons for ground/sea/air forces
-        # - Set up spawn area constraints for unit placement
-        pass
     
     def _is_controllable_entity(self, entity) -> bool:
         """Check if entity is controllable by our faction"""
@@ -419,12 +391,10 @@ class TridentIslandEnv(gym.Env):
         
     def _victory(self, event):
         """Handle victory events"""
-        # TODO: Handle victory conditions
         pass
     
     def _adversary_contact(self, event):
         """Handle adversary contact events"""
-        # TODO: Handle adversary detection
         pass
         
     def _update_enemy_sensing_data(self):
@@ -540,7 +510,6 @@ class TridentIslandEnv(gym.Env):
         return 0, 0.0  # Placeholder
 
     def close(self):
-        # TODO: To implement
         """Clean up"""
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
