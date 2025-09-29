@@ -9,9 +9,10 @@ from pathlib import Path
 
 import SimulationInterface
 from SimulationInterface import (
-    SimulationConfig, SimulationData, ForceLaydown, Faction, EntitySpawnData
+    Simulation, SimulationConfig, SimulationData, ForceLaydown, Faction, EntitySpawnData, FactionConfiguration, EntityList
 )
 
+from ..entities import w4a_entities
 
 
 def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list_path, 
@@ -28,57 +29,77 @@ def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list
         seed: Optional random seed for simulation
         
     Returns:
-        Created simulation handle
+        Nothing (simulation is being injected into the environment)
     """
+
+    # TODO: This file loading and json parsing should be done in a preprocess step instead of repeating it every time
+    scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"   # TODO: this should not be hardcoded here
+
+    # Load scenario data (base mission setup and spawn data per faction)
+    with open(scenario_path / "MissionEvents.json") as f:
+        mission_events_data = f.read()
+
+    faction_entity_spawn_data = {}
+    with open(legacy_spawn_data_path) as f:
+        faction_entity_spawn_data[Faction.LEGACY] = EntitySpawnData.import_json(f.read())
+
+    with open(dynasty_spawn_data_path) as f:
+        faction_entity_spawn_data[Faction.DYNASTY] = EntitySpawnData.import_json(f.read())
+
+    # Load entities lists that have emerged from the auction
+    faction_entity_data = {}
+
+    with open(legacy_entity_list_path) as f:
+        faction_entity_data[Faction.LEGACY] = EntityList().load_json(f.read())
+
+    with open(dynasty_entity_list_path) as f:
+        faction_entity_data[Faction.DYNASTY] = EntityList().load_json(f.read())
+
+    # TODO: All stuff above should be part of the preprocess step
+
     # Create simulation config
     config = SimulationConfig()
     config.name = env.scenario_name
     config.random_seed = seed if seed is not None else (env.config.seed or 42)
     config.log_json = env.enable_replay
 
-    simulation = SimulationInterface.create_simulation(config)
+    env.simulation = SimulationInterface.create_simulation(config)
 
+    # TODO: @Sanjna initialize the actual RL agents here
+    # env.legacy_agent = SimpleAgent(Faction.LEGACY)
+    # env.dynasty_agent = SimpleAgent(Faction.DYNASTY)
 
-    # TODO: Do we need to add agents?
-    # legacy_agent = SimpleAgent(Faction.LEGACY)
-    # dynasty_agent = SimpleAgent(Faction.DYNASTY) 
-    # simulation.add_agent(legacy_agent)
-    # simulation.add_agent(dynasty_agent)
+    env.simulation.add_agent(env.legacy_agent)
+    env.simulation.add_agent(env.dynasty_agent)
 
-    # TODO: Do we load in mission events here as well?
+    env.sim_data = SimulationData()
+    env.sim_data.add_mission_events(Simulation.create_mission_events(mission_events_data))
 
-    # Load JSON files
-    legacy_entities = _load_entity_list_json(legacy_entity_list_path)
-    dynasty_entities = _load_entity_list_json(dynasty_entity_list_path)
-    legacy_spawn_data = _load_spawn_data_json(legacy_spawn_data_path)
-    dynasty_spawn_data = _load_spawn_data_json(dynasty_spawn_data_path)
+    # Add the mission events to the simulation. Agents will get this data too.
+    pre_simulation_tick(env)
 
     # Create force laydowns
     force_laydowns = {}
-    
-    # Legacy faction
-    legacy_laydown = ForceLaydown()
-    legacy_laydown.entity_spawn_data = legacy_spawn_data
-    legacy_laydown.entity_data = legacy_entities
-    force_laydowns[Faction.LEGACY] = legacy_laydown
-    
-    # Dynasty faction  
-    dynasty_laydown = ForceLaydown()
-    dynasty_laydown.entity_spawn_data = dynasty_spawn_data
-    dynasty_laydown.entity_data = dynasty_entities
-    force_laydowns[Faction.DYNASTY] = dynasty_laydown
 
-    # Process the mission setup
-    simulation.start_force_laydown(force_laydowns)
+    for faction in [Faction.LEGACY, Faction.DYNASTY]:
+        force_laydown = ForceLaydown()
+        force_laydown.entity_spawn_data = faction_entity_spawn_data[faction]
+        force_laydown.entity_data = FactionConfiguration().create_entities(faction_entity_data[faction], lambda type: env.simulation.create_mission_event(w4a_entities.get_entity(type)))
+
+        force_laydowns[faction] = force_laydown
+
+    # Start force laydown phase
+    env.simulation.start_force_laydown(force_laydowns)
     
-    sim_data = SimulationData()
-    simulation.finalize_force_laydown(sim_data)
+    # Finalize force laydown phase. Theoretically, we could give the agents time in between these steps, but let's make it immediate for now.
+    env.simulation.finalize_force_laydown(env.sim_data)
+
+    sim_data = env.sim_data
+
+    env.sim_data = SimulationData()
 
     # Process all events coming out of this
     process_simulation_events(env, sim_data.simulation_events)
-    
-    return simulation
-
 
 def _load_entity_list_json(file_path):
     """Load entity list from JSON file"""
@@ -120,6 +141,16 @@ def process_simulation_events(env, events):
             # print(f"Frame {getattr(env.simulation, 'frame_index', 0)}: Unhandled {event.__class__.__name__}")
             pass
 
+def pre_simulation_tick(env):
+    sim_data = env.sim_data
+
+    env.simulation.pre_simulation_tick(sim_data)
+
+    # Set up the simulation data for the next frame
+    env.sim_data = SimulationData()
+
+    # Process all events the simulation generated
+    process_simulation_events(env, sim_data.simulation_events)
 
 def tick_simulation(env):
     """
@@ -139,7 +170,7 @@ def tick_simulation(env):
 
     sim_data = env.sim_data
 
-    env.simulation_handle.tick(sim_data, env.frame_rate)
+    env.simulation.tick(sim_data, env.frame_rate)
 
     # Set up the simulation data for the next frame
     env.sim_data = SimulationData()

@@ -26,7 +26,7 @@ class Config:
     early_termination_capture_seconds: float = 600.0  # Capture time in seconds
 
     # Environment setup (uses constants but can be overridden)
-    map_size: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
+    map_size_km: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
     grid_resolution_km: int = 50  # Discretized grid resolution in km
     
     # Action space parameters
@@ -36,7 +36,7 @@ class Config:
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
     
     # Faction configuration
-    our_faction: int = 1  # 0=LEGACY, 1=DYNASTY # TODO: Make this configurable per scenario
+    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY # TODO: Make this configurable per scenario
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
     max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  

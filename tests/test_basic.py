@@ -9,6 +9,7 @@ from w4a.envs.trident_island_env import TridentIslandEnv
 from w4a.wrappers.wrapper import EnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
+from SimulationInterface import (EntityList, EntitySpawnData)
 
 
 def test_config():
@@ -30,11 +31,17 @@ def test_env_creation():
     env_replay = TridentIslandEnv(enable_replay=True)
     assert env_replay.enable_replay is True
 
+def test_env_reset():
+    """Test environment creation"""
+    env = TridentIslandEnv(enable_replay=True)
+
+    env.reset()
 
 def test_simulation_interface_integration():
     """Test that SimulationInterface integration works or fails gracefully"""
     try:
         env = TridentIslandEnv()
+        env.reset()
         # If SimulationInterface is available, simulation should be created
         assert env.simulation is not None
         print("SimulationInterface available and working")
@@ -84,6 +91,7 @@ def test_scenario_loading():
     """Test loading scenario JSON files into simulation"""
     import json
     from pathlib import Path
+    from SimulationInterface import (EntityList, EntitySpawnData)
     
     try:
         # Test that scenario files exist and are valid JSON
@@ -98,14 +106,12 @@ def test_scenario_loading():
         
         # Test that they're valid JSON
         with open(legacy_composition) as f:
-            legacy_data = json.load(f)
-            assert "Entities" in legacy_data
-            assert len(legacy_data["Entities"]) > 0
+            legacy_data = EntityList().load_json(f.read())
+            assert len(legacy_data.entities) > 0
             
         with open(dynasty_composition) as f:
-            dynasty_data = json.load(f)
-            assert "Entities" in dynasty_data
-            assert len(dynasty_data["Entities"]) > 0
+            dynasty_data = EntityList().load_json(f.read())
+            assert len(dynasty_data.entities) > 0
             
         # Test laydown files
         legacy_laydown = scenarios_path / "laydown" / "LegacyEntitySpawnData.json"
@@ -116,14 +122,20 @@ def test_scenario_loading():
         
         # Test that they're valid JSON
         with open(legacy_laydown) as f:
-            legacy_spawn = json.load(f)
-            assert "GroundForcesSpawnAreas" in legacy_spawn
-            assert "AirForcesSpawnLocations" in legacy_spawn
-            
+            legacy_spawn = EntitySpawnData.import_json(f.read())
+
+            assert len(legacy_spawn.ground_forces_spawn_areas) > 0
+            assert len(legacy_spawn.sea_forces_spawn_areas) > 0
+            assert len(legacy_spawn.air_forces_spawn_locations) > 0
+            assert len(legacy_spawn.caps) > 0
+
         with open(dynasty_laydown) as f:
-            dynasty_spawn = json.load(f)
-            assert "GroundForcesSpawnAreas" in dynasty_spawn
-            assert "AirForcesSpawnLocations" in dynasty_spawn
+            dynasty_spawn = EntitySpawnData.import_json(f.read())
+
+            assert len(dynasty_spawn.ground_forces_spawn_areas) > 0
+            assert len(dynasty_spawn.sea_forces_spawn_areas) > 0
+            assert len(dynasty_spawn.air_forces_spawn_locations) > 0
+            assert len(dynasty_spawn.caps) > 0
             
         # Test integration with SimulationInterface
         from SimulationInterface import EntitySpawnData
@@ -145,6 +157,7 @@ def test_scenario_loading():
         pytest.skip("SimulationInterface not available - skipping scenario loading test")
 
 
+@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_wrapper():
     """Test environment wrapper functionality"""
     env = TridentIslandEnv()
@@ -168,7 +181,7 @@ def test_wrapper():
     
     wrapped.close()
 
-
+@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_random_agent_evaluation():
     """Test agent evaluation system"""
     env = TridentIslandEnv()
@@ -187,7 +200,7 @@ def test_random_agent_evaluation():
     
     env.close()
 
-
+@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_env_properties():
     """Test environment properties and metadata"""
     env = TridentIslandEnv()

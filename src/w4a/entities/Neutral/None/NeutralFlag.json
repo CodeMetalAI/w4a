@@ -1,0 +1,21 @@
+{
+    "EventName": "SimSpawnFlag",
+    "EntityId": 0,
+    "Faction": 2,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 0,
+        "Domain": 0,
+        "Country": 0,
+        "Category": 0,
+        "SubCategory": 0,
+        "Specific": 0,
+        "Extra": 33
+    },
+    "SpawnComponents": [],
+    "Location": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    }
+}

@@ -9,18 +9,23 @@ from gymnasium import spaces
 import numpy as np
 from typing import Dict, Any, Optional, Tuple, List
 from pathlib import Path
+
 from ..config import Config
 from . import actions
+from ..entities import w4a_entities
 from . import simulation_utils
 from . import observations
 from . import mission_metrics
 from .utils import get_time_elapsed
 
+from pathlib import Path
+
 import SimulationInterface
 from SimulationInterface import (
-    SimulationConfig, SimulationData, Faction, ForceLaydown,
+    Simulation, SimulationConfig, SimulationData, Faction,
     EntitySpawned, Victory, AdversaryContact,
-    Entity, ControllableEntity, Unit, EntityDomain
+    Entity, ControllableEntity, Unit, EntityDomain,
+    EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
 
 
@@ -45,7 +50,7 @@ class TridentIslandEnv(gym.Env):
         self.scenario_name = scenario_name
         
         # Set up paths
-        self.scenario_path = Path(__file__).parent / "scenarios"  
+        self.scenario_path = Path(__file__).parent.parent / "scenarios"  
         # This is fixed for a single scenario, can be configured for running multiple mission types
         self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
 
@@ -55,6 +60,9 @@ class TridentIslandEnv(gym.Env):
         # Simulation will be created in reset() method for proper Gymnasium compliance
         self.simulation = None
         
+        # Load scenario data 
+        scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"
+
         # Initialize state tracking variables
         self.current_step = 0
         self.frame_rate = 600
@@ -63,24 +71,24 @@ class TridentIslandEnv(gym.Env):
 
         self.simulation_events = []
         
+        # Parse data from the config and constants file as needed
+        # Load CONSTANT mission rules (objectives, victory conditions, map)
+        with open(scenario_path / "MissionEvents.json") as f:
+            self.mission_events = Simulation.create_mission_events(f.read())
+
         # Set up simulation event handlers
         self.simulation_event_handlers = {
             EntitySpawned: self._entity_spawned,
             Victory: self._victory,
             AdversaryContact: self._adversary_contact
         }
-        
-        # TODO: Set up scenario entities, objectives, victory conditions
-        # - Spawn initial units for each faction
-        # - Set victory conditions (e.g., capture flag, destroy targets)
-        # - Initialize mission timeline and events
-        
+
         # Entity tracking - stores ALL entities from ALL factions
         self.entities = {}  # Dict[entity_id -> entity] for all entities in game
         self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups 
         
         # Calculate grid dimensions for discretized positioning
-        map_size_km = self.config.map_size[0] // 1000  # Convert meters to km
+        map_size_km = self.config.map_size_km[0]
         self.grid_size = map_size_km // self.config.grid_resolution_km
         self.max_grid_positions = self.grid_size * self.grid_size
         
@@ -109,7 +117,7 @@ class TridentIslandEnv(gym.Env):
             "stealth_enabled": spaces.Discrete(2),    # 0=off, 1=on
             
             # Sensing direction action parameters
-            "sensing_direction_grid": spaces.Discrete(self.max_grid_positions),
+            "sensing_position_grid": spaces.Discrete(self.max_grid_positions + 1), # +1 for default sensing (forward)
             
             # Refuel action parameters
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
@@ -120,7 +128,7 @@ class TridentIslandEnv(gym.Env):
         
         # Initialize force configuration paths (will be set by wrapper)
         self.force_config_paths = None
-
+        
     def set_force_config_paths(self, legacy_entity_list, dynasty_entity_list, 
                               legacy_spawn_data, dynasty_spawn_data):
         """Set the JSON file paths for force configuration"""
@@ -130,18 +138,18 @@ class TridentIslandEnv(gym.Env):
             'legacy_spawn_data': legacy_spawn_data,
             'dynasty_spawn_data': dynasty_spawn_data
         }
-
+        
         
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
         """Reset environment"""
         super().reset(seed=seed)
-        
+
         # Destroy existing simulation if it exists
         # TODO: Do this at every reset?
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
-        
+
         # Set up simulation using JSON files if available
         if self.force_config_paths:
             self.simulation = simulation_utils.setup_simulation_from_json(
@@ -159,7 +167,7 @@ class TridentIslandEnv(gym.Env):
             legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
             dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
             
-            self.simulation = simulation_utils.setup_simulation_from_json(
+            simulation_utils.setup_simulation_from_json(
                 self, 
                 str(legacy_entity_list),
                 str(dynasty_entity_list),
@@ -172,6 +180,8 @@ class TridentIslandEnv(gym.Env):
         self.current_step = 0
         self.FrameIndex = 0
         self.time_elapsed = 0.0
+
+        # For now just clear events
         self.simulation_events = []
         self.entities.clear()
         self.target_groups.clear()
@@ -200,7 +210,7 @@ class TridentIslandEnv(gym.Env):
         self.current_step += 1
         self.FrameIndex += self.frame_rate  # Advance simulation time
         self.time_elapsed = get_time_elapsed(self.FrameIndex)  # Update mission time
-
+        
         self.simulation_events = []  # Clear previous step's events
         
         # TODO: Reset frame-specific state if needed
@@ -209,14 +219,14 @@ class TridentIslandEnv(gym.Env):
         # Execute action
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
-        # Prepare simulation step data 
+        # Prepare simulation step data
         sim_data = SimulationData()
         sim_data.player_events = player_events
         
         # Execute simulation step
         # TODO: Implement event processing
         simulation_utils.tick_simulation(self)
-
+        
         # Update sensing information for enemy target groups
         self._update_enemy_sensing_data()
 
@@ -249,7 +259,7 @@ class TridentIslandEnv(gym.Env):
                 "controllable_entities": self._get_controllable_entities_set(),  # Which entity IDs can be commanded
                 "detected_targets": self._get_detected_targets_set(),     # Which target group IDs are available
                 "entity_target_matrix": self._get_entity_target_engagement_matrix()  # Which entities can engage which targets
-            }
+        }
         }
         
         return observation, reward, terminated, truncated, info
@@ -257,7 +267,7 @@ class TridentIslandEnv(gym.Env):
     def _get_observation(self) -> np.ndarray:
         """Extract observation from simulation state (globals-only for now)."""
         # Update globals that depend on per-step conditions
-        self._update_global_flags()
+        #self._update_global_flags()
         return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:
@@ -268,7 +278,7 @@ class TridentIslandEnv(gym.Env):
         # - Tactical performance (effective engagement ranges, formations)
         # - Step penalties (encourage efficient missions)
         return 0.0
-
+    
 
     def _check_termination(self) -> bool:
         """Check if mission/episode should end"""
@@ -324,7 +334,7 @@ class TridentIslandEnv(gym.Env):
         has_weapons = entity.has_weapons and len(entity.weapons) > 0
         if not has_weapons:
             return False
-
+    
         # Check if any detected targets are valid for this entity
         # TODO: Is this correct check?
         for target_group in self.target_groups.values():
@@ -343,11 +353,11 @@ class TridentIslandEnv(gym.Env):
     def _get_valid_action_types(self) -> set:
         """Get set of valid action types based on current entities"""
         valid_actions = {0}  # noop always valid
-        
+    
         for entity in self.entities.values():
             if not self._is_controllable_entity(entity):
                 continue
-                
+    
             if entity.domain == EntityDomain.AIR:
                 valid_actions.update({1, 6})  # move, rtb
             if self._entity_can_engage(entity):
@@ -358,7 +368,7 @@ class TridentIslandEnv(gym.Env):
                 valid_actions.update({3, 4})  # stealth, sense
             if entity.has_fuel: # TODO: Can all air units refuel?
                 valid_actions.add(7)  # refuel
-        
+    
         return valid_actions
     
     def _get_controllable_entities_set(self) -> set:
@@ -374,7 +384,7 @@ class TridentIslandEnv(gym.Env):
             tg_id for tg_id, target_group in self.target_groups.items()
             if target_group.faction.value != self.config.our_faction
         }
-    
+        
     def _get_entity_target_engagement_matrix(self) -> dict:
         """Get matrix of which entities can engage which target groups"""
         engagement_matrix = {}
@@ -382,7 +392,7 @@ class TridentIslandEnv(gym.Env):
         for entity_id, entity in self.entities.items():
             if not self._is_controllable_entity(entity):
                 continue
-                
+        
             # Get valid targets this entity can engage
             valid_targets = set()
             for tg_id, target_group in self.target_groups.items():
@@ -390,17 +400,17 @@ class TridentIslandEnv(gym.Env):
                 is_enemy = target_group.faction.value != self.config.our_faction
                 if not is_enemy:
                     continue
-                    
+    
                 # Check weapon compatibility
                 available_weapons = entity.select_weapons(target_group, False)
                 if len(available_weapons) > 0:
                     valid_targets.add(tg_id)
-            
+        
             # Returns set of target group IDs that this entity can engage, empty set if none
             engagement_matrix[entity_id] = valid_targets
-                
+        
         return engagement_matrix
-
+    
         
     def _entity_spawned(self, event):
         """Handle entity spawned events"""
@@ -411,12 +421,12 @@ class TridentIslandEnv(gym.Env):
         """Handle victory events"""
         # TODO: Handle victory conditions
         pass
-        
+    
     def _adversary_contact(self, event):
         """Handle adversary contact events"""
         # TODO: Handle adversary detection
         pass
-
+        
     def _update_enemy_sensing_data(self):
         """Update sensing information for all enemy target groups.
         
@@ -477,10 +487,10 @@ class TridentIslandEnv(gym.Env):
         #         sensing_data.is_detected = False
         #         # Keep historical data but mark as stale
         pass
-
+    
     def _calculate_sensing_tier(self, target_group, friendly_sensors):
         """Calculate sensing tier and confidence for a target group.
-        
+    
         Args:
             target_group: Enemy target group to assess
             friendly_sensors: List of friendly sensor platforms

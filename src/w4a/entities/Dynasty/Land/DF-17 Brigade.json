@@ -1,0 +1,339 @@
+{
+    "EventName": "SimSpawnPackage",
+    "EntityId": 0,
+    "Faction": 1,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 45,
+        "Category": 5,
+        "SubCategory": 6,
+        "Specific": 0,
+        "Extra": 0
+    },
+    "SpawnComponents": [],
+    "Pos": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Rot": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+    },
+    "Controllable": true,
+    "FormationOffset": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "SpawnEntities": [
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "DF-17_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 5,
+                    "SubCategory": 6,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "FuelCapacity": 0.0,
+                    "RadarData": [],
+                    "JammerData": []
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/DF-17.DF-17": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 11,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Range": 1800000.0,
+                                "Damage": 100.0,
+                                "Speed": 1715.0,
+                                "AutonomousDistance": 500000.0,
+                                "BlastRadius": 120.0,
+                                "Accuracy": 0.8999999761581421,
+                                "MaxAcceleration": 294.29998779296875,
+                                "RadarCrossSection": 0.5,
+                                "TargetDomains": 5
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "DF-17_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 5,
+                    "SubCategory": 6,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 2.0,
+                    "Y": 0.5,
+                    "Z": 0.0
+                },
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "FuelCapacity": 0.0,
+                    "RadarData": [],
+                    "JammerData": []
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/DF-17.DF-17": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 11,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Range": 1800000.0,
+                                "Damage": 100.0,
+                                "Speed": 1715.0,
+                                "AutonomousDistance": 500000.0,
+                                "BlastRadius": 120.0,
+                                "Accuracy": 0.8999999761581421,
+                                "MaxAcceleration": 294.29998779296875,
+                                "RadarCrossSection": 0.5,
+                                "TargetDomains": 5
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "DF-17_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 5,
+                    "SubCategory": 6,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 4.0,
+                    "Y": -0.5,
+                    "Z": 0.0
+                },
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "FuelCapacity": 0.0,
+                    "RadarData": [],
+                    "JammerData": []
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/DF-17.DF-17": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 11,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Range": 1800000.0,
+                                "Damage": 100.0,
+                                "Speed": 1715.0,
+                                "AutonomousDistance": 500000.0,
+                                "BlastRadius": 120.0,
+                                "Accuracy": 0.8999999761581421,
+                                "MaxAcceleration": 294.29998779296875,
+                                "RadarCrossSection": 0.5,
+                                "TargetDomains": 5
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "DF-17_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 5,
+                    "SubCategory": 6,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 6.0,
+                    "Y": 0.5,
+                    "Z": 0.0
+                },
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "FuelCapacity": 0.0,
+                    "RadarData": [],
+                    "JammerData": []
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/DF-17.DF-17": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 11,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Range": 1800000.0,
+                                "Damage": 100.0,
+                                "Speed": 1715.0,
+                                "AutonomousDistance": 500000.0,
+                                "BlastRadius": 120.0,
+                                "Accuracy": 0.8999999761581421,
+                                "MaxAcceleration": 294.29998779296875,
+                                "RadarCrossSection": 0.5,
+                                "TargetDomains": 5
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        }
+    ]
+}

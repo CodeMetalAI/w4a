@@ -1,0 +1,1087 @@
+[
+    {
+        "EventName": "SimSpawnFlag",
+        "EntityId": 0,
+        "Faction": 1,
+        "Identifier": "DynastyFlag",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 0,
+            "Country": 45,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 33
+        },
+        "SpawnComponents": [],
+        "Location": {
+            "X": 0.0,
+            "Y": -500000.0,
+            "Z": 0.0
+        },
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSpawnFlag",
+        "EntityId": 0,
+        "Faction": 0,
+        "Identifier": "LegacyFlag",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 0,
+            "Country": 225,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 33
+        },
+        "SpawnComponents": [],
+        "Location": {
+            "X": 0.0,
+            "Y": 500000.0,
+            "Z": 0.0
+        },
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSpawnFlag",
+        "EntityId": 0,
+        "Faction": 2,
+        "Identifier": "NeutralFlag",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 0,
+            "Country": 0,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 33
+        },
+        "SpawnComponents": [],
+        "Location": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+        },
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSetVictoryConditions",
+        "EntityId": 0,
+        "Faction": 1,
+        "Identifier": "DynastyVictoryConditions",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 0,
+            "Country": 45,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 99
+        },
+        "SpawnComponents": [],
+        "KeepAlive": [],
+        "Kill": [
+            {
+                "EntityIdentifier": "PIONEER",
+                "Priority": 0.0
+            }
+        ],
+        "Capture": [
+            {
+                "FlagIdentifier": "NeutralFlag"
+            }
+        ],
+        "KillRatio": {
+            "Ratio": 0.8999999761581421
+        },
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSetVictoryConditions",
+        "EntityId": 0,
+        "Faction": 0,
+        "Identifier": "LegacyVictoryConditions",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 0,
+            "Country": 225,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 99
+        },
+        "SpawnComponents": [],
+        "KeepAlive": [],
+        "Kill": [
+            {
+                "EntityIdentifier": "Bamboo",
+                "Priority": 0.0
+            }
+        ],
+        "Capture": [
+            {
+                "FlagIdentifier": "NeutralFlag"
+            }
+        ],
+        "KillRatio": {
+            "Ratio": 0.8999999761581421
+        },
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSpawnPackage",
+        "EntityId": 0,
+        "Faction": 0,
+        "Identifier": "PIONEER",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 2,
+            "Country": 225,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 77
+        },
+        "SpawnComponents": [],
+        "Pos": {
+            "X": 0.0,
+            "Y": 413900.09375,
+            "Z": 15000.0
+        },
+        "Rot": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+        },
+        "Controllable": true,
+        "FormationOffset": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+        },
+        "SpawnEntities": [
+            {
+                "Event": {
+                    "EventName": "SimSpawnSquadron",
+                    "EntityId": 0,
+                    "Faction": 0,
+                    "Identifier": "Melon",
+                    "DISEntityType": {
+                        "Kind": 0,
+                        "Domain": 2,
+                        "Country": 225,
+                        "Category": 0,
+                        "SubCategory": 0,
+                        "Specific": 0,
+                        "Extra": 0
+                    },
+                    "SpawnComponents": [
+                        {
+                            "EventName": "SimSpawnCaptureFlagComponent",
+                            "ComponentId": 0
+                        }
+                    ],
+                    "Pos": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0
+                    },
+                    "Rot": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0,
+                        "W": 1.0
+                    },
+                    "Controllable": true,
+                    "FormationOffset": {
+                        "X": 0.0,
+                        "Y": -90.0,
+                        "Z": 0.0
+                    },
+                    "SpawnUnits": [
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 0,
+                                "Identifier": "C-130",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 225,
+                                    "Category": 4,
+                                    "SubCategory": 1,
+                                    "Specific": 1,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": -50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        },
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 0,
+                                "Identifier": "C-130",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 225,
+                                    "Category": 4,
+                                    "SubCategory": 1,
+                                    "Specific": 1,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": 50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "Event": {
+                    "EventName": "SimSpawnSquadron",
+                    "EntityId": 0,
+                    "Faction": 0,
+                    "Identifier": "Welby",
+                    "DISEntityType": {
+                        "Kind": 0,
+                        "Domain": 2,
+                        "Country": 225,
+                        "Category": 0,
+                        "SubCategory": 0,
+                        "Specific": 0,
+                        "Extra": 0
+                    },
+                    "SpawnComponents": [
+                        {
+                            "EventName": "SimSpawnCaptureFlagComponent",
+                            "ComponentId": 0
+                        }
+                    ],
+                    "Pos": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0
+                    },
+                    "Rot": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0,
+                        "W": 1.0
+                    },
+                    "Controllable": true,
+                    "FormationOffset": {
+                        "X": 0.0,
+                        "Y": 90.0,
+                        "Z": 0.0
+                    },
+                    "SpawnUnits": [
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 0,
+                                "Identifier": "C-130",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 225,
+                                    "Category": 4,
+                                    "SubCategory": 1,
+                                    "Specific": 1,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": -50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        },
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 0,
+                                "Identifier": "C-130",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 225,
+                                    "Category": 4,
+                                    "SubCategory": 1,
+                                    "Specific": 1,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": 50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "FrameIndex": 0
+    },
+    {
+        "EventName": "SimSpawnPackage",
+        "EntityId": 0,
+        "Faction": 1,
+        "Identifier": "Bamboo",
+        "DISEntityType": {
+            "Kind": 0,
+            "Domain": 2,
+            "Country": 45,
+            "Category": 0,
+            "SubCategory": 0,
+            "Specific": 0,
+            "Extra": 77
+        },
+        "SpawnComponents": [],
+        "Pos": {
+            "X": 0.0,
+            "Y": -428610.0,
+            "Z": 15000.0
+        },
+        "Rot": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+        },
+        "Controllable": true,
+        "FormationOffset": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+        },
+        "SpawnEntities": [
+            {
+                "Event": {
+                    "EventName": "SimSpawnSquadron",
+                    "EntityId": 0,
+                    "Faction": 1,
+                    "Identifier": "Yangtze",
+                    "DISEntityType": {
+                        "Kind": 0,
+                        "Domain": 2,
+                        "Country": 45,
+                        "Category": 0,
+                        "SubCategory": 0,
+                        "Specific": 0,
+                        "Extra": 0
+                    },
+                    "SpawnComponents": [
+                        {
+                            "EventName": "SimSpawnCaptureFlagComponent",
+                            "ComponentId": 0
+                        }
+                    ],
+                    "Pos": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0
+                    },
+                    "Rot": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0,
+                        "W": 1.0
+                    },
+                    "Controllable": true,
+                    "FormationOffset": {
+                        "X": 0.0,
+                        "Y": -90.0,
+                        "Z": 0.0
+                    },
+                    "SpawnUnits": [
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 1,
+                                "Identifier": "Y-9",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 45,
+                                    "Category": 4,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": -50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        },
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 1,
+                                "Identifier": "Y-9",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 45,
+                                    "Category": 4,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": 50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "Event": {
+                    "EventName": "SimSpawnSquadron",
+                    "EntityId": 0,
+                    "Faction": 1,
+                    "Identifier": "Tai",
+                    "DISEntityType": {
+                        "Kind": 0,
+                        "Domain": 2,
+                        "Country": 45,
+                        "Category": 0,
+                        "SubCategory": 0,
+                        "Specific": 0,
+                        "Extra": 0
+                    },
+                    "SpawnComponents": [],
+                    "Pos": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0
+                    },
+                    "Rot": {
+                        "X": 0.0,
+                        "Y": 0.0,
+                        "Z": 0.0,
+                        "W": 1.0
+                    },
+                    "Controllable": true,
+                    "FormationOffset": {
+                        "X": 0.0,
+                        "Y": 90.0,
+                        "Z": 0.0
+                    },
+                    "SpawnUnits": [
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 1,
+                                "Identifier": "Y-9",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 45,
+                                    "Category": 4,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": -50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        },
+                        {
+                            "Event": {
+                                "EventName": "SimSpawnFlight",
+                                "EntityId": 0,
+                                "Faction": 1,
+                                "Identifier": "Y-9",
+                                "DISEntityType": {
+                                    "Kind": 1,
+                                    "Domain": 2,
+                                    "Country": 45,
+                                    "Category": 4,
+                                    "SubCategory": 9,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "SpawnComponents": [],
+                                "Pos": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "Rot": {
+                                    "X": 0.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0,
+                                    "W": 1.0
+                                },
+                                "Controllable": true,
+                                "FormationOffset": {
+                                    "X": 0.0,
+                                    "Y": 50.0,
+                                    "Z": 0.0
+                                },
+                                "Specifications": {
+                                    "CruisingSpeed": 150.0,
+                                    "MaxSpeed": 164.0,
+                                    "RadarCrossSection": 70.0,
+                                    "FuelCapacity": 45000.0,
+                                    "RadarData": [
+                                        {
+                                            "RadarFOV": 1.5707963705062866,
+                                            "TransmitterPower": 5000.0,
+                                            "TransmitterGain": 30.0,
+                                            "ReceiverGain": 20.0,
+                                            "SignalWavelength": 0.10000000149011612,
+                                            "MinimumSignalPower": 9.9999998245167e-15,
+                                            "TransmitterLosses": 2.0,
+                                            "ReceiverLosses": 2.0,
+                                            "FilterBandwidth": 1000000.0,
+                                            "NoiseFigure": 6.0,
+                                            "WorkingTemperature": 300.0,
+                                            "Rotates": false,
+                                            "RotationPeriod": 0.0,
+                                            "PositionAngle": 0.0,
+                                            "MemoryTime": 5.0,
+                                            "RotationRange": 0.0,
+                                            "FilterMethod": 1,
+                                            "FusionMethod": 0
+                                        }
+                                    ],
+                                    "JammerData": []
+                                },
+                                "Loadout": {
+                                    "Weapons": {}
+                                },
+                                "Vel": {
+                                    "X": 164.0,
+                                    "Y": 0.0,
+                                    "Z": 0.0
+                                },
+                                "FlightSpecifications": {
+                                    "Mass": 79000.0,
+                                    "CrossSectionalArea": 16.0,
+                                    "WingArea": 70.0,
+                                    "DragCoefficient": 0.05999999865889549,
+                                    "LiftCoefficient": 0.800000011920929,
+                                    "MaxBankAngle": 60.0,
+                                    "MaxGForce": 2.5,
+                                    "MaxDryThrust": 100000.0,
+                                    "MaxAfterburnThrust": 0.0,
+                                    "HasAfterburner": false,
+                                    "FuelConsumptionMilitary": [
+                                        0.000007999999979801942,
+                                        5.99999978589949e-8,
+                                        8.000000106811456e-10
+                                    ],
+                                    "FuelConsumptionAfterburn": []
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "FrameIndex": 0
+    }
+]

@@ -5,9 +5,13 @@ Action execution and validation functions for TridentIslandEnv.
 from typing import Dict, List, Tuple
 from ..config import Config
 
+import math
+
 from SimulationInterface import (
-    PlayerEventCommit, MoveManouver, CAPManouver, RTBManouver,
-    Vector3, Formation, ControllableEntity, EntityDomain
+    PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
+    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag, Refuel,
+    RefuelComponent,
+    Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
 
@@ -29,33 +33,31 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     if not is_valid_action(action, entities, target_groups, config):
         return []
     
-    player_events = []
+    player_events = None
     
     if action_type == 0:  # No-op
         pass
     elif action_type == 1:  # Move
         event = execute_move_action(entity_id, action, entities, config)
-        player_events.append(event)
+        player_events = event
     elif action_type == 2:  # Engage
         event = execute_engage_action(entity_id, action, entities, target_groups)
-        player_events.append(event)
+        player_events = event
     elif action_type == 3:  # Stealth
         event = execute_stealth_action(entity_id, action, entities)
-        if event:
-            player_events.append(event)
+        player_events = event
     elif action_type == 4:  # Sensing Direction
-        event = execute_sensing_direction_action(entity_id, action, entities, config)
-        if event:
-            player_events.append(event)
+        event = execute_set_radar_focus_action(entity_id, action, entities, config)
+        player_events = event
     elif action_type == 5:  # Capture
         event = execute_capture_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
-        player_events.append(event)
+        player_events = event
     
     return player_events
 
@@ -76,7 +78,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return False
     
     action_type = action["action_type"]
-    
+    # TODO: Make this dict mapping
     if action_type == 0:  # No-op
         return True
     elif action_type == 1:  # Move
@@ -85,9 +87,9 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return validate_engage_action(action, entities, target_groups)
     elif action_type == 3:  # Stealth
         return validate_stealth_action(action, entities)
-    elif action_type == 4:  # Sensing Direction
-        return validate_sensing_direction_action(action, entities, config)
-    elif action_type == 5:  # capture
+    elif action_type == 4:  # Sensing Position
+        return validate_sensing_position_action(action, entities, config)
+    elif action_type == 5:  # Capture
         return validate_capture_action(action, entities)
     elif action_type == 6:  # RTB
         return validate_rtb_action(action, entities)
@@ -100,18 +102,21 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action - create CAP maneuver"""
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
-    short_angle = action["move_short_angle"] * config.angle_resolution_degrees
-    long_axis_km = config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km)
-    axis_angle = action["move_axis_angle"] * config.angle_resolution_degrees
+    # TODO: @Erwin + @Sanjna this breaks action space
+    # short_axis_m = action["move_short_axis_km"] * 1000
+    # long_axis_m = action["move_long_axis_km"] * 1000 # config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
+    # axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
     
-    # Create CAP route using FFSim pattern
-    entity = entities[entity_id]
-    
-    cap_maneuver = CAPManouver()
-    # TODO: Placeholder call for CAP route creation with center, angles, axis length
-    # cap_maneuver.create_from_parameters(center_x, center_y, short_angle, long_axis_km, axis_angle)
-    
-    return cap_maneuver
+    # entity = entities[entity_id]
+
+    # center = Vector3(center_x, center_y, entity.pos.z)
+    # axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
+
+    # event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+    # event.entity = entity
+
+    # return event
+    pass
 
 
 def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_groups: Dict):
@@ -143,59 +148,65 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     
     return commit
 
+def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute sense action - point radar at location"""
 
-def execute_stealth_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute stealth action - enable/disable stealth mode"""
+    max_grid_positions = calculate_max_grid_positions(config)
+    if action["sensing_position_grid"] == max_grid_positions: # Default sensing (forward)
+        entity = entities[entity_id]
+        
+        event = ClearRadarFocus()
+        event.entity = entity
+
+        return event
+
+    sense_x, sense_y = grid_to_position(action["sensing_position_grid"], config)
+    
+    entity = entities[entity_id]
+    
+    event = SetRadarFocus()
+    event.entity = entity
+    event.position = Vector3(sense_x, sense_y, entity.pos.z)
+    
+    return event
+
+def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute sense action - set radar strength"""
     stealth_enabled = action["stealth_enabled"]
     
     entity = entities[entity_id]
     
-    # TODO: Create PlayerEventStealth when available in FFSim
-    # stealth_event = PlayerEventStealth()
-    # stealth_event.entity = entity
-    # stealth_event.stealth_mode = bool(stealth_enabled)
+    event = SetRadarStrength()
+    event.entity = entity
+    event.strength = 0 if stealth_enabled else 1
     
-    # Placeholder for now
-    return None
-
-
-def execute_sensing_direction_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute sensing direction action - point radar at grid location"""
-    sense_x, sense_y = grid_to_position(action["sensing_direction_grid"], config)
-    
-    entity = entities[entity_id]
-    
-    # TODO: Create PlayerEventSenseDirection when available in FFSim
-    # sense_direction_event = PlayerEventSenseDirection()
-    # sense_direction_event.entity = entity
-    # sense_direction_event.position = Vector3(sense_x, sense_y, 0)
-    
-    # Placeholder for now
-    return None
-
+    return event
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute land action - land at nearest friendly airbase"""
-    entity = entities[entity_id]
-    
-    # TODO: Create PlayerEventLand when available in FFSim
-    # land_event = PlayerEventLand()
-    # land_event.entity = entity
-    
-    # Placeholder for now
-    return None
+    # """Execute land action - land at nearest friendly airbase"""
+    # # TODO: The agent shouldnt learn flag_id? Does that change?
+    # @Sanjna + @Erwin: This breaks the action space.
+    # entity = entities[entity_id]
+    # flag = entities[action["flag_id"]]
 
+    # event = CaptureFlag()
+    # event.entity = entity
+    # event.flag = flag
+
+    # return event
+    pass
 
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute RTB action - return to base"""
-    entity = entities[entity_id]
-    
-    rtb_maneuver = RTBManouver()
-    # TODO: Configure RTB maneuver with entity's home base
-    # rtb_maneuver.target_base = entity.home_base
-    
-    return rtb_maneuver
+    # """Execute RTB action - return to base"""
+    # entity = entities[entity_id]
+    # flag = entities[action["flag_id"]]
 
+    # event = RTBManouver()
+    # event.entity = entity
+    # event.flag = flag
+    
+    # return event
+    pass
 
 def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     """Execute refuel action - refuel from another entity"""
@@ -203,15 +214,13 @@ def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     
     entity = entities[entity_id]
     refuel_target = entities[refuel_target_id]
-    
-    # TODO: Create PlayerEventRefuel when available in FFSim
-    # refuel_event = PlayerEventRefuel()
-    # refuel_event.entity = entity
-    # refuel_event.refuel_source = refuel_target
-    
-    # Placeholder for now
-    return None
 
+    event = Refuel()
+    event.component = entity.find_component_by_class(RefuelComponent)
+    event.entity = entity
+    event.refueling_entity = refuel_target
+    
+    return event
 
 def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate entity exists and is controllable."""
@@ -244,17 +253,19 @@ def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
     center_grid = action["move_center_grid"]
     
     entity = entities[entity_id]
-    
+
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
+
     if center_grid >= max_grid_positions:
         return False
-    
+
     # Convert to world coordinates and check bounds
     world_x, world_y = grid_to_position(center_grid, config)
+
     if not position_in_bounds(world_x, world_y, config):
-        return False
-    
+        return False  
+
     # Check entity is capable of movement (air units for CAP)
     if entity.domain != EntityDomain.AIR:  # Only air units can do CAP
         return False
@@ -304,20 +315,23 @@ def validate_stealth_action(action: Dict, entities: Dict) -> bool:
     return True
 
 
-def validate_sensing_direction_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate sensing direction action parameters."""
+def validate_sensing_position_action(action: Dict, entities: Dict, config: Config) -> bool:
+    """Validate sensing position action parameters."""
     entity_id = action["entity_id"]
-    sensing_direction_grid = action["sensing_direction_grid"]
+    sensing_position_grid = action["sensing_position_grid"]
     
     entity = entities[entity_id]
     
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
-    if sensing_direction_grid >= max_grid_positions:
+    if sensing_position_grid > max_grid_positions:
         return False
     
+    if sensing_position_grid == max_grid_positions:
+        return True  # Default sensing (forward)
+
     # Convert to world coordinates and check bounds
-    world_x, world_y = grid_to_position(sensing_direction_grid, config)
+    world_x, world_y = grid_to_position(sensing_position_grid, config)
     if not position_in_bounds(world_x, world_y, config):
         return False
     
@@ -327,14 +341,20 @@ def validate_sensing_direction_action(action: Dict, entities: Dict, config: Conf
     
     return True
 
-
 def validate_capture_action(action: Dict, entities: Dict) -> bool:
     """Validate capture action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
+
+    flag_id = action["flag_id"]
+    flag = entities[flag_id]
     
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
+        return False
+
+    # Check if flag is neutral
+    if flag.faction != Faction.NEUTRAL:
         return False
     
     # Check entity can capture
@@ -348,9 +368,16 @@ def validate_rtb_action(action: Dict, entities: Dict) -> bool:
     """Validate RTB action parameters."""
     entity_id = action["entity_id"]
     entity = entities[entity_id]
+
+    flag_id = action["flag_id"]
+    flag = entities[flag_id]
     
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
+        return False
+
+    # Check if flag faction is the same as the aircraft
+    if flag.faction != entity.faction:
         return False
     
     return True
@@ -372,9 +399,12 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
     # Check both entities are same faction
     if entity.faction.value != refuel_target.faction.value:
         return False
+
+    if not entity.can_refuel:
+        return False    
     
     # Check refuel target can provide fuel
-    if not refuel_target.can_refuel_others: # TODO: Check its a refuel unit
+    if not refuel_target.can_refuel_others:
         return False
     
     return True
@@ -433,25 +463,26 @@ def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
 
 def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
     """Convert grid index to world coordinates"""
-    grid_size = int((config.map_size[0] / 1000) / config.grid_resolution_km)  # Grid size in cells
+
+    grid_size = int(config.map_size_km[0] / config.grid_resolution_km)  # Grid size in cells
     
     grid_x = grid_index % grid_size
     grid_y = grid_index // grid_size
     
     # Convert to world coordinates (meters)
-    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size[0] // 2)
-    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size[1] // 2)
+    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] // 2)
+    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] // 2)
     
     return world_x, world_y
 
 
 def position_in_bounds(x: float, y: float, config: Config) -> bool:
     """Check if position is within map boundaries."""
-    half_map = config.map_size[0] // 2
+    half_map = config.map_size_km[0] * 1000 // 2
     return abs(x) <= half_map and abs(y) <= half_map
 
 
 def calculate_max_grid_positions(config: Config) -> int:
     """Calculate maximum number of grid positions for the map."""
-    grid_size = int((config.map_size[0] / 1000) / config.grid_resolution_km)
+    grid_size = int((config.map_size_km[0]) / config.grid_resolution_km)
     return grid_size * grid_size

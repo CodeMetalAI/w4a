@@ -68,3 +68,7 @@ checkpoints/
 *.tmp
 *.temp
 *.log
+
+# Sublime
+*.sublime-project
+*.sublime-workspace

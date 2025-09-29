@@ -12,9 +12,12 @@ from .config import Config
 
 from .envs.trident_island_env import TridentIslandEnv
 from .envs.force_design_env import ForceDesignEnv
+from .envs.actions import *
 from .wrappers.wrapper import EnvWrapper  
 from .training.replay import ReplayRecorder
 from .training.evaluation import RandomAgent, evaluate
+
+from .entities import w4a_entities
 
 # TODO: Decide public api
 __all__ = [

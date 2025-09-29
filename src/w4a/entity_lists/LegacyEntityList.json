@@ -1,0 +1,29 @@
+{
+  "Entities": [
+    {
+      "Type": "F-35C (Strike)",
+      "Amount": 2,
+      "Identifiers": ["SCAT", "BONG"]
+    },
+    {
+      "Type": "F-22",
+      "Amount": 1,
+      "Identifiers": ["SATAN"]
+    },
+    {
+      "Type": "F-15EX",
+      "Amount": 1,
+      "Identifiers": ["HOSS"]
+    },
+    {
+      "Type": "B-1B (Land Strike)",
+      "Amount": 1,
+      "Identifiers": ["SLAM"]
+    },
+    {
+      "Type": "EA-18G",
+      "Amount": 1,
+      "Identifiers": ["CHAOS"]
+    }
+  ]
+}
