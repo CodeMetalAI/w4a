@@ -9,7 +9,6 @@ from gymnasium import spaces
 import numpy as np
 from typing import Dict, Any, Optional, Tuple, List
 from pathlib import Path
-from .simple_agent import SimpleAgent
 
 from ..config import Config
 from . import actions

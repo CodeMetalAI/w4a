@@ -102,20 +102,21 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action - create CAP maneuver"""
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
-    # TODO: This breaks action space
-    short_axis_m = action["move_short_axis_km"] * 1000
-    long_axis_m = action["move_long_axis_km"] * 1000 # config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
-    axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
+    # TODO: @Erwin + @Sanjna this breaks action space
+    # short_axis_m = action["move_short_axis_km"] * 1000
+    # long_axis_m = action["move_long_axis_km"] * 1000 # config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
+    # axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
     
-    entity = entities[entity_id]
+    # entity = entities[entity_id]
 
-    center = Vector3(center_x, center_y, entity.pos.z)
-    axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
+    # center = Vector3(center_x, center_y, entity.pos.z)
+    # axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
 
-    event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
-    event.entity = entity
+    # event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+    # event.entity = entity
 
-    return event
+    # return event
+    pass
 
 
 def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_groups: Dict):
@@ -182,27 +183,30 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     return event
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute land action - land at nearest friendly airbase"""
-    # TODO: The agent shouldnt learn flag_id? Does that change?
-    entity = entities[entity_id]
-    flag = entities[action["flag_id"]]
+    # """Execute land action - land at nearest friendly airbase"""
+    # # TODO: The agent shouldnt learn flag_id? Does that change?
+    # @Sanjna + @Erwin: This breaks the action space.
+    # entity = entities[entity_id]
+    # flag = entities[action["flag_id"]]
 
-    event = CaptureFlag()
-    event.entity = entity
-    event.flag = flag
+    # event = CaptureFlag()
+    # event.entity = entity
+    # event.flag = flag
 
-    return event
+    # return event
+    pass
 
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute RTB action - return to base"""
-    entity = entities[entity_id]
-    flag = entities[action["flag_id"]]
+    # """Execute RTB action - return to base"""
+    # entity = entities[entity_id]
+    # flag = entities[action["flag_id"]]
 
-    event = RTBManouver()
-    event.entity = entity
-    event.flag = flag
+    # event = RTBManouver()
+    # event.entity = entity
+    # event.flag = flag
     
-    return event
+    # return event
+    pass
 
 def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     """Execute refuel action - refuel from another entity"""

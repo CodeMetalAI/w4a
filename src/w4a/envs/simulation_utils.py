@@ -12,8 +12,6 @@ from SimulationInterface import (
     Simulation, SimulationConfig, SimulationData, ForceLaydown, Faction, EntitySpawnData, FactionConfiguration, EntityList
 )
 
-from .simple_agent import SimpleAgent
-
 from ..entities import w4a_entities
 
 
@@ -68,8 +66,8 @@ def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list
     env.simulation = SimulationInterface.create_simulation(config)
 
     # TODO: @Sanjna initialize the actual RL agents here
-    env.legacy_agent = SimpleAgent(Faction.LEGACY)
-    env.dynasty_agent = SimpleAgent(Faction.DYNASTY)
+    # env.legacy_agent = SimpleAgent(Faction.LEGACY)
+    # env.dynasty_agent = SimpleAgent(Faction.DYNASTY)
 
     env.simulation.add_agent(env.legacy_agent)
     env.simulation.add_agent(env.dynasty_agent)
