@@ -104,7 +104,7 @@ class RLEnvWrapper(gym.Wrapper):
         # User agent: provided or passive RLAgent
         user_agent = self.agent or RLAgent(self.env.config, faction=user_faction)
 
-        # Opponent agent: SimpleAgent or passive RLAgent (to keep sim happy)
+        # Opponent agent: SimpleAgent or passive RLAgent
         if self.enable_adversary:
             opponent_agent = SimpleAgent(opponent_faction)
         else:
