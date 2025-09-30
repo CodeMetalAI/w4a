@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import EnvWrapper
+from w4a.wrappers.wrapper import RLEnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 from SimulationInterface import (EntityList, EntitySpawnData)
@@ -25,53 +25,62 @@ def test_config():
 
 
 def test_env_creation():
-    """Test environment creation"""
-    env = TridentIslandEnv()
-    
-    env_replay = TridentIslandEnv(enable_replay=True)
-    assert env_replay.enable_replay is True
+    """Create wrapped env, verify spaces and basic reward on one step."""
+    from gymnasium import spaces
+    wrapped = RLEnvWrapper(TridentIslandEnv())
+    # Spaces exist and are Gymnasium spaces
+    assert hasattr(wrapped, 'action_space')
+    assert hasattr(wrapped, 'observation_space')
+    assert isinstance(wrapped.action_space, spaces.Space)
+    assert isinstance(wrapped.observation_space, spaces.Space)
+    # Do a minimal reset/step to confirm reward is numeric
+    obs, info = wrapped.reset()
+    action = wrapped.action_space.sample()
+    obs, reward, terminated, truncated, info = wrapped.step(action)
+    assert isinstance(reward, (int, float))
+    wrapped.close()
 
 def test_env_reset():
     """Test environment creation"""
-    env = TridentIslandEnv(enable_replay=True)
+    wrapped = RLEnvWrapper(TridentIslandEnv(enable_replay=True))
 
-    env.reset()
+    obs, info = wrapped.reset()
+    assert obs is not None
+    assert isinstance(info, dict)
+
+    # Agents should be installed by the wrapper and simulation created
+    assert hasattr(wrapped.env, "legacy_agent")
+    assert hasattr(wrapped.env, "dynasty_agent")
+    assert wrapped.env.simulation is not None
 
 def test_simulation_interface_integration():
     """Test that SimulationInterface integration works or fails gracefully"""
-    try:
-        env = TridentIslandEnv()
-        env.reset()
-        # If SimulationInterface is available, simulation should be created
-        assert env.simulation is not None
-        print("SimulationInterface available and working")
-    except ImportError:
-        # If SimulationInterface not available, should fail cleanly
-        pytest.fail("SimulationInterface not available - environment creation should fail cleanly")
-    except Exception as e:
-        pytest.fail(f"Unexpected error in environment creation: {e}")
+    wrapped = RLEnvWrapper(TridentIslandEnv())
+    wrapped.reset()
+    # Require SimulationInterface and successful simulation creation
+    assert wrapped.env.simulation is not None
 
 
 def test_env_reset_step_cycle():
     """Test complete environment usage cycle"""
-    env = TridentIslandEnv()
+    wrapped = RLEnvWrapper(TridentIslandEnv())
     
     # Test reset
-    obs, info = env.reset()
+    obs, info = wrapped.reset()
     assert obs is not None
     assert isinstance(obs, np.ndarray)
-    assert obs.shape == env.observation_space.shape
+    assert obs.shape == wrapped.observation_space.shape
     assert isinstance(info, dict)
     
     # Test multiple steps
     for _ in range(5):
-        action = env.action_space.sample()
-        obs, reward, terminated, truncated, info = env.step(action)
+        action = wrapped.action_space.sample()
+        obs, reward, terminated, truncated, info = wrapped.step(action)
         
         # Validate return types
         assert obs is not None
         assert isinstance(obs, np.ndarray)
-        assert obs.shape == env.observation_space.shape
+        assert obs.shape == wrapped.observation_space.shape
         assert isinstance(reward, (int, float))
         assert isinstance(terminated, bool)
         assert isinstance(truncated, bool)
@@ -81,7 +90,31 @@ def test_env_reset_step_cycle():
             break
     
     # Test cleanup
-    env.close()
+    wrapped.close()
+
+
+def test_wrapper_hooks_applied():
+    """Custom obs/action transforms via overriding wrapper methods"""
+    class HookWrapper(RLEnvWrapper):
+        def obs_fn(self, obs):
+            import numpy as _np
+            return _np.ones_like(obs)
+
+        def action_fn(self, action):
+            action = dict(action)
+            action["action_type"] = 0  # force no-op
+            return action
+
+    wrapped = HookWrapper(TridentIslandEnv())
+    obs, info = wrapped.reset()
+    assert isinstance(obs, np.ndarray)
+    assert np.allclose(obs, 1.0)
+
+    action = wrapped.action_space.sample()
+    # Should not raise with transformed action/obs and obs remains ones after step
+    obs2, _, _, _, _ = wrapped.step(action)
+    assert np.allclose(obs2, 1.0)
+    wrapped.close()
 
 
 # TODO: Add replay testing
@@ -156,31 +189,10 @@ def test_scenario_loading():
     except ImportError:
         pytest.skip("SimulationInterface not available - skipping scenario loading test")
 
+# TODO: Add test for overriding with different JSON
 
-@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
-def test_wrapper():
-    """Test environment wrapper functionality"""
-    env = TridentIslandEnv()
-    
-    # Test custom reward function with fixed reward
-    def add_fixed_reward(obs, action, reward, info):
-        return reward + 10  # Add 10 to any reward
-    
-    wrapped = EnvWrapper(env, reward_fn=add_fixed_reward)
-    
-    obs, info = wrapped.reset()
-    action = wrapped.action_space.sample()
-    obs, wrapped_reward, terminated, truncated, info = wrapped.step(action)
-    
-    # Test unwrapped environment for comparison
-    obs2, info2 = env.reset()
-    obs2, original_reward, terminated2, truncated2, info2 = env.step(action)
-    
-    # Wrapper should add 10 to the original reward
-    assert wrapped_reward == original_reward + 10
-    
-    wrapped.close()
 
+# TODO: Add random agent testing
 @pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_random_agent_evaluation():
     """Test agent evaluation system"""
@@ -200,28 +212,26 @@ def test_random_agent_evaluation():
     
     env.close()
 
-@pytest.mark.skip(reason="Test is disabled because it's not ready yet")
 def test_env_properties():
-    """Test environment properties and metadata"""
-    env = TridentIslandEnv()
-    
-    # Test Gymnasium interface compliance
+    """Gymnasium compliance for wrapped env with Dict action space."""
+    from gymnasium import spaces
+    env = RLEnvWrapper(TridentIslandEnv())
+    # Required attributes
     assert hasattr(env, 'action_space')
     assert hasattr(env, 'observation_space')
     assert hasattr(env, 'reset')
     assert hasattr(env, 'step')
     assert hasattr(env, 'close')
-    
-    # Test action space
-    assert env.action_space.n > 0  # Discrete space
-    
-    # Test observation space
-    assert len(env.observation_space.shape) > 0
-    
-    # Test metadata
-    if hasattr(env, 'metadata'):
-        assert isinstance(env.metadata, dict)
-    
+    # Spaces should be Gymnasium spaces
+    assert isinstance(env.action_space, spaces.Dict)
+    assert isinstance(env.observation_space, spaces.Space)
+    # Reset/step cycle sanity
+    obs, info = env.reset()
+    assert env.observation_space.contains(obs)
+    action = env.action_space.sample()
+    obs2, reward, terminated, truncated, info2 = env.step(action)
+    assert env.observation_space.contains(obs2)
+    assert isinstance(reward, (int, float))
     env.close()
 
 

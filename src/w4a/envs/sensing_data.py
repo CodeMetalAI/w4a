@@ -1,11 +1,15 @@
 """
-Enemy sensing data structures for tiered intelligence system.
+Enemy Sensing Data Structures
 
-This module defines the data structures used to track what we know about enemy forces
-based on our sensor capabilities and intelligence gathering.
+This module defines the data structures used to track intelligence about enemy forces
+based on sensor capabilities and intelligence gathering. It implements a tiered sensing
+system where information quality and detail improve with better sensor coverage.
+
+The tiered system provides realistic fog-of-war mechanics where agents must make
+decisions based on incomplete and uncertain information about enemy forces.
+
+TODO: This is all pseudocode!
 """
-
-# TODO: This is all pseudocode!
 
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional, Dict, Any
@@ -13,7 +17,10 @@ from enum import Enum
 
 
 class SensingTier(Enum):
-    """Sensing capability tiers."""
+    """Sensing capability tiers that determine information quality.
+    
+    Higher tiers provide more detailed and accurate intelligence about enemy forces.
+    """
     NONE = 0        # No detection
     DOMAIN = 1      # Domain detection only (air/surface/land)
     INDIVIDUAL = 2  # Individual unit identification and positions
@@ -21,7 +28,7 @@ class SensingTier(Enum):
 
 
 class Domain(Enum):
-    """Unit domain types."""
+    """Unit domain types for tactical classification."""
     AIR = "AIR"
     SURFACE = "SURFACE" 
     LAND = "LAND"
@@ -30,7 +37,11 @@ class Domain(Enum):
 
 @dataclass
 class WeaponCapabilities:
-    """Weapon system capabilities (Tier 3 intelligence)."""
+    """Weapon system capabilities available at Tier 3 intelligence.
+    
+    Detailed weapon information that enables precise threat assessment
+    and tactical planning against enemy forces.
+    """
     can_engage_air: bool = False
     can_engage_surface: bool = False
     can_engage_land: bool = False
@@ -43,8 +54,12 @@ class WeaponCapabilities:
 class EnemySensingData:
     """Complete sensing data for an enemy target group.
     
-    This structure holds all intelligence we have gathered about an enemy target group,
-    organized by sensing tier. Higher tiers include more detailed information.
+    This structure holds all sensing data gathered about an enemy target group,
+    organized by sensing tier. Information quality and detail improve with
+    higher sensing tiers, providing realistic fog-of-war mechanics.
+    
+    The data structure supports aging and uncertainty modeling to simulate
+    real-world sensing limitations.
     """
     
     # Detection status
@@ -78,7 +93,10 @@ class EnemySensingData:
     last_engagement_time: float = 0.0
     
     def get_group_center_position(self) -> Tuple[float, float]:
-        """Get center position of the target group.
+        """Get the center position of the target group.
+        
+        Uses individual unit positions for Tier 2+ sensing,
+        falls back to approximate position for Tier 1.
         
         Returns:
             (x, y) coordinates of group center
@@ -94,7 +112,9 @@ class EnemySensingData:
             return self.approximate_position
     
     def get_position_uncertainty(self) -> float:
-        """Get position uncertainty factor.
+        """Get position uncertainty factor based on sensing tier.
+        
+        Higher sensing tiers provide more accurate position information.
         
         Returns:
             Uncertainty factor [0.0, 1.0] where 0.0 = very certain, 1.0 = very uncertain
@@ -107,7 +127,10 @@ class EnemySensingData:
             return 1.0  # No detection, maximum uncertainty
     
     def get_estimated_capabilities(self) -> WeaponCapabilities:
-        """Get weapon capabilities (actual or estimated).
+        """Get weapon capabilities based on available sensing.
+        
+        Returns actual capabilities for Tier 3 sensing, estimates
+        based on domain knowledge for lower tiers.
         
         Returns:
             WeaponCapabilities object with best available information
@@ -139,9 +162,12 @@ class EnemySensingData:
     def update_from_sensor_contact(self, tier: int, confidence: float, current_time: float):
         """Update sensing data from new sensor contact.
         
+        Upgrades intelligence tier and confidence based on new sensor information.
+        Never downgrades existing intelligence within the same contact period.
+        
         Args:
             tier: New sensing tier achieved
-            confidence: Detection confidence
+            confidence: Detection confidence [0.0, 1.0]
             current_time: Current simulation time
         """
         self.is_detected = True
@@ -151,6 +177,9 @@ class EnemySensingData:
     
     def age_data(self, current_time: float, max_age: float = 300.0):
         """Age the sensing data and reduce confidence over time.
+        
+        Simulates the degradation of intelligence over time as enemy forces
+        move and change their configuration.
         
         Args:
             current_time: Current simulation time

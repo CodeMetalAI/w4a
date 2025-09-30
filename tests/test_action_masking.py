@@ -8,6 +8,7 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
+from w4a.wrappers.wrapper import RLEnvWrapper
 
 
 class TestActionMaskStructure:
@@ -15,7 +16,7 @@ class TestActionMaskStructure:
     
     def test_action_type_masks(self):
         """Test action type masks are properly formatted"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         action_types = info['valid_masks']['action_types']
@@ -34,7 +35,7 @@ class TestActionMaskStructure:
     
     def test_controllable_entity_masks(self):
         """Test controllable entity masks are properly formatted"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         controllable_entities = info['valid_masks']['controllable_entities']
@@ -50,7 +51,7 @@ class TestActionMaskStructure:
     
     def test_detected_target_masks(self):
         """Test detected target masks are properly formatted"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         detected_targets = info['valid_masks']['detected_targets']
@@ -66,7 +67,7 @@ class TestActionMaskStructure:
     
     def test_entity_target_matrix_masks(self):
         """Test entity-target engagement matrix is properly formatted"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         matrix = info['valid_masks']['entity_target_matrix']
@@ -93,7 +94,7 @@ class TestMaskValidation:
     
     def test_valid_action_respects_masks(self):
         """Test that valid actions respect the provided masks"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         masks = info['valid_masks']

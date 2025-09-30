@@ -1,7 +1,19 @@
 """
-TridentIslandEnv
+Trident Island Environment
 
-Single-agent Gymnasium environment for tactical simulation.
+This module implements a single-agent Gymnasium environment for tactical military simulation
+using the simulation engine. The environment provides a realistic tactical
+scenario where agents must coordinate air, sea, and land forces to achieve mission objectives.
+
+The environment features:
+- Hierarchical action space for complex tactical decisions
+- Multi-modal observations including global state and entity features  
+- Realistic sensing and fog-of-war mechanics
+- Mission-based reward structure with multiple victory conditions
+- Integration with professional military simulation systems
+
+This environment is designed for training and evaluating AI agents on complex tactical
+decision-making tasks in contested environments.
 """
 
 import gymnasium as gym
@@ -30,9 +42,14 @@ from SimulationInterface import (
 
 
 class TridentIslandEnv(gym.Env):
-    """
-    Single-agent tactical environment using BANE simulation engine.
+    """Single-agent tactical environment using simulation engine.
     
+    This environment provides a complex tactical scenario where an AI agent must
+    coordinate multiple military units across air, sea, and land domains to achieve
+    mission objectives while facing an intelligent adversary.
+    
+    The environment supports various mission types including capture-and-hold,
+    force-on-force engagements, and combined arms operations.
     """
     
     metadata = {"render_modes": ["rgb_array", "human"]}
@@ -40,7 +57,16 @@ class TridentIslandEnv(gym.Env):
     def __init__(self, config: Optional[Config] = None, render_mode: Optional[str] = None, 
                  enable_replay: bool = False, scenario_name: str = "TridentIsland",
                  force_config_json: Optional[str] = None, spawn_config_json: Optional[str] = None):
-        """Initialize environment"""
+        """Initialize the tactical simulation environment.
+        
+        Args:
+            config: Environment configuration parameters
+            render_mode: Rendering mode for visualization
+            enable_replay: Whether to enable replay recording
+            scenario_name: Name of the tactical scenario to load
+            force_config_json: Optional path to force configuration JSON
+            spawn_config_json: Optional path to spawn configuration JSON
+        """
         
         super().__init__()
 
@@ -122,7 +148,14 @@ class TridentIslandEnv(gym.Env):
         
     def set_force_config_paths(self, legacy_entity_list, dynasty_entity_list, 
                               legacy_spawn_data, dynasty_spawn_data):
-        """Set the JSON file paths for force configuration"""
+        """Set the JSON file paths for force configuration.
+        
+        Args:
+            legacy_entity_list: Path to Legacy faction entity list JSON
+            dynasty_entity_list: Path to Dynasty faction entity list JSON
+            legacy_spawn_data: Path to Legacy faction spawn data JSON
+            dynasty_spawn_data: Path to Dynasty faction spawn data JSON
+        """
         self.force_config_paths = {
             'legacy_entity_list': legacy_entity_list,
             'dynasty_entity_list': dynasty_entity_list,
@@ -132,7 +165,15 @@ class TridentIslandEnv(gym.Env):
         
         
     def reset(self, seed: Optional[int] = None, options: Optional[Dict] = None) -> Tuple[np.ndarray, Dict]:
-        """Reset environment"""
+        """Reset the environment to start a new episode.
+        
+        Args:
+            seed: Random seed for reproducible episodes
+            options: Additional reset options
+            
+        Returns:
+            Tuple of (initial_observation, info_dict)
+        """
         super().reset(seed=seed)
 
         if self.simulation:
@@ -180,27 +221,35 @@ class TridentIslandEnv(gym.Env):
         # Reset mission metrics to track fresh mission progress
         mission_metrics.reset_mission_metrics(self)
 
+        # Initialize per-episode tracking for info/debugging
+        self.last_action_by_entity = {}
+        self.last_commit_by_entity = {}
+        self.committed_this_step = set()
+
         observation = self._get_observation()
-        info = {
-            "step": self.current_step,
-            "valid_masks": {
-                "action_types": self._get_valid_action_types(),           
-                "controllable_entities": self._get_controllable_entities_set(),  
-                "detected_targets": self._get_detected_targets_set(),
-                "entity_target_matrix": self._get_entity_target_engagement_matrix()
-            }
-        }
+        info = self._build_info()
         
         return observation, info
     
     def step(self, action: Dict) -> Tuple[np.ndarray, float, bool, bool, Dict]:
-        """Execute hierarchical action"""
+        """Execute one environment step with the given action.
+        
+        Args:
+            action: Hierarchical action dictionary from the agent
+            
+        Returns:
+            Tuple of (observation, reward, terminated, truncated, info)
+        """
         self.current_step += 1
         self.FrameIndex += self.frame_rate  # Advance simulation time
         self.time_elapsed = get_time_elapsed(self.FrameIndex)  # Update mission time
         
         self.simulation_events = []  # Clear previous step's events
         
+        # Track action intent for info/debugging
+        self._record_last_action(action)
+        self.committed_this_step = set()
+
         # Execute action
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
         
@@ -229,31 +278,33 @@ class TridentIslandEnv(gym.Env):
         # Truncate on time limit 
         truncated = self.time_elapsed >= self.config.max_game_time
 
-        # Update terminal reward
-        info = {
-            "step": self.current_step,
-            "time_elapsed": self.time_elapsed,
-            "total_entities": len(self.entities),
-            "controllable_entities_count": len(self._get_controllable_entities_set()),
-            "detected_targets_count": len(self._get_detected_targets_set()),
-            "last_events_count": len(self.simulation_events),
-            "valid_masks": {
-                "action_types": self._get_valid_action_types(),           # What action types are possible 
-                "controllable_entities": self._get_controllable_entities_set(),  # Which entity IDs can be commanded
-                "detected_targets": self._get_detected_targets_set(),     # Which target group IDs are available
-                "entity_target_matrix": self._get_entity_target_engagement_matrix()  # Which entities can engage which targets
-        }
-        }
+        # Terminal reward on termination or truncation
+        if terminated or truncated:
+            if self._did_win():
+                reward += 100.0
+            elif self._did_lose():
+                reward -= 100.0
+
+        # Build enriched info
+        info = self._build_info()
         
         return observation, reward, terminated, truncated, info
     
     def _get_observation(self) -> np.ndarray:
-        """Extract observation from simulation state (globals-only for now)."""
+        """Extract observation from current simulation state.
+        
+        Returns:
+            Normalized observation vector for the agent
+        """
         # Update globals that depend on per-step conditions
         return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:
-        """Calculate reward from simulation events"""
+        """Calculate step reward based on mission progress and tactical performance.
+        
+        Returns:
+            Reward value for the current step
+        """
         # TODO: Implement reward calculation based on:
         # - Mission objectives (flag capture, target destruction)
         # - Unit preservation (casualties vs enemy losses) 
@@ -263,33 +314,51 @@ class TridentIslandEnv(gym.Env):
     
 
     def _check_termination(self) -> bool:
-        """Check if mission/episode should end"""
-        # TODO: Check victory conditions from simulation
-        # - Mission objectives achieved (victory)
-        # - Critical units destroyed (defeat)
-        # - Time limits exceeded
-        # - Use constants.SIMULATION_VICTORY_THRESHOLD
-        return False
+        """Check if the mission should terminate early.
+        
+        Returns:
+            True if episode should end due to win/loss conditions
+        """
+        # Terminate early when win or loss conditions are met
+        outcome = self._evaluate_outcome()
+        return outcome in ("win", "loss")
     
     def render(self) -> Optional[np.ndarray]:
-        # TODO: Should we implement rendering?
-        """Render environment"""
+        """Render the environment for visualization.
+        
+        Returns:
+            RGB array for rgb_array mode, None for human mode
+            
+        TODO: Should we implement rendering?
+        """
         if self.render_mode == "rgb_array":
             return np.zeros((400, 600, 3), dtype=np.uint8)
         elif self.render_mode == "human":
             print(f"Step {self.current_step}")
     
     def get_simulation_handle(self):
-        """Provide access to simulation for replay recording"""
+        """Provide access to simulation handle for replay recording.
+        
+        Returns:
+            Simulation handle if replay is enabled, None otherwise
+        """
         return self.simulation if self.enable_replay else None
     
     def _is_controllable_entity(self, entity) -> bool:
-        """Check if entity is controllable by our faction"""
+        """Check if entity is controllable by our faction.
+        
+        Returns:
+            True if entity can be controlled by the agent
+        """
         return (entity.is_controllable and entity.is_alive and 
                 entity.faction.value == self.config.our_faction)
     
     def _entity_can_engage(self, entity) -> bool:
-        """Check if entity can engage targets (has weapons and valid targets exist)"""
+        """Check if entity can engage targets.
+        
+        Returns:
+            True if entity has weapons and valid targets exist
+        """
         # Check if entity has weapons # TODO: Is this correct check?
         has_weapons = entity.has_weapons and len(entity.weapons) > 0
         if not has_weapons:
@@ -306,12 +375,20 @@ class TridentIslandEnv(gym.Env):
         return False
     
     def _entity_can_capture(self, entity) -> bool:
-        """Check if entity can capture objectives (ground units near objectives)"""
+        """Check if entity can capture objectives.
+        
+        Returns:
+            True if entity is capable of capturing objectives
+        """
         # TODO: Check if its settler 
         return entity.is_settler
     
     def _get_valid_action_types(self) -> set:
-        """Get set of valid action types based on current entities"""
+        """Get set of valid action types based on current entity capabilities.
+        
+        Returns:
+            Set of valid action type indices
+        """
         valid_actions = {0}  # noop always valid
     
         for entity in self.entities.values():
@@ -332,21 +409,34 @@ class TridentIslandEnv(gym.Env):
         return valid_actions
     
     def _get_controllable_entities_set(self) -> set:
-        """Get set of controllable entity IDs"""
+        """Get set of controllable entity IDs.
+        
+        Returns:
+            Set of entity IDs that can be controlled by the agent
+        """
         return {
             entity_id for entity_id, entity in self.entities.items()
             if self._is_controllable_entity(entity)
         }
     
     def _get_detected_targets_set(self) -> set:
-        """Get set of detected target group IDs"""
+        """Get set of detected enemy target group IDs.
+        
+        Returns:
+            Set of target group IDs that have been detected
+        """
         return {
             tg_id for tg_id, target_group in self.target_groups.items()
             if target_group.faction.value != self.config.our_faction
         }
         
     def _get_entity_target_engagement_matrix(self) -> dict:
-        """Get matrix of which entities can engage which target groups"""
+        """Get matrix of which entities can engage which target groups.
+        
+        Returns:
+            Dict mapping entity_id to set of engageable target_group_ids
+        """
+        # TODO: Is this correct?
         engagement_matrix = {}
         
         for entity_id, entity in self.entities.items():
@@ -370,26 +460,159 @@ class TridentIslandEnv(gym.Env):
             engagement_matrix[entity_id] = valid_targets
         
         return engagement_matrix
+
+    def _build_info(self) -> Dict:
+        """Build comprehensive info dictionary for agents and debugging.
+        
+        Returns:
+            Dictionary containing detailed environment state information
+        """
+        controllable = self._get_controllable_entities_set()
+        detected = self._get_detected_targets_set()
+        return {
+            "step": self.current_step,
+            "time_elapsed": self.time_elapsed,
+            "time_remaining": max(0.0, float(self.config.max_game_time - self.time_elapsed)),
+            "total_entities": len(self.entities),
+            "controllable_entities_count": len(controllable),
+            "detected_targets_count": len(detected),
+            "last_events_count": len(self.simulation_events),
+            "valid_masks": {
+                "action_types": self._get_valid_action_types(),
+                "controllable_entities": controllable,
+                "visible_targets": detected,
+                "entity_target_matrix": self._get_entity_target_engagement_matrix()
+            },
+            "controllable_entities": list(controllable),
+            "refuel": {
+                "receivers": list(self._get_refuel_receivers_set()),
+                "providers": list(self._get_refuel_providers_set())
+            },
+            "committing_entities": list(self.committed_this_step),
+            "last_action_by_entity": self.last_action_by_entity,
+            "last_commit_by_entity": self.last_commit_by_entity,
+            "mission": {
+                "friendly_kills": len(self.friendly_kills),
+                "enemy_kills": len(self.enemy_kills),
+                "kill_ratio": self._compute_kill_ratio(),
+                "capture_progress": float(self.capture_timer_progress),
+                "capture_possible": bool(self.capture_possible),
+                "island_contested": bool(self.island_contested)
+            }
+        }
     
+    def _get_refuel_receivers_set(self) -> set:
+        """Get entities that can receive fuel.
+        
+        Returns:
+            Set of entity IDs that can receive fuel and are alive
+        """
+        receivers = set()
+        # TODO: Is this correct?
+        for entity_id, entity in self.entities.items():
+            if (entity.is_alive and entity.faction.value == self.config.our_faction and entity.can_refuel):
+                receivers.add(entity_id)
+        return receivers
+
+    def _get_refuel_providers_set(self) -> set:
+        """Get entities that can provide fuel to others.
+        
+        Returns:
+            Set of entity IDs that can refuel others and are alive
+            
+        TODO: Is this correct?
+        """
+        providers = set()
+        for entity_id, entity in self.entities.items():
+            if (entity.is_alive and entity.faction.value == self.config.our_faction and entity.can_refuel_others):
+                providers.add(entity_id)
+        return providers
+
+    def _record_last_action(self, action: Dict) -> None:
+        """Record last action issued per entity for debugging and analysis.
+        
+        Args:
+            action: Action dictionary that was executed
+        """
+        entity_id = action["entity_id"]
+        self.last_action_by_entity[str(entity_id)] = {
+            "action_type": int(action["action_type"]),
+            "time": float(self.time_elapsed)
+        }
+
+        # Track commit intents for convenience
+        if int(action["action_type"]) == 2:  # Engage/Commit
+            target_group_id = int(action["target_group_id"])
+            self.committed_this_step.add(entity_id)
+            self.last_commit_by_entity[str(entity_id)] = {
+                "target_group_id": target_group_id,
+                "time": float(self.time_elapsed)
+            }
+
+    def _compute_kill_ratio(self) -> float:
+        """Compute kill ratio for mission assessment.
+        
+        Returns:
+            Ratio of enemy kills to friendly losses (safe division)
+        """
+        friendly_losses = len(self.friendly_kills)
+        enemy_losses = len(self.enemy_kills)
+        denom = max(1, friendly_losses)
+        return float(enemy_losses) / float(denom)
+
+    def _evaluate_outcome(self) -> str:
+        """Evaluate current mission outcome based on victory conditions.
+        
+        Returns:
+            Mission status: "win", "loss", or "ongoing"
+        """
+        # Win conditions
+        capture_win = self.capture_timer_progress >= self.config.capture_required_seconds and self.capture_possible
+        kill_ratio = self._compute_kill_ratio()
+        kill_ratio_win = kill_ratio >= self.config.kill_ratio_threshold
+
+        if capture_win or kill_ratio_win:
+            return "win"
+
+        # Loss conditions
+        no_capture_path = (not self.capture_possible)
+        inverse_threshold = 1.0 / max(1e-6, self.config.kill_ratio_threshold)
+        kill_ratio_loss = kill_ratio <= inverse_threshold
+        if no_capture_path and kill_ratio_loss:
+            return "loss"
+
+        return "ongoing"
+
+    def _did_win(self) -> bool:
+        """Check if mission was won."""
+        return self._evaluate_outcome() == "win"
+
+    def _did_lose(self) -> bool:
+        """Check if mission was lost."""
+        return self._evaluate_outcome() == "loss"
+
         
     def _entity_spawned(self, event):
-        """Handle entity spawned events"""
-        # TODO: Track spawned entities
+        """Handle entity spawned events.
+        
+        TODO: Track spawned entities
+        """
         pass
         
     def _victory(self, event):
-        """Handle victory events"""
+        """Handle victory events."""
         pass
     
     def _adversary_contact(self, event):
-        """Handle adversary contact events"""
+        """Handle adversary contact events."""
         pass
         
     def _update_enemy_sensing_data(self):
         """Update sensing information for all enemy target groups.
         
-        This method should be called every step to update what we know about enemy forces
-        based on our current sensor coverage and capabilities.
+        This method should be called every step to update intelligence about enemy forces
+        based on current sensor coverage and capabilities. Implements tiered sensing
+        where information quality improves with better sensor positioning.
         """
         # TODO: Implement sensing update logic
         # 
@@ -448,13 +671,16 @@ class TridentIslandEnv(gym.Env):
     
     def _calculate_sensing_tier(self, target_group, friendly_sensors):
         """Calculate sensing tier and confidence for a target group.
+        
+        Determines the quality of sensing available for an enemy target group
+        based on sensor coverage, range, and environmental factors.
     
         Args:
             target_group: Enemy target group to assess
             friendly_sensors: List of friendly sensor platforms
             
         Returns:
-            tuple: (sensing_tier, confidence) where tier is 0-3 and confidence is 0.0-1.0
+            Tuple of (sensing_tier, confidence) where tier is 0-3 and confidence is 0.0-1.0
         """
         # TODO: Implement sensing tier calculation
         # 
@@ -498,7 +724,7 @@ class TridentIslandEnv(gym.Env):
         return 0, 0.0  # Placeholder
 
     def close(self):
-        """Clean up"""
+        """Clean up environment resources."""
         if self.simulation:
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None

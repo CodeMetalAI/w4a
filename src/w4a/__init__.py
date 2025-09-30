@@ -13,7 +13,7 @@ from .config import Config
 from .envs.trident_island_env import TridentIslandEnv
 from .envs.force_design_env import ForceDesignEnv
 from .envs.actions import *
-from .wrappers.wrapper import EnvWrapper  
+from .wrappers.wrapper import RLEnvWrapper  
 from .training.replay import ReplayRecorder
 from .training.evaluation import RandomAgent, evaluate
 
@@ -25,7 +25,7 @@ __all__ = [
     "Config",
     "TridentIslandEnv",
     "ForceDesignEnv", 
-    "EnvWrapper",
+    "RLEnvWrapper",
     "ReplayRecorder",
     "RandomAgent",
     "evaluate",

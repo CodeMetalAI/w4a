@@ -25,6 +25,10 @@ class Config:
     early_loss_threshold: float = 0.2  # End episode early if 80% own forces destroyed
     early_termination_capture_seconds: float = 600.0  # Capture time in seconds
 
+    # Kill ratio threshold (friendly advantage). Win if ratio >= threshold, lose if ratio <= 1/threshold
+    # Ratio is defined as enemy_losses / max(1, friendly_losses)
+    kill_ratio_threshold: float = 1.2
+
     # Environment setup (uses constants but can be overridden)
     map_size_km: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
     grid_resolution_km: int = 50  # Discretized grid resolution in km

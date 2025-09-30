@@ -1,14 +1,16 @@
 """
-Observations module
+Observation System
 
-Comprehensive observation builder and encoder for tactical simulation.
+This module provides comprehensive observation encoding for tactical simulation environments.
+It transforms raw simulation state into normalized feature vectors suitable for machine learning.
 
-This module encodes:
-- Global features: mission state, time, objectives
-- Friendly features: our units and capabilities  
-- Enemy features: detected enemy units and threats
+The observation system encodes three main categories:
+- Global features: mission state, time, objectives, and overall tactical situation
+- Friendly features: our units' capabilities, positions, and status
+- Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-Current implementation focuses on globals with placeholders for entity features.
+The current implementation focuses on global features with structured placeholders
+for entity-level features that can be expanded as needed.
 """
 
 from typing import Any
@@ -18,12 +20,13 @@ from gymnasium import spaces
 
 
 def build_observation_space(config) -> spaces.Box:
-    """Build the complete observation space.
+    """Build the complete observation space for the environment.
 
-    Currently globals-only (7 features) with placeholders for entity features.
+    Creates a normalized Box space containing all observation features.
+    Currently includes 7 global features with placeholders for entity features.
     
     Returns:
-        Box space with values in [0, 1]
+        Box space with normalized values in [0, 1]
     """
     # Current: 7 global features
     # TODO: Add friendly entity features (max_entities * features_per_entity)
@@ -36,15 +39,16 @@ def build_observation_space(config) -> spaces.Box:
 
 
 def compute_observation(env: Any) -> np.ndarray:
-    """Compute the complete observation vector.
+    """Compute the complete observation vector from current environment state.
     
-    Combines global, friendly, and enemy features into single vector.
+    Extracts and normalizes all relevant features from the simulation state,
+    combining global mission status with entity-specific information.
     
     Args:
-        env: Environment instance
+        env: Environment instance containing simulation state
         
     Returns:
-        Normalized observation vector [0, 1]
+        Normalized observation vector with values in [0, 1]
     """
     # Compute feature groups
     global_features = _compute_global_features(env)
@@ -65,17 +69,20 @@ def compute_observation(env: Any) -> np.ndarray:
 def _compute_global_features(env: Any) -> np.ndarray:
     """Compute global mission state features.
     
+    Extracts high-level mission status that affects overall tactical decisions.
+    All features are normalized to [0,1] for consistent learning.
+    
     Features:
     - time_remaining_norm: Mission time remaining [0,1]
-    - friendly_kills_norm: Our kill count normalized
-    - enemy_kills_norm: Enemy kill count normalized  
+    - friendly_kills_norm: Our casualties normalized by max entities
+    - enemy_kills_norm: Enemy casualties normalized by max entities
     - awacs_alive_flag: AWACS availability [0,1]
     - capture_progress_norm: Objective capture progress [0,1]
     - island_contested_flag: Area contestation status [0,1]
     - capture_possible_flag: Capture capability status [0,1]
     
     Returns:
-        Array of shape (7,) with normalized values
+        Array of shape (7,) with normalized values in [0,1]
     """
     # Time remaining normalized (in seconds)
     time_remaining = max(0, env.config.max_game_time - env.time_elapsed)
@@ -115,18 +122,22 @@ def _compute_global_features(env: Any) -> np.ndarray:
 
 
 def _get_friendly_entities(env: Any) -> list:
-    """Get list of friendly entities.
+    """Get list of friendly entities from the environment.
     
     Returns:
-        List of friendly entities
+        List of entities belonging to our faction
     """
     return [entity for entity in env.entities.values() if entity.faction.value == env.config.our_faction]
 
 
 def _compute_friendly_features(env: Any) -> np.ndarray:
-    """Compute friendly entity features.
+    """Compute friendly entity features for observation encoding.
     
-    For each friendly entity (up to max_entities):
+    Extracts detailed information about our units including capabilities,
+    status, and tactical situation. Features are organized by category
+    for each entity up to the maximum entity limit.
+    
+    Feature categories per entity (24 features total):
     - Identity & Intent: can_engage_now, can_sense_now, can_refuel
     - Kinematics: position, heading, speed
     - Egocentric: distance/bearing to island
@@ -135,7 +146,7 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
     - Engagement: current engagement state, target info
     
     Returns:
-        Array of shape (max_entities * 24,) with padding for unused slots
+        Array of shape (max_entities * 24,) with zero padding for unused slots
     """
     # TODO: Implement this correctly
     friendly_entities = _get_friendly_entities(env)
@@ -168,12 +179,14 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
 
 
 def compute_friendly_identity_features(entity: Any) -> np.ndarray:
-    """Compute identity and intent features.
+    """Compute identity and intent features for a friendly entity.
+    
+    Encodes the entity's basic capabilities and role in the mission.
     
     Features: can_engage_now, can_sense_now, can_refuel (3 features)
     
     Returns:
-        Array of shape (3,)
+        Array of shape (3,) with binary capability flags
     """
     # Identity & Intent (3 features)
     # TODO: Implement these features
@@ -185,12 +198,15 @@ def compute_friendly_identity_features(entity: Any) -> np.ndarray:
     
 
 def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
-    """Compute kinematic state features.
+    """Compute kinematic state features for a friendly entity.
+    
+    Encodes position, heading, and speed in a normalized format suitable
+    for neural networks. Position is discretized to match action space.
     
     Features: grid_x_norm, grid_y_norm, heading_sin, heading_cos, speed_norm (5 features)
     
     Returns:
-        Array of shape (5,)
+        Array of shape (5,) with normalized kinematic state
     """
     # Kinematics (5 features)
     # Convert position to grid coordinates (matching action space)
@@ -215,12 +231,15 @@ def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
 
 
 def compute_friendly_egocentric_features(env: Any, entity: Any) -> np.ndarray:
-    """Compute egocentric spatial relationships.
+    """Compute egocentric spatial relationships for a friendly entity.
+    
+    Encodes the entity's spatial relationship to key mission objectives,
+    providing context for tactical decision making.
     
     Features: island_range_norm, island_bearing_norm (2 features)
     
     Returns:
-        Array of shape (2,)
+        Array of shape (2,) with normalized spatial relationships
     """
     # Egocentric (2 features)
     # Calculate map diagonal for normalization (max possible distance)
@@ -239,12 +258,14 @@ def compute_friendly_egocentric_features(env: Any, entity: Any) -> np.ndarray:
 
 
 def compute_friendly_status_features(entity: Any) -> np.ndarray:
-    """Compute entity status features.
+    """Compute entity status features for a friendly entity.
+    
+    Encodes the current operational status and configuration of the entity.
     
     Features: health_ok, radar_on, radar_direction_norm, fuel_remaining_norm (4 features)
     
     Returns:
-        Array of shape (4,)
+        Array of shape (4,) with normalized status indicators
     """
     health_ok = 1.0 if entity.is_alive else 0.0
     radar_on = 1.0 if entity.radar_active else 0.0
@@ -255,12 +276,14 @@ def compute_friendly_status_features(entity: Any) -> np.ndarray:
     
 
 def compute_friendly_weapon_features(entity: Any) -> np.ndarray:
-    """Compute weapon system features.
+    """Compute weapon system features for a friendly entity.
+    
+    Encodes the entity's weapon capabilities and ammunition status.
     
     Features: has_air_weapons, has_surface_weapons, air_ammo_norm, surface_ammo_norm (4 features)
     
     Returns:
-        Array of shape (4,)
+        Array of shape (4,) with weapon capability and ammo status
     """
     # Weapons (4 features)
     # TODO: What does weapon information look like for an entity? 
@@ -297,13 +320,15 @@ def compute_friendly_weapon_features(entity: Any) -> np.ndarray:
 
 
 def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
-    """Compute current engagement status features.
+    """Compute current engagement status features for a friendly entity.
+    
+    Encodes the entity's current combat engagement state and target information.
     
     Features: currently_engaging, target_group_id_norm, target_range_norm, 
              target_bearing_norm, target_closure_norm, time_since_shot_norm (6 features)
     
     Returns:
-        Array of shape (6,)
+        Array of shape (6,) with engagement status and target information
     """
     # Engagement (6 features)
     # Check if entity is currently engaging a target group
@@ -357,12 +382,16 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
 def _compute_enemy_features(env: Any) -> np.ndarray:
     """Compute enemy entity features based on tiered sensing information.
     
+    Implements a realistic intelligence gathering system where information quality
+    depends on sensor coverage and capabilities. Higher sensing tiers provide
+    more detailed and accurate information about enemy forces.
+    
     Tiered Sensing Model:
     - Tier 1: Domain detection (air/surface/land) - enables weapon selection
     - Tier 2: Individual unit identification and positions  
     - Tier 3: Detailed weapon loadout information
     
-    Features per enemy target group (variable sensing fidelity):
+    Features per enemy target group (16 features total):
     - Detection: is_detected, sensing_tier, detection_confidence, time_since_contact_norm
     - Identity: domain_one_hot (air/surface/land), estimated_count, unit_type_known
     - Position: last_known_x_norm, last_known_y_norm
@@ -371,7 +400,7 @@ def _compute_enemy_features(env: Any) -> np.ndarray:
     - Threat: threat_level_norm, is_engaging_us
     
     Returns:
-        Array of shape (max_target_groups * 16,) - 16 features per enemy group
+        Array of shape (max_target_groups * 16,) with zero padding for undetected groups
     """
     # NOTE: Sensing information should be updated in env.step() before calling this function
     # TODO: Add sensing update logic in trident_island_env.step():
@@ -472,11 +501,14 @@ def _compute_enemy_features(env: Any) -> np.ndarray:
 
 
 def position_to_grid(x: float, y: float, config: Any) -> int:
-    """Convert world position to grid index (inverse of grid_to_position).
+    """Convert world position to grid index for discretized action space.
+    
+    Transforms continuous world coordinates into discrete grid indices
+    that match the action space representation.
     
     Args:
         x, y: World coordinates in meters
-        config: Environment configuration
+        config: Environment configuration with grid parameters
         
     Returns:
         Grid index corresponding to the position
@@ -501,10 +533,10 @@ def position_to_grid(x: float, y: float, config: Any) -> int:
 
 
 def distance_to_island(position: Any) -> float:
-    """Calculate distance from position to island center.
+    """Calculate distance from entity position to the mission objective.
     
     Args:
-        position: Entity position object
+        position: Entity position object with x, y coordinates
         
     Returns:
         Distance in meters to island center
@@ -519,10 +551,10 @@ def distance_to_island(position: Any) -> float:
 
 
 def bearing_to_island(position: Any) -> float:
-    """Calculate bearing from position to island center.
+    """Calculate bearing from entity position to the mission objective.
     
     Args:
-        position: Entity position object
+        position: Entity position object with x, y coordinates
         
     Returns:
         Bearing in degrees [0, 360)
@@ -545,10 +577,14 @@ def bearing_to_island(position: Any) -> float:
 
 
 def _awacs_alive(env: Any) -> bool:
-    """Return True if an AWACS-equivalent friendly radar asset is alive.
+    """Check if friendly AWACS or equivalent radar platform is operational.
 
-    Scan for any friendly, alive entity with has_radar=True.
-    TODO: Correct way to identiy AWACS.
+    Scans for any friendly, alive entity with AWACS identification.
+    
+    Returns:
+        True if at least one AWACS platform is alive and operational
+        
+    TODO: Determine correct way to identify AWACS entities.
     """
     our_faction = env.config.our_faction
     for entity in env.entities.values():
