@@ -9,6 +9,7 @@ import numpy as np
 from gymnasium import spaces
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
+from w4a.wrappers.wrapper import RLEnvWrapper
 
 
 class TestObservationSpace:
@@ -16,7 +17,7 @@ class TestObservationSpace:
     
     def test_observation_consistency(self):
         """Test observations match observation space"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         obs, info = env.reset()
         
@@ -49,7 +50,7 @@ class TestObservationSpace:
     
     def test_observation_features_bounded(self):
         """Test that observation features are properly normalized"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         # Run multiple episodes to test different states
         for episode in range(3):
@@ -82,7 +83,7 @@ class TestActionSpace:
     
     def test_action_space_structure(self):
         """Test action space has correct hierarchical structure"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         # Should be Dict space
         assert isinstance(env.action_space, spaces.Dict)
@@ -105,7 +106,7 @@ class TestActionSpace:
     
     def test_action_space_bounds(self):
         """Test action space discrete bounds are reasonable"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         # Test specific bounds
         assert env.action_space["action_type"].n == 8  # 0-7 action types
@@ -121,7 +122,7 @@ class TestActionSpace:
     
     def test_action_sampling(self):
         """Test action sampling produces valid actions"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         for _ in range(10):
             action = env.action_space.sample()
@@ -149,7 +150,7 @@ class TestActionMasking:
     
     def test_masks_consistency_during_episode(self):
         """Test action masks remain consistent during episode"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         for step in range(5):

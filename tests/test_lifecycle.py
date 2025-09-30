@@ -9,6 +9,7 @@ import numpy as np
 from gymnasium import spaces
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
+from w4a.wrappers.wrapper import RLEnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 
 
@@ -17,7 +18,7 @@ class TestEnvironmentProperties:
     
     def test_gymnasium_interface_compliance(self):
         """Test environment implements Gymnasium interface correctly"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         # Required attributes
         assert hasattr(env, 'action_space'), "Missing action_space"
@@ -46,7 +47,7 @@ class TestTerminationConditions:
         config = Config()
         config.max_game_time = 100.0  # Short time limit for testing
         
-        env = TridentIslandEnv(config=config)
+        env = RLEnvWrapper(TridentIslandEnv(config=config))
         obs, info = env.reset()
         
         step_count = 0
@@ -77,7 +78,7 @@ class TestTerminationConditions:
     
     def test_manual_termination_conditions(self):
         """Test manual termination by setting game state"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         obs, info = env.reset()
         
         # Manually set capture conditions to test termination
@@ -101,7 +102,7 @@ class TestTerminationConditions:
         env.close()
         
         # Test elimination-based termination
-        env2 = TridentIslandEnv()
+        env2 = RLEnvWrapper(TridentIslandEnv())
         obs, info = env2.reset()
         
         # Manually set all opponents as eliminated
@@ -127,7 +128,7 @@ class TestEnvironmentIntegration:
     
     def test_random_agent_integration(self):
         """Test environment works with RandomAgent"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         agent = RandomAgent(seed=42)
         
         # Should be able to run evaluation

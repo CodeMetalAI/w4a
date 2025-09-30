@@ -8,42 +8,28 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import EnvWrapper
+from w4a.wrappers.wrapper import RLEnvWrapper
 
 
 class TestRewardCustomization:
     """Test reward customization through wrappers"""
     
     def test_wrapper_reward_modification(self):
-        """Test reward modification through EnvWrapper"""
-        base_env = TridentIslandEnv()
-        
-        # Create wrapper with custom reward function
-        def add_constant_reward(obs, action, reward, info):
-            return reward + 5.0
-        
-        wrapped_env = EnvWrapper(base_env, reward_fn=add_constant_reward)
-        
-        # Compare rewards
-        base_env.reset(seed=42)
+        """Test reward modification via overriding wrapper.reward_fn"""
+        class ConstantRewardWrapper(RLEnvWrapper):
+            def reward_fn(self, obs, action, reward, info):
+                return 10.0
+
+        wrapped_env = ConstantRewardWrapper(TridentIslandEnv())
+
         wrapped_env.reset(seed=42)
-        
-        for step in range(3):
-            action = base_env.action_space.sample()
-            
-            # Step both environments with same action
-            _, base_reward, base_term, base_trunc, _ = base_env.step(action)
-            _, wrapped_reward, wrapped_term, wrapped_trunc, _ = wrapped_env.step(action)
-            
-            # Wrapped reward should be base reward + 5
-            expected_wrapped = base_reward + 5.0
-            assert abs(wrapped_reward - expected_wrapped) < 1e-10, \
-                f"Wrapper reward incorrect: {wrapped_reward} != {expected_wrapped}"
-            
-            if base_term or base_trunc:
-                break
-        
-        base_env.close()
+
+        action = wrapped_env.action_space.sample()
+        _, wrapped_reward, _, _, _ = wrapped_env.step(action)
+
+        assert isinstance(wrapped_reward, (int, float))
+        assert abs(wrapped_reward - 10.0) < 1e-9
+
         wrapped_env.close()
 
 
@@ -52,7 +38,7 @@ class TestRewardSignals:
     
     def test_reward_changes_with_actions(self):
         """Test that different actions can produce different rewards"""
-        env = TridentIslandEnv()
+        env = RLEnvWrapper(TridentIslandEnv())
         
         rewards_by_action_type = {}
         
