@@ -85,9 +85,6 @@ class TridentIslandEnv(gym.Env):
         
         self.simulation = None
         
-        # Load scenario data 
-        scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"
-
         # Initialize state tracking variables
         self.current_step = 0
         self.frame_rate = 600
@@ -96,11 +93,6 @@ class TridentIslandEnv(gym.Env):
 
         self.simulation_events = []
         
-        # Parse data from the config and constants file as needed
-        # Load constant mission rules (objectives, victory conditions, map)
-        with open(scenario_path / "MissionEvents.json") as f:
-            self.mission_events = Simulation.create_mission_events(f.read())
-
         # Set up simulation event handlers
         self.simulation_event_handlers = {
             EntitySpawned: self._entity_spawned,

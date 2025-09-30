@@ -24,11 +24,12 @@ import math
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
-    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag, Refuel,
+    SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
     RefuelComponent,
     Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
+CENTER_ISLAND_FLAG_ID = 0
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> List:
     """Execute a hierarchical action and return corresponding player events.
@@ -47,37 +48,37 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     """
     action_type = action["action_type"]
     entity_id = action["entity_id"]
+
+    player_event = []
     
     if not is_valid_action(action, entities, target_groups, config):
-        return []
-    
-    player_events = None
+        return player_event
     
     if action_type == 0:  # No-op
-        pass
+        return player_event
     elif action_type == 1:  # Move
         event = execute_move_action(entity_id, action, entities, config)
-        player_events = event
+        player_event = event
     elif action_type == 2:  # Engage
         event = execute_engage_action(entity_id, action, entities, target_groups)
-        player_events = event
+        player_event = event
     elif action_type == 3:  # Stealth
         event = execute_stealth_action(entity_id, action, entities)
-        player_events = event
+        player_event = event
     elif action_type == 4:  # Sensing Direction
         event = execute_set_radar_focus_action(entity_id, action, entities, config)
-        player_events = event
+        player_event = event
     elif action_type == 5:  # Capture
         event = execute_capture_action(entity_id, action, entities)
-        player_events = event
+        player_event = event
     elif action_type == 6:  # RTB
         event = execute_rtb_action(entity_id, action, entities)
-        player_events = event
+        player_event = event
     elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
-        player_events = event
+        player_event = event
     
-    return player_events
+    return player_event
 
 
 def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> bool:
@@ -99,7 +100,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         return False
     
     action_type = action["action_type"]
-    # TODO: Make this dict mapping
+
     if action_type == 0:  # No-op
         return True
     elif action_type == 1:  # Move
@@ -133,21 +134,27 @@ def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Co
         PlayerEvent for CAP maneuver
     """
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
-    # TODO: @Erwin + @Sanjna this breaks action space
-    # short_axis_m = action["move_short_axis_km"] * 1000
-    # long_axis_m = action["move_long_axis_km"] * 1000 # config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km) * 1000
-    # axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
+
+    # Convert discrete action values to actual patrol axis lengths
+    short_axis_km = config.min_patrol_axis_km + (action["move_short_axis_km"] * config.patrol_axis_increment_km)
+    long_axis_km = config.min_patrol_axis_km + (action["move_long_axis_km"] * config.patrol_axis_increment_km)
     
-    # entity = entities[entity_id]
+    # Convert to meters
+    short_axis_m = short_axis_km * 1000
+    long_axis_m = long_axis_km * 1000
+    
+    axis_angle = math.radians(action["move_axis_angle"] * config.angle_resolution_degrees)
+    
+    entity = entities[entity_id]
 
-    # center = Vector3(center_x, center_y, entity.pos.z)
-    # axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
+    center = Vector3(center_x, center_y, entity.pos.z)
+    axis = Vector3(math.cos(axis_angle), math.sin(axis_angle), 0)
 
-    # event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
-    # event.entity = entity
+    event = NonCombatManouverQueue.create(entity.pos, lambda: CAPManouver.create_race_track(center, short_axis_m, long_axis_m, axis, 32))
+    event.entity = entity
 
-    # return event
-    pass
+    return event
+
 
 
 def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_groups: Dict):
@@ -176,8 +183,7 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     # RL agent selects which compatible weapons to use
     selected_weapons = select_weapons_from_available(available_weapons, weapon_selection)
     
-    # TODO: Check if selected weapons have ammo available
-    
+    # TODO: Check if selected weapons have ammo available    
     commit = PlayerEventCommit()
     commit.entity = entity
     commit.target_group = target_group
@@ -237,7 +243,7 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     
     entity = entities[entity_id]
     
-    event = SetRadarStrength()
+    event = SetRadarEnabled()
     event.entity = entity
     event.strength = 0 if stealth_enabled else 1
     
@@ -245,29 +251,25 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     # """Execute land action - land at nearest friendly airbase"""
-    # # TODO: The agent shouldnt learn flag_id? Does that change?
-    # @Sanjna + @Erwin: This breaks the action space.
-    # entity = entities[entity_id]
-    # flag = entities[action["flag_id"]]
+    entity = entities[entity_id]
+    flag = CENTER_ISLAND_FLAG_ID
 
-    # event = CaptureFlag()
-    # event.entity = entity
-    # event.flag = flag
+    event = CaptureFlag()
+    event.entity = entity
+    event.flag = flag
 
-    # return event
-    pass
+    return event
 
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
-    # """Execute RTB action - return to base"""
-    # entity = entities[entity_id]
-    # flag = entities[action["flag_id"]]
+    """Execute RTB action - return to base"""
+    entity = entities[entity_id]
+    flag = CENTER_ISLAND_FLAG_ID
 
-    # event = RTBManouver()
-    # event.entity = entity
-    # event.flag = flag
+    event = RTBManouver()
+    event.entity = entity
+    event.flag = flag
     
-    # return event
-    pass
+    return event
 
 def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     """Execute refuel action to refuel from another entity.

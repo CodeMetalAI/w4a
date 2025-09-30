@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import EnvWrapper
+from w4a.wrappers.wrapper import RLEnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 from SimulationInterface import (EntityList, EntitySpawnData)
@@ -26,24 +26,31 @@ def test_config():
 
 def test_env_creation():
     """Test environment creation"""
-    env = TridentIslandEnv()
+    wrapped = RLEnvWrapper(TridentIslandEnv())
     
-    env_replay = TridentIslandEnv(enable_replay=True)
-    assert env_replay.enable_replay is True
+    wrapped_replay = RLEnvWrapper(TridentIslandEnv(enable_replay=True))
+    assert wrapped_replay.env.enable_replay is True
 
 def test_env_reset():
     """Test environment creation"""
-    env = TridentIslandEnv(enable_replay=True)
+    wrapped = RLEnvWrapper(TridentIslandEnv(enable_replay=True))
 
-    env.reset()
+    obs, info = wrapped.reset()
+    assert obs is not None
+    assert isinstance(info, dict)
+
+    # Agents should be installed by the wrapper and simulation created
+    assert hasattr(wrapped.env, "legacy_agent")
+    assert hasattr(wrapped.env, "dynasty_agent")
+    assert wrapped.env.simulation is not None
 
 def test_simulation_interface_integration():
     """Test that SimulationInterface integration works or fails gracefully"""
     try:
-        env = TridentIslandEnv()
-        env.reset()
+        wrapped = RLEnvWrapper(TridentIslandEnv())
+        wrapped.reset()
         # If SimulationInterface is available, simulation should be created
-        assert env.simulation is not None
+        assert wrapped.env.simulation is not None
         print("SimulationInterface available and working")
     except ImportError:
         # If SimulationInterface not available, should fail cleanly
@@ -54,24 +61,24 @@ def test_simulation_interface_integration():
 
 def test_env_reset_step_cycle():
     """Test complete environment usage cycle"""
-    env = TridentIslandEnv()
+    wrapped = RLEnvWrapper(TridentIslandEnv())
     
     # Test reset
-    obs, info = env.reset()
+    obs, info = wrapped.reset()
     assert obs is not None
     assert isinstance(obs, np.ndarray)
-    assert obs.shape == env.observation_space.shape
+    assert obs.shape == wrapped.observation_space.shape
     assert isinstance(info, dict)
     
     # Test multiple steps
     for _ in range(5):
-        action = env.action_space.sample()
-        obs, reward, terminated, truncated, info = env.step(action)
+        action = wrapped.action_space.sample()
+        obs, reward, terminated, truncated, info = wrapped.step(action)
         
         # Validate return types
         assert obs is not None
         assert isinstance(obs, np.ndarray)
-        assert obs.shape == env.observation_space.shape
+        assert obs.shape == wrapped.observation_space.shape
         assert isinstance(reward, (int, float))
         assert isinstance(terminated, bool)
         assert isinstance(truncated, bool)
@@ -81,7 +88,7 @@ def test_env_reset_step_cycle():
             break
     
     # Test cleanup
-    env.close()
+    wrapped.close()
 
 
 # TODO: Add replay testing
@@ -166,7 +173,7 @@ def test_wrapper():
     def add_fixed_reward(obs, action, reward, info):
         return reward + 10  # Add 10 to any reward
     
-    wrapped = EnvWrapper(env, reward_fn=add_fixed_reward)
+    wrapped = RLEnvWrapper(env, reward_fn=add_fixed_reward)
     
     obs, info = wrapped.reset()
     action = wrapped.action_space.sample()
