@@ -1935,7 +1935,7 @@
         "FuelCapacity": 5000.0,
         "RadarData": [
             {
-                "RadarFOV": 2.094395160675049,
+                "RadarFOV": 6.2831854820251465,
                 "TransmitterPower": 25000.0,
                 "TransmitterGain": 35.5,
                 "ReceiverGain": 35.0,
@@ -1946,10 +1946,10 @@
                 "FilterBandwidth": 1000000.0,
                 "NoiseFigure": 3.0,
                 "WorkingTemperature": 300.0,
-                "Rotates": true,
-                "RotationPeriod": 5.0,
+                "Rotates": false,
+                "RotationPeriod": 0.0,
                 "PositionAngle": 0.0,
-                "MemoryTime": 5.0,
+                "MemoryTime": 10.0,
                 "RotationRange": 6.2831854820251465,
                 "FilterMethod": 1,
                 "FusionMethod": 1
