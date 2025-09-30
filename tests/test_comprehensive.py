@@ -1,7 +1,7 @@
 """
-Comprehensive RL Test Suite
+Comprehensive Test Suite
 
-Master test runner that imports and runs all RL verification tests.
+Master test runner that imports and runs all verification tests.
 """
 
 import pytest
@@ -14,10 +14,10 @@ sys.path.insert(0, str(src_path))
 
 # Import all test modules
 try:
-    from test_rl_spaces import TestObservationSpace, TestActionSpace, TestActionMasking as SpaceActionMasking
-    from test_rl_rewards import TestRewardCustomization, TestRewardSignals
-    from test_rl_lifecycle import TestEnvironmentProperties, TestTerminationConditions, TestEnvironmentIntegration
-    from test_rl_action_masking import TestActionMaskStructure, TestMaskValidation
+    from test_spaces import TestObservationSpace, TestActionSpace, TestActionMasking as SpaceActionMasking
+    from test_rewards import TestRewardCustomization, TestRewardSignals
+    from test_lifecycle import TestEnvironmentProperties, TestTerminationConditions, TestEnvironmentIntegration
+    from test_action_masking import TestActionMaskStructure, TestMaskValidation
     
     IMPORTS_SUCCESSFUL = True
 except ImportError as e:
@@ -25,8 +25,8 @@ except ImportError as e:
     IMPORTS_SUCCESSFUL = False
 
 
-class TestRLComprehensive:
-    """Comprehensive RL test suite runner"""
+class TestComprehensive:
+    """Comprehensive test suite runner"""
     
     @pytest.mark.skipif(not IMPORTS_SUCCESSFUL, reason="Test module imports failed")
     def test_observation_space_comprehensive(self):
@@ -102,10 +102,10 @@ class TestRLComprehensive:
         print("All action masking tests passed")
 
 
-def run_comprehensive_rl_tests():
-    """Run all RL tests as a standalone function"""
+def run_comprehensive_tests():
+    """Run all tests as a standalone function"""
     print("=" * 60)
-    print("COMPREHENSIVE RL FUNCTIONALITY TEST SUITE")
+    print("COMPREHENSIVE FUNCTIONALITY TEST SUITE")
     print("=" * 60)
     
     if not IMPORTS_SUCCESSFUL:
@@ -114,7 +114,7 @@ def run_comprehensive_rl_tests():
     
     try:
         # Create test instance
-        test_suite = TestRLComprehensive()
+        test_suite = TestComprehensive()
         
         # Run all test categories
         test_suite.test_observation_space_comprehensive()
@@ -124,7 +124,7 @@ def run_comprehensive_rl_tests():
         test_suite.test_action_masking_comprehensive()
         
         print("=" * 60)
-        print("ALL COMPREHENSIVE RL TESTS PASSED")
+        print("ALL COMPREHENSIVE TESTS PASSED")
         print("=" * 60)
         print()
         print("Test Coverage Summary:")
@@ -134,7 +134,7 @@ def run_comprehensive_rl_tests():
         print("- Episode Lifecycle: Gymnasium compliance, termination")
         print("- Action Masking: Structure, validation, consistency")
         print()
-        print("Your RL environment is ready for training")
+        print("Your environment is ready for training")
         
         return True
         
@@ -146,5 +146,5 @@ def run_comprehensive_rl_tests():
 
 
 if __name__ == "__main__":
-    success = run_comprehensive_rl_tests()
+    success = run_comprehensive_tests()
     sys.exit(0 if success else 1)

@@ -1,5 +1,5 @@
 """
-RL Action Masking Tests
+Action Masking Tests
 
 Tests for action masking functionality and valid action constraints.
 """
@@ -138,7 +138,7 @@ class TestMaskValidation:
 
 if __name__ == "__main__":
     # Run basic tests
-    print("Running RL action masking tests...")
+    print("Running action masking tests...")
     
     test_structure = TestActionMaskStructure()
     test_structure.test_action_type_masks()
@@ -151,4 +151,4 @@ if __name__ == "__main__":
     test_validation.test_valid_action_respects_masks()
     print("Mask validation tests passed")
     
-    print("All RL action masking tests passed")
+    print("All action masking tests passed")

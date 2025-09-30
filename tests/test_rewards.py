@@ -1,5 +1,5 @@
 """
-RL Reward Tests
+Reward Tests
 
 Tests for reward calculation and customization.
 """
@@ -86,7 +86,7 @@ class TestRewardSignals:
 
 if __name__ == "__main__":
     # Run basic tests
-    print("Running RL reward tests...")
+    print("Running reward tests...")
     
     test_custom = TestRewardCustomization()
     test_custom.test_wrapper_reward_modification()
@@ -96,4 +96,4 @@ if __name__ == "__main__":
     test_signals.test_reward_changes_with_actions()
     print("Reward signals tests passed")
     
-    print("All RL reward tests passed")
+    print("All reward tests passed")

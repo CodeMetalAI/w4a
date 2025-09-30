@@ -1,5 +1,5 @@
 """
-RL Episode Lifecycle Tests
+Episode Lifecycle Tests
 
 Tests for episode lifecycle, termination conditions, and environment properties.
 """
@@ -153,7 +153,7 @@ class TestEnvironmentIntegration:
 
 if __name__ == "__main__":
     # Run basic tests
-    print("Running RL lifecycle tests...")
+    print("Running lifecycle tests...")
     
     test_properties = TestEnvironmentProperties()
     test_properties.test_gymnasium_interface_compliance()
@@ -168,4 +168,4 @@ if __name__ == "__main__":
     test_integration.test_random_agent_integration()
     print("Environment integration tests passed")
     
-    print("All RL lifecycle tests passed")
+    print("All lifecycle tests passed")

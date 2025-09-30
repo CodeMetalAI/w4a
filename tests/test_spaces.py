@@ -1,5 +1,5 @@
 """
-RL Space Tests
+Space Tests
 
 Tests for observation space, action space, and action masking.
 """
@@ -173,7 +173,7 @@ class TestActionMasking:
 
 if __name__ == "__main__":
     # Run basic tests
-    print("Running RL space tests...")
+    print("Running space tests...")
     
     test_obs = TestObservationSpace()
     test_obs.test_observation_consistency()
@@ -190,4 +190,4 @@ if __name__ == "__main__":
     test_masks.test_masks_consistency_during_episode()
     print("Action masking tests passed")
     
-    print("All RL space tests passed")
+    print("All space tests passed")
