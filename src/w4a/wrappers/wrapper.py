@@ -9,7 +9,7 @@ import gymnasium as gym
 from typing import Optional
 
 from SimulationInterface import Agent as SimAgent
-from SimulationInterface import Faction
+from SimulationInterface import (Faction, CAPManouver, NonCombatManouverQueue)
 
 # Simple built-in adversary
 from .simple_agent import SimpleAgent
@@ -32,10 +32,50 @@ class RLAgent(SimAgent):
         else:
             self.faction = faction
 
+    def start_force_laydown(self, force_laydown):
+        self.force_laydown = force_laydown
+
+    def finalize_force_laydown(self):
+        force_laydown = self.force_laydown
+
+        entities = []
+
+        for entity in force_laydown.ground_forces_entities:
+            spawn_location = force_laydown.get_random_ground_force_spawn_location()
+
+            entity.pos = spawn_location.pos
+            entity.rot = spawn_location.rot
+
+            entities.append(entity)
+
+        for entity in force_laydown.sea_forces_entities:
+            spawn_location = force_laydown.get_random_sea_force_spawn_location()
+
+            entity.pos = spawn_location.pos
+            entity.rot = spawn_location.rot
+
+            entities.append(entity)
+
+        for entity in force_laydown.air_forces_entities:
+            spawn_location = force_laydown.get_random_air_force_spawn_location()
+
+            entity.pos = spawn_location.pos
+            entity.rot = spawn_location.rot
+
+            NonCombatManouverQueue.create(entity.pos, lambda: 
+                CAPManouver.create_from_spline_points(force_laydown.get_random_cap().spline_points))
+
+            entities.append(entity)
+
+        return entities # This is a minimum implementation
+
     def pre_simulation_tick(self, simulation_data):
         # Passive during training; in eval/competition this can compile PlayerEvents from policy
         # actions to coordinate multiple agents inside the simulation loop.
         simulation_data.player_events = []
+
+    def tick(self, simulation_data):
+        pass
 
 
 class RLEnvWrapper(gym.Wrapper):
@@ -99,7 +139,7 @@ class RLEnvWrapper(gym.Wrapper):
 
         is_legacy = getattr(self.env.config, "our_faction", 0) == 1
         user_faction = Faction.LEGACY if is_legacy else Faction.DYNASTY
-        opponent_faction = Faction.DYNASTY if not is_legacy else Faction.LEGACY
+        opponent_faction = Faction.DYNASTY if is_legacy else Faction.LEGACY
 
         # User agent: provided or passive RLAgent
         user_agent = self.agent or RLAgent(self.env.config, faction=user_faction)

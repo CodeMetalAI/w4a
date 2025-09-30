@@ -148,6 +148,8 @@ def _execute_force_laydown(env, force_laydowns):
 
     sim_data = env.sim_data
 
+    env.sim_data = SimulationData()
+
     # Process all events coming out of this
     process_simulation_events(env, sim_data.simulation_events)
 
