@@ -1,5 +1,20 @@
 """
-Action execution and validation functions for TridentIslandEnv.
+Action System
+
+This module handles the execution and validation of hierarchical actions in the
+TridentIslandEnv. It provides a comprehensive action space that covers tactical
+military operations including movement, engagement, sensing, and support actions.
+
+The action system validates all actions against current game state and entity
+capabilities before execution, ensuring that only valid tactical decisions
+are processed by the simulation engine.
+
+Action types supported:
+- Movement: CAP routes and positioning
+- Engagement: Target selection and weapon employment  
+- Sensing: Radar direction and stealth modes
+- Additional: Refueling and return-to-base operations
+- Objectives: Capture and hold operations
 """
 
 from typing import Dict, List, Tuple
@@ -16,16 +31,19 @@ from SimulationInterface import (
 
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> List:
-    """Execute action and return list of player events.
+    """Execute a hierarchical action and return corresponding player events.
+    
+    Validates the action against current game state and entity capabilities,
+    then converts it into appropriate player events for execution.
     
     Args:
-        action: Action dictionary from agent
+        action: Hierarchical action dictionary from agent
         entities: Dict of entity_id -> entity objects
         target_groups: Dict of target_group_id -> target_group objects  
         config: Environment configuration
         
     Returns:
-        List of PlayerEvent objects to submit to FFSim
+        List of PlayerEvent objects to submit, empty if action invalid
     """
     action_type = action["action_type"]
     entity_id = action["entity_id"]
@@ -63,7 +81,10 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
 
 
 def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> bool:
-    """Validate action against FFSim constraints and game state.
+    """Validate action against simulation constraints and current game state.
+    
+    Performs comprehensive validation including entity existence, capability checks,
+    parameter bounds, and tactical feasibility before allowing action execution.
     
     Args:
         action: Action dictionary from agent
@@ -72,7 +93,7 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
         config: Environment configuration
         
     Returns:
-        True if action is valid, False otherwise
+        True if action is valid and can be executed, False otherwise
     """
     if not validate_entity(action, entities, config):
         return False
@@ -100,7 +121,17 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
 
 
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute move action - create CAP maneuver"""
+    """Execute move action by creating a CAP (Combat Air Patrol) maneuver.
+    
+    Args:
+        entity_id: ID of entity to move
+        action: Action dictionary with movement parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        PlayerEvent for CAP maneuver
+    """
     center_x, center_y = grid_to_position(action["move_center_grid"], config)
     # TODO: @Erwin + @Sanjna this breaks action space
     # short_axis_m = action["move_short_axis_km"] * 1000
@@ -120,7 +151,17 @@ def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Co
 
 
 def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_groups: Dict):
-    """Execute engage action - create combat commit"""
+    """Execute engage action by creating a combat commit event.
+    
+    Args:
+        entity_id: ID of entity to engage
+        action: Action dictionary with engagement parameters
+        entities: Dict of entity objects
+        target_groups: Dict of target group objects
+        
+    Returns:
+        PlayerEventCommit for combat engagement
+    """
     target_group_id = action["target_group_id"]
     weapon_selection = action["weapon_selection"]
     weapon_usage = action["weapon_usage"]
@@ -129,7 +170,7 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     entity = entities[entity_id]
     target_group = target_groups[target_group_id]
     
-    # Get weapons compatible with target group (FFSim determines domain compatibility)
+    # Get weapons compatible with target group
     available_weapons = entity.select_weapons(target_group, False)
     
     # RL agent selects which compatible weapons to use
@@ -149,7 +190,17 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     return commit
 
 def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute sense action - point radar at location"""
+    """Execute radar focus action to direct sensing at specific location.
+    
+    Args:
+        entity_id: ID of entity with radar
+        action: Action dictionary with sensing parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        PlayerEvent for radar focus or clear focus
+    """
 
     max_grid_positions = calculate_max_grid_positions(config)
     if action["sensing_position_grid"] == max_grid_positions: # Default sensing (forward)
@@ -171,7 +222,17 @@ def execute_set_radar_focus_action(entity_id: int, action: Dict, entities: Dict,
     return event
 
 def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config: Config):
-    """Execute sense action - set radar strength"""
+    """Execute stealth action by setting radar emission strength.
+    
+    Args:
+        entity_id: ID of entity to set stealth mode
+        action: Action dictionary with stealth parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        PlayerEvent for radar strength setting
+    """
     stealth_enabled = action["stealth_enabled"]
     
     entity = entities[entity_id]
@@ -209,7 +270,16 @@ def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
     pass
 
 def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
-    """Execute refuel action - refuel from another entity"""
+    """Execute refuel action to refuel from another entity.
+    
+    Args:
+        entity_id: ID of entity that needs fuel
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        PlayerEvent for refueling operation
+    """
     refuel_target_id = action["refuel_target_id"]
     
     entity = entities[entity_id]
@@ -223,7 +293,16 @@ def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     return event
 
 def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate entity exists and is controllable."""
+    """Validate that the target entity exists and is controllable.
+    
+    Args:
+        action: Action dictionary containing entity_id
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        True if entity is valid and controllable
+    """
     entity_id = action["entity_id"]
     
     # Check entity exists
@@ -248,7 +327,16 @@ def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
 
 
 def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate move action parameters."""
+    """Validate move action parameters and entity capabilities.
+    
+    Args:
+        action: Action dictionary with movement parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        True if move action is valid
+    """
     entity_id = action["entity_id"]
     center_grid = action["move_center_grid"]
     
@@ -274,7 +362,16 @@ def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
 
 
 def validate_engage_action(action: Dict, entities: Dict, target_groups: Dict) -> bool:
-    """Validate engage action parameters."""
+    """Validate engage action parameters and target availability.
+    
+    Args:
+        action: Action dictionary with engagement parameters
+        entities: Dict of entity objects
+        target_groups: Dict of target group objects
+        
+    Returns:
+        True if engage action is valid
+    """
     entity_id = action["entity_id"]
     target_group_id = action["target_group_id"]
     weapon_selection = action["weapon_selection"]
@@ -305,7 +402,15 @@ def validate_engage_action(action: Dict, entities: Dict, target_groups: Dict) ->
 
 
 def validate_stealth_action(action: Dict, entities: Dict) -> bool:
-    """Validate stealth action parameters."""
+    """Validate stealth action parameters and entity radar capability.
+    
+    Args:
+        action: Action dictionary with stealth parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        True if stealth action is valid
+    """
     entity_id = action["entity_id"]
     entity = entities[entity_id]
     
@@ -316,7 +421,16 @@ def validate_stealth_action(action: Dict, entities: Dict) -> bool:
 
 
 def validate_sensing_position_action(action: Dict, entities: Dict, config: Config) -> bool:
-    """Validate sensing position action parameters."""
+    """Validate sensing position action parameters and radar capability.
+    
+    Args:
+        action: Action dictionary with sensing parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        True if sensing action is valid
+    """
     entity_id = action["entity_id"]
     sensing_position_grid = action["sensing_position_grid"]
     
@@ -342,7 +456,15 @@ def validate_sensing_position_action(action: Dict, entities: Dict, config: Confi
     return True
 
 def validate_capture_action(action: Dict, entities: Dict) -> bool:
-    """Validate capture action parameters."""
+    """Validate capture action parameters and entity capability.
+    
+    Args:
+        action: Action dictionary with capture parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        True if capture action is valid
+    """
     entity_id = action["entity_id"]
     entity = entities[entity_id]
 
@@ -365,7 +487,15 @@ def validate_capture_action(action: Dict, entities: Dict) -> bool:
 
 
 def validate_rtb_action(action: Dict, entities: Dict) -> bool:
-    """Validate RTB action parameters."""
+    """Validate return-to-base action parameters.
+    
+    Args:
+        action: Action dictionary with RTB parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        True if RTB action is valid
+    """
     entity_id = action["entity_id"]
     entity = entities[entity_id]
 
@@ -384,7 +514,15 @@ def validate_rtb_action(action: Dict, entities: Dict) -> bool:
 
 
 def validate_refuel_action(action: Dict, entities: Dict) -> bool:
-    """Validate refuel action parameters."""
+    """Validate refuel action parameters and entity capabilities.
+    
+    Args:
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        True if refuel action is valid
+    """
     entity_id = action["entity_id"]
     refuel_target_id = action["refuel_target_id"]
     
@@ -410,14 +548,17 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
     return True
 
 def select_weapons_from_available(available_weapons: Dict, selection_index: int) -> Dict:
-    """Select specific weapons from FFSim-compatible weapons using combinatorial selection.
+    """Select specific weapons using combinatorial selection from available options.
+    
+    Converts the agent's discrete weapon selection choice into a specific
+    subset of available weapons using binary combination encoding.
     
     Args:
         available_weapons: Dict from entity.select_weapons() containing compatible weapons
         selection_index: Agent's weapon combination choice (0 to max_weapon_combinations-1)
         
     Returns:
-        Dict containing selected weapons
+        Dict containing selected weapons for engagement
     """
     available_keys = list(available_weapons.keys())
     
@@ -444,7 +585,10 @@ def select_weapons_from_available(available_weapons: Dict, selection_index: int)
 
 
 def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
-    """Get valid combination indices for current available weapons.
+    """Get valid weapon combination indices for current available weapons.
+    
+    Generates all possible weapon combinations that can be selected from
+    the currently available weapons for this entity and target.
     
     Args:
         available_weapons: Dict from entity.select_weapons() containing compatible weapons
@@ -462,7 +606,18 @@ def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
 
 
 def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
-    """Convert grid index to world coordinates"""
+    """Convert discrete grid index to world coordinates.
+    
+    Transforms the agent's discrete position choice into continuous
+    world coordinates for use in the simulation.
+    
+    Args:
+        grid_index: Discrete grid position index
+        config: Environment configuration with grid parameters
+        
+    Returns:
+        Tuple of (x, y) world coordinates in meters
+    """
 
     grid_size = int(config.map_size_km[0] / config.grid_resolution_km)  # Grid size in cells
     
@@ -477,12 +632,27 @@ def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
 
 
 def position_in_bounds(x: float, y: float, config: Config) -> bool:
-    """Check if position is within map boundaries."""
+    """Check if world position is within map boundaries.
+    
+    Args:
+        x, y: World coordinates in meters
+        config: Environment configuration with map size
+        
+    Returns:
+        True if position is within map bounds
+    """
     half_map = config.map_size_km[0] * 1000 // 2
     return abs(x) <= half_map and abs(y) <= half_map
 
 
 def calculate_max_grid_positions(config: Config) -> int:
-    """Calculate maximum number of grid positions for the map."""
+    """Calculate maximum number of grid positions for the map.
+    
+    Args:
+        config: Environment configuration with map and grid parameters
+        
+    Returns:
+        Total number of discrete grid positions available
+    """
     grid_size = int((config.map_size_km[0]) / config.grid_resolution_km)
     return grid_size * grid_size

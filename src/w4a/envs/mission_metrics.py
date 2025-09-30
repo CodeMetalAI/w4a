@@ -1,10 +1,12 @@
 """
 Mission Metrics Management
 
-Functions to update and track mission progress metrics like kills, capture progress,
-contestation status, and capture capability.
+This module provides functions to track and update mission progress metrics including
+kill counts, capture progress, contestation status, and capture capability. These
+metrics represent the current tactical situation and progress toward mission objectives.
 
-These metrics represent the tactical situation and mission objectives progress.
+The metrics are updated each simulation step and used for reward calculation,
+termination conditions, and agent observations.
 """
 
 from typing import Dict, List, Set, Any
@@ -13,9 +15,10 @@ from .utils import *
 
 
 def update_dead_entities(env: Any) -> None:
-    """
-    Track dead entities and update kill sets.
+    """Track dead entities and update kill counters.
 
+    Scans all entities and adds newly dead units to the appropriate kill set
+    based on faction (friendly casualties vs enemy kills).
     
     Args:
         env: Environment instance with entities dict and kill counters
@@ -29,10 +32,10 @@ def update_dead_entities(env: Any) -> None:
 
 
 def update_capture_progress(env: Any) -> None:
-    """
-    Update capture timer progress based on current capture conditions.
+    """Update capture timer progress based on current capture conditions.
     
-    Only advance progress if friendly units are currently capturing.
+    Advances capture progress only when friendly units are actively capturing
+    the objective. Progress resets if capture is interrupted.
     
     Args:
         env: Environment instance with capture state variables
@@ -49,11 +52,10 @@ def update_capture_progress(env: Any) -> None:
     # TODO: Do we keep track of time for each settler unit? Is there an exposed function for time on target?
 
 def update_island_contested(env: Any) -> None:
-    """
-    Check if the island/capture area is contested by enemy forces.
+    """Check if the capture area is contested by enemy forces.
     
-    Island is contested if both friendly and enemy forces are present
-
+    The area is considered contested when both friendly and enemy forces
+    are present within the capture zone simultaneously.
     
     Args:
         env: Environment instance with contestation flag
@@ -66,10 +68,10 @@ def update_island_contested(env: Any) -> None:
 
 
 def update_capture_possible(env: Any) -> None:
-    """
-    Check if capture is currently possible (we have capture-capable units alive).
+    """Check if capture is currently possible.
 
-    Capture is possible if we have at least one alive unit that can capture.
+    Capture is possible when at least one friendly settler unit is alive
+    and capable of capturing the objective.
     
     Args:
         env: Environment instance with capture_possible flag  
@@ -83,10 +85,10 @@ def update_capture_possible(env: Any) -> None:
 
 
 def update_all_mission_metrics(env: Any) -> None:
-    """
-    Update all mission metrics in correct order.
+    """Update all mission metrics in the correct order.
     
-    Call this once per step to maintain consistent mission progress tracking.
+    This function should be called once per simulation step to maintain
+    consistent mission progress tracking across all metrics.
     
     Args:
         env: Environment instance
@@ -99,10 +101,10 @@ def update_all_mission_metrics(env: Any) -> None:
 
 
 def reset_mission_metrics(env: Any) -> None:
-    """
-    Reset all mission metrics to initial values.
+    """Reset all mission metrics to initial values.
     
-    Call this during environment reset to start fresh mission tracking.
+    This function should be called during environment reset to initialize
+    fresh mission tracking for a new episode.
     
     Args:
         env: Environment instance
