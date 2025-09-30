@@ -300,16 +300,21 @@ class TridentIslandEnv(gym.Env):
         return observations.compute_observation(self)
     
     def _calculate_reward(self) -> float:
-        """Calculate step reward based on mission progress and tactical performance.
-        
-        Returns:
-            Reward value for the current step
+        """Return the base per-step reward.
+
+        This environment intentionally returns a neutral base reward (0.0) by default.
+        Users can provide a custom reward via the wrapper's `reward_fn`
+        (`w4a.wrappers.wrapper.EnvWrapper`) to tailor learning objectives.
+
+        Note: Terminal outcome bonuses/penalties (+100/-100) are applied in `step()`
+        when the episode terminates or truncates.
+
+        Example components for a custom reward function:
+        - Mission objectives (capture progress, target destruction)
+        - Force preservation (casualties vs enemy losses)
+        - Tactical performance (WEZ management, formations, fuel management)
+        - Shaping penalties (time, invalid actions, risky behavior)
         """
-        # TODO: Implement reward calculation based on:
-        # - Mission objectives (flag capture, target destruction)
-        # - Unit preservation (casualties vs enemy losses) 
-        # - Tactical performance (effective engagement ranges, formations)
-        # - Step penalties (encourage efficient missions)
         return 0.0
     
 

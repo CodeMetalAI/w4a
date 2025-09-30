@@ -143,3 +143,14 @@ class RLEnvWrapper(gym.Wrapper):
 
     def reward_fn(self, obs, action, reward, info):
         return reward
+
+    def __getattr__(self, name):
+        """Delegate unknown attributes to the underlying environment.
+
+        This makes common attributes like `config` available directly on the wrapper
+        (e.g., `env.config`) without adding one-off passthroughs.
+        """
+        try:
+            return getattr(self.env, name)
+        except AttributeError as exc:
+            raise AttributeError(f"{self.__class__.__name__} has no attribute '{name}'") from exc

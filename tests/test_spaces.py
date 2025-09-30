@@ -20,6 +20,13 @@ class TestObservationSpace:
         env = RLEnvWrapper(TridentIslandEnv())
         
         obs, info = env.reset()
+        # Info structure should be present
+        assert isinstance(info, dict)
+        assert "valid_masks" in info
+        vm = info["valid_masks"]
+        # Expect the exact keys used by the environment
+        required_mask_keys = {"action_types", "controllable_entities", "visible_targets", "entity_target_matrix"}
+        assert set(vm.keys()) == required_mask_keys
         
         # Observation should match space shape
         assert obs.shape == env.observation_space.shape
@@ -35,7 +42,11 @@ class TestObservationSpace:
         # Test multiple steps
         for _ in range(3):
             action = env.action_space.sample()
+            # Sampled actions should be valid for the space
+            assert env.action_space.contains(action)
             obs, reward, terminated, truncated, info = env.step(action)
+            # Maintain info structure during steps
+            assert "valid_masks" in info
             
             assert obs.shape == env.observation_space.shape
             assert env.observation_space.contains(obs)
@@ -93,7 +104,7 @@ class TestActionSpace:
             "action_type", "entity_id", "move_center_grid", "move_short_axis_km",
             "move_long_axis_km", "move_axis_angle", "target_group_id", 
             "weapon_selection", "weapon_usage", "weapon_engagement",
-            "stealth_enabled", "sensing_position_grid"
+            "stealth_enabled", "sensing_position_grid", "refuel_target_id"
         }
         assert set(env.action_space.spaces.keys()) == expected_keys
         
@@ -142,6 +153,70 @@ class TestActionSpace:
                 assert isinstance(value, (int, np.integer)), f"Action {key} not integer: {type(value)}"
                 assert 0 <= value < env.action_space[key].n, f"Action {key} out of bounds: {value}"
         
+        env.close()
+
+    def test_step_sampled_action_contains(self):
+        """During steps, sampled actions must satisfy action_space.contains."""
+        env = RLEnvWrapper(TridentIslandEnv())
+        env.reset()
+        for _ in range(5):
+            action = env.action_space.sample()
+            assert env.action_space.contains(action)
+            _ = env.step(action)
+        env.close()
+
+    def test_action_edge_min_max_step(self):
+        """Construct min/max edge actions and ensure they are valid and step without error."""
+        env = RLEnvWrapper(TridentIslandEnv())
+        env.reset()
+
+        # Build min action (all zeros) and max action (n-1 for each key)
+        min_action = {}
+        max_action = {}
+        for key, space in env.action_space.spaces.items():
+            assert isinstance(space, spaces.Discrete)
+            min_action[key] = 0
+            max_action[key] = space.n - 1
+
+        # Validate and step
+        assert env.action_space.contains(min_action)
+        _ = env.step(min_action)
+
+        assert env.action_space.contains(max_action)
+        _ = env.step(max_action)
+
+        env.close()
+
+    def test_action_negative_contains(self):
+        """Invalid actions should fail action_space.contains."""
+        env = RLEnvWrapper(TridentIslandEnv())
+        env.reset()
+
+        # Start from a valid sampled action
+        valid = env.action_space.sample()
+        assert env.action_space.contains(valid)
+
+        # 1) Missing key
+        missing_key_action = dict(valid)
+        any_key = next(iter(env.action_space.spaces.keys()))
+        missing_key_action.pop(any_key, None)
+        assert not env.action_space.contains(missing_key_action)
+
+        # 2) Wrong type
+        wrong_type_action = dict(valid)
+        wrong_type_action[any_key] = "not-an-int"
+        assert not env.action_space.contains(wrong_type_action)
+
+        # 3) Out of range
+        out_of_range_action = dict(valid)
+        out_of_range_action[any_key] = env.action_space[any_key].n  # n is outside [0, n-1]
+        assert not env.action_space.contains(out_of_range_action)
+
+        # 4) Extra key
+        extra_key_action = dict(valid)
+        extra_key_action["__extra__"] = 0
+        assert not env.action_space.contains(extra_key_action)
+
         env.close()
 
 
