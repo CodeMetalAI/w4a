@@ -24,11 +24,11 @@ fi
 
 echo "Installing dependencies..."
 pip install gymnasium numpy
-
+ 
 echo "Installing SimulationInterface..."
 # Cannot use -e mode due to compiled extensions
 pip install ./SimulationInterface/
-
+ 
 echo "Installing w4a in development mode..."
 pip install -e .
 

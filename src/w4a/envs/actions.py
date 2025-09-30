@@ -9,7 +9,7 @@ import math
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
-    SetRadarFocus, ClearRadarFocus, SetRadarStrength, CaptureFlag, Refuel,
+    SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
     RefuelComponent,
     Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
@@ -176,7 +176,7 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     
     entity = entities[entity_id]
     
-    event = SetRadarStrength()
+    event = SetRadarEnabled()
     event.entity = entity
     event.strength = 0 if stealth_enabled else 1
     
