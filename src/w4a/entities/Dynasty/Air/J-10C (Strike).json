@@ -30,6 +30,8 @@
         "Y": 0.0,
         "Z": 0.0
     },
+    "DefaultRadarsEnabled": 1,
+    "DefaultJammersEnabled": 0,
     "SpawnUnits": [
         {
             "Event": {
@@ -64,29 +66,32 @@
                     "Y": -50.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 686.0,
                     "RadarCrossSection": 4.0,
+                    "RadarCrossSectionWithRadar": 5.0,
                     "FuelCapacity": 3200.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
+                            "TransmitterPower": 1800.0,
                             "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -179,18 +184,18 @@
                     "LiftCoefficient": 1.100000023841858,
                     "MaxBankAngle": 90.0,
                     "MaxGForce": 9.0,
-                    "MaxDryThrust": 65000.0,
-                    "MaxAfterburnThrust": 150000.0,
+                    "MaxDryThrust": 79000.0,
+                    "MaxAfterburnThrust": 129700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.400000004814217e-9
+                        0.00002152733941329643,
+                        1.3455000669182482e-7,
+                        2.0199999450909445e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3000000365082087e-7,
-                        1.7000000296363282e-9
+                        0.00005523462823475711,
+                        3.452099974765588e-7,
+                        5.169999983678508e-9
                     ]
                 }
             }
@@ -228,29 +233,32 @@
                     "Y": 50.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 686.0,
                     "RadarCrossSection": 4.0,
+                    "RadarCrossSectionWithRadar": 5.0,
                     "FuelCapacity": 3200.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
+                            "TransmitterPower": 1800.0,
                             "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -343,18 +351,18 @@
                     "LiftCoefficient": 1.100000023841858,
                     "MaxBankAngle": 90.0,
                     "MaxGForce": 9.0,
-                    "MaxDryThrust": 65000.0,
-                    "MaxAfterburnThrust": 150000.0,
+                    "MaxDryThrust": 79000.0,
+                    "MaxAfterburnThrust": 129700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.400000004814217e-9
+                        0.00002152733941329643,
+                        1.3455000669182482e-7,
+                        2.0199999450909445e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3000000365082087e-7,
-                        1.7000000296363282e-9
+                        0.00005523462823475711,
+                        3.452099974765588e-7,
+                        5.169999983678508e-9
                     ]
                 }
             }
@@ -392,29 +400,32 @@
                     "Y": -150.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 686.0,
                     "RadarCrossSection": 4.0,
+                    "RadarCrossSectionWithRadar": 5.0,
                     "FuelCapacity": 3200.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
+                            "TransmitterPower": 1800.0,
                             "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -507,18 +518,18 @@
                     "LiftCoefficient": 1.100000023841858,
                     "MaxBankAngle": 90.0,
                     "MaxGForce": 9.0,
-                    "MaxDryThrust": 65000.0,
-                    "MaxAfterburnThrust": 150000.0,
+                    "MaxDryThrust": 79000.0,
+                    "MaxAfterburnThrust": 129700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.400000004814217e-9
+                        0.00002152733941329643,
+                        1.3455000669182482e-7,
+                        2.0199999450909445e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3000000365082087e-7,
-                        1.7000000296363282e-9
+                        0.00005523462823475711,
+                        3.452099974765588e-7,
+                        5.169999983678508e-9
                     ]
                 }
             }
@@ -556,29 +567,32 @@
                     "Y": 150.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 686.0,
                     "RadarCrossSection": 4.0,
+                    "RadarCrossSectionWithRadar": 5.0,
                     "FuelCapacity": 3200.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
+                            "TransmitterPower": 1800.0,
                             "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -671,18 +685,18 @@
                     "LiftCoefficient": 1.100000023841858,
                     "MaxBankAngle": 90.0,
                     "MaxGForce": 9.0,
-                    "MaxDryThrust": 65000.0,
-                    "MaxAfterburnThrust": 150000.0,
+                    "MaxDryThrust": 79000.0,
+                    "MaxAfterburnThrust": 129700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.400000004814217e-9
+                        0.00002152733941329643,
+                        1.3455000669182482e-7,
+                        2.0199999450909445e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3000000365082087e-7,
-                        1.7000000296363282e-9
+                        0.00005523462823475711,
+                        3.452099974765588e-7,
+                        5.169999983678508e-9
                     ]
                 }
             }

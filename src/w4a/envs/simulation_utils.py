@@ -171,17 +171,19 @@ def _execute_force_laydown(env, force_laydowns):
     # Finalize force laydown phase. Theoretically, we could give the agents time in between these steps, but let's make it immediate for now.
     env.simulation.finalize_force_laydown(env.sim_data)
 
-    sim_data = env.sim_data
+
+    env.sim_data = SimulationData()
 
     # Debug: report event summary from finalize
     try:
-        events = getattr(sim_data, 'simulation_events', [])
+        events = getattr(env.sim_data, 'simulation_events', [])
         print(f"[LAYDOWN] finalize produced {len(events)} events")
     except Exception:
         pass
 
+
     # Process all events coming out of this
-    process_simulation_events(env, sim_data.simulation_events)
+    process_simulation_events(env, env.sim_data.simulation_events)
 
 
 def _ensure_passive_agent_laydown(env):

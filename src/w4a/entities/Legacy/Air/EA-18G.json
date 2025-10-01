@@ -30,6 +30,8 @@
         "Y": 0.0,
         "Z": 0.0
     },
+    "DefaultRadarsEnabled": 1,
+    "DefaultJammersEnabled": 0,
     "SpawnUnits": [
         {
             "Event": {
@@ -64,29 +66,32 @@
                     "Y": -50.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 544.0,
                     "RadarCrossSection": 3.0,
-                    "FuelCapacity": 6500.0,
+                    "RadarCrossSectionWithRadar": 5.0,
+                    "FuelCapacity": 6300.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
-                            "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "TransmitterPower": 2500.0,
+                            "TransmitterGain": 36.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -149,25 +154,25 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 21500.0,
+                    "Mass": 21300.0,
                     "CrossSectionalArea": 5.199999809265137,
                     "WingArea": 46.0,
                     "DragCoefficient": 0.029999999329447746,
                     "LiftCoefficient": 1.0,
                     "MaxBankAngle": 85.0,
                     "MaxGForce": 7.5,
-                    "MaxDryThrust": 90000.0,
-                    "MaxAfterburnThrust": 180000.0,
+                    "MaxDryThrust": 97800.0,
+                    "MaxAfterburnThrust": 195700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.500000013088254e-9
+                        0.000024643140932312235,
+                        1.5402000030917407e-7,
+                        2.309999969085652e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3999999737279722e-7,
-                        1.8999999351621e-9
+                        0.0000560843909624964,
+                        3.5051999702773173e-7,
+                        5.249999990297738e-9
                     ]
                 }
             }
@@ -205,29 +210,32 @@
                     "Y": 50.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 544.0,
                     "RadarCrossSection": 3.0,
-                    "FuelCapacity": 6500.0,
+                    "RadarCrossSectionWithRadar": 5.0,
+                    "FuelCapacity": 6300.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
-                            "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "TransmitterPower": 2500.0,
+                            "TransmitterGain": 36.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -290,25 +298,25 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 21500.0,
+                    "Mass": 21300.0,
                     "CrossSectionalArea": 5.199999809265137,
                     "WingArea": 46.0,
                     "DragCoefficient": 0.029999999329447746,
                     "LiftCoefficient": 1.0,
                     "MaxBankAngle": 85.0,
                     "MaxGForce": 7.5,
-                    "MaxDryThrust": 90000.0,
-                    "MaxAfterburnThrust": 180000.0,
+                    "MaxDryThrust": 97800.0,
+                    "MaxAfterburnThrust": 195700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.500000013088254e-9
+                        0.000024643140932312235,
+                        1.5402000030917407e-7,
+                        2.309999969085652e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3999999737279722e-7,
-                        1.8999999351621e-9
+                        0.0000560843909624964,
+                        3.5051999702773173e-7,
+                        5.249999990297738e-9
                     ]
                 }
             }
@@ -346,29 +354,32 @@
                     "Y": -150.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 544.0,
                     "RadarCrossSection": 3.0,
-                    "FuelCapacity": 6500.0,
+                    "RadarCrossSectionWithRadar": 5.0,
+                    "FuelCapacity": 6300.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
-                            "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "TransmitterPower": 2500.0,
+                            "TransmitterGain": 36.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -431,25 +442,25 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 21500.0,
+                    "Mass": 21300.0,
                     "CrossSectionalArea": 5.199999809265137,
                     "WingArea": 46.0,
                     "DragCoefficient": 0.029999999329447746,
                     "LiftCoefficient": 1.0,
                     "MaxBankAngle": 85.0,
                     "MaxGForce": 7.5,
-                    "MaxDryThrust": 90000.0,
-                    "MaxAfterburnThrust": 180000.0,
+                    "MaxDryThrust": 97800.0,
+                    "MaxAfterburnThrust": 195700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.500000013088254e-9
+                        0.000024643140932312235,
+                        1.5402000030917407e-7,
+                        2.309999969085652e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3999999737279722e-7,
-                        1.8999999351621e-9
+                        0.0000560843909624964,
+                        3.5051999702773173e-7,
+                        5.249999990297738e-9
                     ]
                 }
             }
@@ -487,29 +498,32 @@
                     "Y": 150.0,
                     "Z": 0.0
                 },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
                 "Specifications": {
                     "CruisingSpeed": 300.0,
                     "MaxSpeed": 544.0,
                     "RadarCrossSection": 3.0,
-                    "FuelCapacity": 6500.0,
+                    "RadarCrossSectionWithRadar": 5.0,
+                    "FuelCapacity": 6300.0,
                     "RadarData": [
                         {
                             "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 7000.0,
-                            "TransmitterGain": 35.0,
-                            "ReceiverGain": 25.0,
+                            "TransmitterPower": 2500.0,
+                            "TransmitterGain": 36.0,
+                            "ReceiverGain": 35.0,
                             "SignalWavelength": 0.029999999329447746,
-                            "MinimumSignalPower": 9.9999998245167e-15,
+                            "MinimumSignalPower": 1.599999971922672e-13,
                             "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 2.0,
-                            "FilterBandwidth": 50000000.0,
-                            "NoiseFigure": 4.0,
+                            "ReceiverLosses": 3.0,
+                            "FilterBandwidth": 1000000.0,
+                            "NoiseFigure": 3.0,
                             "WorkingTemperature": 300.0,
                             "Rotates": false,
                             "RotationPeriod": 0.0,
                             "PositionAngle": 0.0,
-                            "MemoryTime": 10.0,
-                            "RotationRange": 0.0,
+                            "MemoryTime": 0.05000000074505806,
+                            "RotationRange": 1.0471975803375244,
                             "FilterMethod": 1,
                             "FusionMethod": 1
                         }
@@ -572,25 +586,25 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 21500.0,
+                    "Mass": 21300.0,
                     "CrossSectionalArea": 5.199999809265137,
                     "WingArea": 46.0,
                     "DragCoefficient": 0.029999999329447746,
                     "LiftCoefficient": 1.0,
                     "MaxBankAngle": 85.0,
                     "MaxGForce": 7.5,
-                    "MaxDryThrust": 90000.0,
-                    "MaxAfterburnThrust": 180000.0,
+                    "MaxDryThrust": 97800.0,
+                    "MaxAfterburnThrust": 195700.0,
                     "HasAfterburner": true,
                     "FuelConsumptionMilitary": [
-                        0.000014999999621068127,
-                        8.500000348021786e-8,
-                        1.500000013088254e-9
+                        0.000024643140932312235,
+                        1.5402000030917407e-7,
+                        2.309999969085652e-9
                     ],
                     "FuelConsumptionAfterburn": [
-                        0.000022000000171829015,
-                        1.3999999737279722e-7,
-                        1.8999999351621e-9
+                        0.0000560843909624964,
+                        3.5051999702773173e-7,
+                        5.249999990297738e-9
                     ]
                 }
             }
