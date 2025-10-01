@@ -29,7 +29,8 @@ from SimulationInterface import (
     Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
-CENTER_ISLAND_FLAG_ID = 0
+FACTION_FLAG_IDS = { Faction.LEGACY: 2, Faction.DYNASTY: 1, Faction.NEUTRAL: 3 } #Ideally, we would not hardcode this
+CENTER_ISLAND_FLAG_ID = FACTION_FLAG_IDS[Faction.NEUTRAL]
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> List:
     """Execute a hierarchical action and return corresponding player events.
@@ -245,14 +246,14 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     
     event = SetRadarEnabled()
     event.entity = entity
-    event.strength = 0 if stealth_enabled else 1
+    event.enabled = stealth_enabled
     
     return event
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
     # """Execute land action - land at nearest friendly airbase"""
     entity = entities[entity_id]
-    flag = CENTER_ISLAND_FLAG_ID
+    flag = entities[FACTION_FLAG_IDS[Faction.NEUTRAL]]
 
     event = CaptureFlag()
     event.entity = entity
@@ -263,7 +264,7 @@ def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
 def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
     """Execute RTB action - return to base"""
     entity = entities[entity_id]
-    flag = CENTER_ISLAND_FLAG_ID
+    flag = entities[FACTION_FLAG_IDS[entity.faction]]
 
     event = RTBManouver()
     event.entity = entity
@@ -470,7 +471,7 @@ def validate_capture_action(action: Dict, entities: Dict) -> bool:
     entity_id = action["entity_id"]
     entity = entities[entity_id]
 
-    flag_id = action["flag_id"]
+    flag_id = FACTION_FLAG_IDS[Faction.NEUTRAL]
     flag = entities[flag_id]
     
     # Check entity is aircraft
@@ -501,7 +502,7 @@ def validate_rtb_action(action: Dict, entities: Dict) -> bool:
     entity_id = action["entity_id"]
     entity = entities[entity_id]
 
-    flag_id = action["flag_id"]
+    flag_id = FACTION_FLAG_IDS[entity.faction]
     flag = entities[flag_id]
     
     # Check entity is aircraft

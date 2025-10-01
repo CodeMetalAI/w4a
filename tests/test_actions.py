@@ -6,16 +6,17 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import EnvWrapper
+#from w4a.wrappers.wrapper import EnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 
-from SimulationInterface import (Vector3, Simulation, create_mock_entity)
+from SimulationInterface import (Vector3, Faction, Simulation, create_mock_entity)
 
 from w4a import(is_valid_action)
 from w4a import (execute_move_action, execute_rtb_action, execute_set_radar_focus_action, execute_stealth_action, execute_capture_action, execute_refuel_action)
 
 from w4a import w4a_entities
+from w4a import FACTION_FLAG_IDS
 
 def create_test_entity():
     return w4a_entities.create_mock_entity("F-35C (Air Superiority)")
@@ -64,13 +65,13 @@ def test_rtb_action():
     entity = create_test_entity()
     flag = create_player_flag()
 
-    entities = { 1: entity, 2: flag}
+    entities = { 33: entity, FACTION_FLAG_IDS[Faction.LEGACY]: flag}
 
-    action = {"entity_id": 1, "action_type": 6, "flag_id": 2 }
+    action = {"entity_id": 33, "action_type": 6 }
 
     assert is_valid_action(action, entities, {}, Config())
 
-    event = execute_rtb_action(1, action, entities)
+    event = execute_rtb_action(33, action, entities)
 
     assert event
     assert event.flag == flag
@@ -104,7 +105,7 @@ def test_stealth_action():
     event = execute_stealth_action(1, action, entities, Config())
 
     assert event
-    assert event.strength == 0
+    assert event.enabled == True
 
 def test_capture_action():
     """Test capture action"""
@@ -112,13 +113,13 @@ def test_capture_action():
     entity = create_capture_entity()
     flag = create_neutral_flag()
 
-    entities = { 1: entity, 2: flag}
+    entities = { 33: entity, FACTION_FLAG_IDS[Faction.NEUTRAL]: flag}
 
-    action = {"entity_id": 1, "action_type": 5, "flag_id": 2 }
+    action = {"entity_id": 33, "action_type": 5 }
 
     assert is_valid_action(action, entities, {}, Config())
 
-    event = execute_capture_action(1, action, entities)
+    event = execute_capture_action(33, action, entities)
 
     assert event
     assert event.flag == flag
