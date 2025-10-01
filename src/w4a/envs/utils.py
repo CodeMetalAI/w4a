@@ -38,4 +38,4 @@ def get_settler_units(entities, our_faction) -> Set[Entity]:
     Returns:
         Set of settler entities that are alive and belong to our faction
     """
-    return {entity for entity in entities.values() if entity.is_alive and entity.faction.value == our_faction and entity.is_settler}
+    return {entity for entity in entities.values() if entity.is_alive and entity.faction.value == our_faction and entity.can_capture}

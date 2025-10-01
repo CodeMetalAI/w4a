@@ -377,7 +377,11 @@ class TridentIslandEnv(gym.Env):
         Returns:
             True if entity can be controlled by the agent
         """
-        return (entity.is_controllable and entity.is_alive and 
+
+        if not isinstance(entity, ControllableEntity):
+            return False
+
+        return (entity.is_alive and 
                 entity.faction.value == self.config.our_faction)
     
     def _entity_can_engage(self, entity) -> bool:
@@ -386,8 +390,8 @@ class TridentIslandEnv(gym.Env):
         Returns:
             True if entity has weapons and valid targets exist
         """
-        # Check if entity has weapons # TODO: Is this correct check?
-        has_weapons = entity.has_weapons and len(entity.weapons) > 0
+        # Check if entity has weapons
+        has_weapons = entity.target_domains != 0
         if not has_weapons:
             return False
     
@@ -408,7 +412,7 @@ class TridentIslandEnv(gym.Env):
             True if entity is capable of capturing objectives
         """
         # TODO: Check if its settler 
-        return entity.is_settler
+        return entity.can_capture
     
     def _get_valid_action_types(self) -> set:
         """Get set of valid action types based on current entity capabilities.
@@ -430,7 +434,7 @@ class TridentIslandEnv(gym.Env):
                 valid_actions.add(5)  # capture
             if entity.has_radar:
                 valid_actions.update({3, 4})  # stealth, sense
-            if entity.has_fuel: # TODO: Can all air units refuel?
+            if entity.can_refuel: # TODO: Can all air units refuel?
                 valid_actions.add(7)  # refuel
     
         return valid_actions
@@ -620,7 +624,8 @@ class TridentIslandEnv(gym.Env):
 
         # TODO: This isn't the correct check?
         # Only track entities that behave like units (must have these attributes)
-        if not entity.is_controllable:
+
+        if not isinstance(entity, ControllableEntity):
             return
 
         ptr = id(entity)
