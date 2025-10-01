@@ -82,7 +82,7 @@ def test_reward_wrapper_inputs_and_non_mutating():
             captured["info"] = info
             return reward  # passthrough
 
-    base_env = TridentIslandEnv()
+    base_env = RLEnvWrapper(TridentIslandEnv())
     wrapped = CaptureWrapper(TridentIslandEnv())
 
     base_env.reset(seed=7)
