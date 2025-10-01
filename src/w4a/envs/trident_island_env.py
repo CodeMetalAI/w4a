@@ -100,9 +100,16 @@ class TridentIslandEnv(gym.Env):
             AdversaryContact: self._adversary_contact
         }
 
-        # Entity tracking - stores ALL entities from ALL factions
-        self.entities = {}  # Dict[entity_id -> entity] for all entities in game
-        self.target_groups = {}  # Dict[target_group_id -> target_group] for all target groups 
+        # Stable ID tracking for the duration of an episode
+        # Entities: Dict[id -> entity], includes all factions and keeps entries after death
+        self.entities = {}
+        self._entity_id_by_ptr = {}  # Dict[id(entity_ptr) -> entity_id]
+        self._next_entity_id = 0
+
+        # Target groups: Dict[id -> group], persistent across visibility changes
+        self.target_groups = {}
+        self._target_group_id_by_ptr = {}  # Dict[id(group_ptr) -> group_id]
+        self._next_target_group_id = 0
         
         # Calculate grid dimensions for discretized positioning
         map_size_km = self.config.map_size_km[0]
@@ -212,8 +219,14 @@ class TridentIslandEnv(gym.Env):
         self.time_elapsed = 0.0
 
         self.simulation_events = []
+        # Reset stable ID maps and counters
         self.entities.clear()
+        self._entity_id_by_ptr.clear()
+        self._next_entity_id = 0
+
         self.target_groups.clear()
+        self._target_group_id_by_ptr.clear()
+        self._next_target_group_id = 0
         
         # Initialize enemy sensing data tracking
         self.enemy_sensing_data = {}  # Dict[int, EnemySensingData]
@@ -222,9 +235,10 @@ class TridentIslandEnv(gym.Env):
         mission_metrics.reset_mission_metrics(self)
 
         # Initialize per-episode tracking for info/debugging
+        # Intent: last requested action per entity (unvalidated)
         self.last_action_by_entity = {}
-        self.last_commit_by_entity = {}
-        self.committed_this_step = set()
+        # Applied: last action that passed validation and was applied
+        self.last_action_applied_by_entity = {}
 
         observation = self._get_observation()
         info = self._build_info()
@@ -247,12 +261,11 @@ class TridentIslandEnv(gym.Env):
         self.simulation_events = []  # Clear previous step's events
         
         # Track action intent for info/debugging
-        self._record_last_action(action)
-        self.committed_this_step = set()
+        self._record_last_intended_action(action)
 
-        # Execute action
+        # Execute action (minimal enforcement inside action system; masks are advisory only)
         player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
-        
+        print(f"Player events: {player_events}")
         # Prepare simulation step data
         sim_data = SimulationData()
         sim_data.player_events = player_events
@@ -285,8 +298,17 @@ class TridentIslandEnv(gym.Env):
             elif self._did_lose():
                 reward -= 100.0
 
+        # Determine termination cause for info
+        if terminated:
+            termination_cause = "win" if self._did_win() else "loss"
+        elif truncated:
+            termination_cause = "time_limit"
+        else:
+            termination_cause = None
+
         # Build enriched info
         info = self._build_info()
+        info["termination_cause"] = termination_cause
         
         return observation, reward, terminated, truncated, info
     
@@ -493,9 +515,8 @@ class TridentIslandEnv(gym.Env):
                 "receivers": list(self._get_refuel_receivers_set()),
                 "providers": list(self._get_refuel_providers_set())
             },
-            "committing_entities": list(self.committed_this_step),
-            "last_action_by_entity": self.last_action_by_entity,
-            "last_commit_by_entity": self.last_commit_by_entity,
+            "last_action_intent_by_entity": self.last_action_by_entity,
+            "last_action_applied_by_entity": self.last_action_applied_by_entity,
             "mission": {
                 "friendly_kills": len(self.friendly_kills),
                 "enemy_kills": len(self.enemy_kills),
@@ -533,11 +554,11 @@ class TridentIslandEnv(gym.Env):
                 providers.add(entity_id)
         return providers
 
-    def _record_last_action(self, action: Dict) -> None:
-        """Record last action issued per entity for debugging and analysis.
+    def _record_last_intended_action(self, action: Dict) -> None:
+        """Record last action issued (pre-validation) per entity for debugging and analysis.
         
         Args:
-            action: Action dictionary that was executed
+            action: Action dictionary that was intended to be executed
         """
         entity_id = action["entity_id"]
         self.last_action_by_entity[str(entity_id)] = {
@@ -545,14 +566,7 @@ class TridentIslandEnv(gym.Env):
             "time": float(self.time_elapsed)
         }
 
-        # Track commit intents for convenience
-        if int(action["action_type"]) == 2:  # Engage/Commit
-            target_group_id = int(action["target_group_id"])
-            self.committed_this_step.add(entity_id)
-            self.last_commit_by_entity[str(entity_id)] = {
-                "target_group_id": target_group_id,
-                "time": float(self.time_elapsed)
-            }
+    
 
     def _compute_kill_ratio(self) -> float:
         """Compute kill ratio for mission assessment.
@@ -575,17 +589,24 @@ class TridentIslandEnv(gym.Env):
         capture_win = self.capture_timer_progress >= self.config.capture_required_seconds and self.capture_possible
         kill_ratio = self._compute_kill_ratio()
         kill_ratio_win = kill_ratio >= self.config.kill_ratio_threshold
+        print("Capture win: ", capture_win)
+        print("Kill ratio win: ", kill_ratio_win)
 
         if capture_win or kill_ratio_win:
+            print("Win conditions met")
             return "win"
 
         # Loss conditions
         no_capture_path = (not self.capture_possible)
         inverse_threshold = 1.0 / max(1e-6, self.config.kill_ratio_threshold)
         kill_ratio_loss = kill_ratio <= inverse_threshold
+        print("No capture path: ", no_capture_path)
+        print("Kill ratio loss: ", kill_ratio_loss)
         if no_capture_path and kill_ratio_loss:
+            print("Loss conditions met")
             return "loss"
 
+        print("Ongoing")
         return "ongoing"
 
     def _did_win(self) -> bool:
@@ -598,19 +619,40 @@ class TridentIslandEnv(gym.Env):
 
         
     def _entity_spawned(self, event):
-        """Handle entity spawned events.
-        
-        TODO: Track spawned entities
-        """
-        pass
+        """Handle entity spawned events and assign stable entity IDs."""
+        try:
+            entity = event.entity
+        except Exception:
+            return
+
+        ptr = id(entity)
+        if ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[ptr]
+        else:
+            entity_id = self._next_entity_id
+            self._next_entity_id += 1
+            self._entity_id_by_ptr[ptr] = entity_id
+        self.entities[entity_id] = entity
         
     def _victory(self, event):
         """Handle victory events."""
         pass
     
     def _adversary_contact(self, event):
-        """Handle adversary contact events."""
-        pass
+        """Handle adversary contact events and assign stable target group IDs."""
+        # TODO: Is this the right check for target group?
+        group = getattr(event, "target_group", None)
+        if group is None:
+            return
+
+        ptr = id(group)
+        if ptr in self._target_group_id_by_ptr:
+            group_id = self._target_group_id_by_ptr[ptr]
+        else:
+            group_id = self._next_target_group_id
+            self._next_target_group_id += 1
+            self._target_group_id_by_ptr[ptr] = group_id
+        self.target_groups[group_id] = group
         
     def _update_enemy_sensing_data(self):
         """Update sensing information for all enemy target groups.

@@ -29,8 +29,14 @@ def build_observation_space(config) -> spaces.Box:
         Box space with normalized values in [0, 1]
     """
     # Current: 7 global features
-    # TODO: Add friendly entity features (max_entities * features_per_entity)
-    # TODO: Add enemy entity features (max_entities * features_per_entity)
+    # NOTE (ID-indexed layout):
+    # When adding per-entity or per-target-group features, index rows by stable IDs
+    # assigned in the environment, not by iteration order. That is:
+    # - Entities: shape (config.max_entities, features_per_entity), row i corresponds
+    #             to entity_id i. Zero rows for IDs that are not assigned.
+    # - Target groups: shape (config.max_target_groups, features_per_group), row j
+    #                  corresponds to target_group_id j. Zero rows when not visible.
+    # This keeps observation indices aligned with action/mask IDs across steps.
     
     total_features = 7  # globals only for now
     low = np.zeros((total_features,), dtype=np.float32)
@@ -56,7 +62,8 @@ def compute_observation(env: Any) -> np.ndarray:
     enemy_features = _compute_enemy_features(env)
     
     # Concatenate all features
-    # Currently only globals are implemented
+    # Currently only globals are implemented. Future per-entity/group features should
+    # be ID-indexed arrays (see build_observation_space note above).
     obs = np.concatenate([
         global_features,
         # friendly_features,  # TODO: Uncomment when implemented
@@ -122,7 +129,7 @@ def _compute_global_features(env: Any) -> np.ndarray:
 
 
 def _get_friendly_entities(env: Any) -> list:
-    """Get list of friendly entities from the environment.
+    """Get list of friendly entities (helper for placeholder code).
     
     Returns:
         List of entities belonging to our faction
@@ -148,11 +155,15 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
     Returns:
         Array of shape (max_entities * 24,) with zero padding for unused slots
     """
-    # TODO: Implement this correctly
-    friendly_entities = _get_friendly_entities(env)
-    friendly_entity_features = np.zeros((len(friendly_entities), 24), dtype=np.float32)
-    
-    for i, entity in enumerate(friendly_entities):
+    # TODO: Implement this as an ID-indexed array sized to max_entities
+    # Build an ID-indexed array: row i corresponds to entity_id i. Zero rows for unused IDs.
+    friendly_entity_features = np.zeros((int(env.config.max_entities), 24), dtype=np.float32)
+
+    for entity_id, entity in env.entities.items():
+        # Include only friendly faction entities
+        if entity.faction.value != env.config.our_faction:
+            continue
+
         # Compute each feature category
         identity_features = compute_friendly_identity_features(entity)
         kinematic_features = compute_friendly_kinematic_features(env, entity)
@@ -160,7 +171,7 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
         status_features = compute_friendly_status_features(entity)
         weapon_features = compute_friendly_weapon_features(entity)
         engagement_features = compute_friendly_engagement_features(env, entity)
-        
+
         # Concatenate all features for this entity
         features = np.concatenate([
             identity_features,
@@ -170,12 +181,13 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
             weapon_features,
             engagement_features
         ])
-        
-        friendly_entity_features[i] = features
-    
-    # return entity_features.flatten()  # Convert (max_entities, 24) -> (max_entities * 24,)
-    
-    return np.array([], dtype=np.float32)  # Placeholder
+
+        # Assign into the stable ID-indexed row
+        if 0 <= entity_id < int(env.config.max_entities):
+            friendly_entity_features[entity_id] = features
+
+    # Convert (max_entities, 24) -> (max_entities * 24,)
+    return friendly_entity_features.flatten()
 
 
 def compute_friendly_identity_features(entity: Any) -> np.ndarray:
@@ -410,8 +422,8 @@ def _compute_enemy_features(env: Any) -> np.ndarray:
     
     enemy_group_features = np.zeros((env.config.max_target_groups, 16), dtype=np.float32)
     
-    # Iterate over actual target groups and populate features for existing groups only
-    for group_id, enemy_group in enumerate(env.target_groups.values()):
+    # Populate rows by stable target_group_id; array size stays fixed
+    for group_id, enemy_group in env.target_groups.items():
         # TODO: Implement sensing data
         sensing_data = env.enemy_sensing_data.get(group_id, None)
         
@@ -495,7 +507,9 @@ def _compute_enemy_features(env: Any) -> np.ndarray:
             threat_level_norm, is_engaging_us  # Threat (2)
         ], dtype=np.float32)  # Total: 16 features
         
-        enemy_group_features[group_id] = features
+        # Assign into the stable ID-indexed row; keep array size fixed
+        if 0 <= group_id < int(env.config.max_target_groups):
+            enemy_group_features[group_id] = features
     
     return enemy_group_features.flatten()  # Shape: (max_target_groups * 15,)
 
