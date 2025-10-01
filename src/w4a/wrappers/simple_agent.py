@@ -129,6 +129,11 @@ class SimpleAgent(Agent, LoggingMixin):
 	def __entity_spawned(self, event):
 		if issubclass(event.entity.__class__, ControllableEntity):
 			self.__controllable_entity_spawned(event)
+		elif issubclass(event.entity.__class__, VictoryConditions):
+			self.__victory_conditions_spawned(event)
+		else:
+			self.log(f"{event.entity.__class__.__name__} {event.entity.identifier} spawned")
+
 
 	def __component_spawned(self, event):
 		self.log(f"{event.component.__class__.__name__} {event.component.entity.identifier} spawned")
@@ -142,6 +147,26 @@ class SimpleAgent(Agent, LoggingMixin):
 		self.log(f"{event.entity.__class__.__name__} {event.entity.identifier} spawned")
 
 		self.entities.add(event.entity)
+
+	def __victory_conditions_spawned(self, event):
+		self.log(f"{event.entity.__class__.__name__} {event.entity.identifier} spawned")
+
+		for keep_alive in event.entity.keep_alive:
+			self.log(f"keep_alive identifier:{keep_alive.entity_identifier}")
+			self.log(f"keep_alive entity:{keep_alive.entity}")
+			self.log(f"keep_alive priority:{keep_alive.priority}")
+			self.log(f"keep_alive should_reach_base:{keep_alive.should_reach_base}")
+
+		for kill in event.entity.kill:
+			self.log(f"kill identifier:{kill.entity_identifier}")
+			#self.log(f"kill entity:{kill.entity}")
+			self.log(f"kill priority:{kill.priority}")
+
+		for capture in event.entity.capture:
+			self.log(f"capture identifier:{capture.flag_identifier}")
+			self.log(f"capture entity:{capture.flag}")
+
+		self.log(f"kill_ratio :{event.entity.kill_ratio.ratio}")
 
 	def __adversary_contact(self, event):
 		selected_weapons = event.entity.select_weapons(event.target_group, False)

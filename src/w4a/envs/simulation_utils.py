@@ -220,8 +220,7 @@ def _ensure_passive_agent_laydown(env):
                 entity.rot = loc.rot
                 entities.append(entity)
 
-            # Spawn individual air units as controllable entities
-            for unit in getattr(laydown, 'air_force_units', []):
+            for unit in getattr(laydown, 'air_forces_entities', []):
                 loc = laydown.get_random_air_force_spawn_location()
                 unit.pos = loc.pos
                 unit.rot = loc.rot
