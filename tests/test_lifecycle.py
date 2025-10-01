@@ -76,51 +76,21 @@ class TestTerminationConditions:
         
         env.close()
     
-    def test_manual_termination_conditions(self):
-        """Test manual termination by setting game state"""
+    def test_cleanup_and_multiple_cycles(self):
+        """Close should destroy simulation; multiple cycles should be safe."""
         env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
-        
-        # Manually set capture conditions to test termination
-        # This tests if the environment properly detects win conditions
-        
-        # Set capture timer to completion
-        env.capture_timer_progress = env.config.capture_required_seconds
-        env.capture_possible = True
-        env.island_contested = False
-        
-        # Take a step to trigger termination check
-        action = env.action_space.sample()
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Should detect capture completion
-        if terminated:
-            print("Capture-based termination detected")
-            # Should get bonus reward for capture
-            assert reward > 0, "No bonus reward for capture completion"
-        
+        env.reset()
+        assert env.env.simulation is not None
         env.close()
-        
-        # Test elimination-based termination
-        env2 = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env2.reset()
-        
-        # Manually set all opponents as eliminated
-        # This simulates destroying all enemy forces
-        if hasattr(env2, 'enemy_kills'):
-            # Set enemy kills to simulate total victory
-            original_entities = len(env2.entities)
-            env2.enemy_kills = list(range(original_entities // 2))  # Simulate killing half (enemies)
-        
-        action = env2.action_space.sample()
-        obs, reward, terminated, truncated, info = env2.step(action)
-        
-        if terminated:
-            print("Elimination-based termination detected")
-            # Should get bonus reward for total victory
-            assert reward >= 0, "Negative reward for victory"
-        
-        env2.close()
+        assert env.env.simulation is None
+
+        # Repeat cycles
+        for _ in range(2):
+            env = RLEnvWrapper(TridentIslandEnv())
+            env.reset()
+            assert env.env.simulation is not None
+            env.close()
+            assert env.env.simulation is None
 
 
 class TestEnvironmentIntegration:

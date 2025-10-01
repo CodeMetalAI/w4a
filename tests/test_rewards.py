@@ -70,6 +70,57 @@ class TestRewardSignals:
         env.close()
 
 
+def test_reward_wrapper_inputs_and_non_mutating():
+    """Wrapper receives correct inputs and does not mutate base env reward pipeline."""
+    captured = {}
+
+    class CaptureWrapper(RLEnvWrapper):
+        def reward_fn(self, obs, action, reward, info):
+            captured["obs"] = obs
+            captured["action"] = action
+            captured["base_reward"] = reward
+            captured["info"] = info
+            return reward  # passthrough
+
+    base_env = TridentIslandEnv()
+    wrapped = CaptureWrapper(TridentIslandEnv())
+
+    base_env.reset(seed=7)
+    wrapped.reset(seed=7)
+
+    action = base_env.action_space.sample()
+    _, base_reward, _, _, _ = base_env.step(action)
+    obs, wrapped_reward, _, _, info = wrapped.step(action)
+
+    # Inputs captured
+    assert isinstance(captured["obs"], np.ndarray)
+    assert captured["action"] == action
+    assert isinstance(captured["base_reward"], (int, float))
+    assert isinstance(captured["info"], dict)
+
+    # Wrapper did not change base reward value
+    assert wrapped_reward == captured["base_reward"]
+
+    base_env.close()
+    wrapped.close()
+
+
+def test_reward_based_on_obs_and_action():
+    """Reward can be a function of observation and action."""
+    class ObsActionReward(RLEnvWrapper):
+        def reward_fn(self, obs, action, reward, info):
+            import numpy as _np
+            return float(_np.sum(obs)) + float(action["action_type"])
+
+    env = ObsActionReward(TridentIslandEnv())
+    obs, info = env.reset(seed=11)
+    action = env.action_space.sample()
+    obs2, r, _, _, _ = env.step(action)
+    expected = float(np.sum(obs2)) + float(action["action_type"])
+    assert abs(r - expected) < 1e-6
+    env.close()
+
+
 if __name__ == "__main__":
     # Run basic tests
     print("Running reward tests...")
