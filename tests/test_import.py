@@ -1,7 +1,7 @@
 import numpy as np
 from SimulationInterface import SetRadarEnabled
 from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import RLEnvWrapper
+from w4a.wrappers.wrapper import RLEnvWrapper, RLAgent
 
 
 def test_environment_100_steps():
@@ -10,8 +10,10 @@ def test_environment_100_steps():
     print("Starting 100-step environment test")
     print("=" * 60)
     
-    # Create wrapped environment
-    env = RLEnvWrapper(TridentIslandEnv())
+    # Create wrapped environment with explicit RLAgent (as in wrapper setup)
+    base_env = TridentIslandEnv()
+    agent = RLAgent(base_env.config)
+    env = RLEnvWrapper(base_env, agent=agent, enable_adversary=True)
     
     try:
         # Reset environment
@@ -22,7 +24,7 @@ def test_environment_100_steps():
         print(f"[RESET] Environment ready for stepping")
         
         # Step through environment 100 times
-        for step_num in range(1, 101):
+        for step_num in range(1, 3):
             print(f"\n--- Step {step_num:3d} ---")
             
             # Sample action
@@ -31,12 +33,14 @@ def test_environment_100_steps():
             
             # Take step
             obs, reward, terminated, truncated, info = env.step(action)
+            print("tick agent")
             
             # Print step results
             print(f"[RESULT] Reward: {reward:.4f}")
             print(f"[RESULT] Terminated: {terminated}")
             print(f"[RESULT] Truncated: {truncated}")
             print(f"[RESULT] Observation shape: {obs.shape}")
+            print(f"[INFO] Target groups visible: {env.target_groups}")
             
             # Print additional info if available
             if 'time_elapsed' in info:

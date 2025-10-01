@@ -35,7 +35,7 @@ from pathlib import Path
 import SimulationInterface
 from SimulationInterface import (
     Simulation, SimulationConfig, SimulationData, Faction, Flag,
-    EntitySpawned, Victory, AdversaryContact,
+    EntitySpawned, Victory, AdversaryContact, TargetGroup,
     Entity, ControllableEntity, Unit, EntityDomain,
     EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
@@ -81,8 +81,6 @@ class TridentIslandEnv(gym.Env):
         
         # Set up paths
         self.scenario_path = Path(__file__).parent.parent / "scenarios"  
-        # This is fixed for a single scenario, can be configured for running multiple mission types
-        self.mission_events_path = Path(__file__).parent.parent.parent.parent / "FFSimulation" / "python" / "Bane" # TODO: Path to fixed MissionEvents.json?
 
         # Initialize simulation interface 
         SimulationInterface.initialize()
@@ -207,6 +205,8 @@ class TridentIslandEnv(gym.Env):
         self.target_groups.clear()
         self._target_group_id_by_ptr.clear()
         self._next_target_group_id = 0
+
+        self.flags.clear()
         
         # Initialize enemy sensing data tracking
         self.enemy_sensing_data = {}  # Dict[int, EnemySensingData]
@@ -246,6 +246,7 @@ class TridentIslandEnv(gym.Env):
                 seed=seed
             )
 
+        # self._update_target_groups()
         observation = self._get_observation()
         info = self._build_info()
         
@@ -318,6 +319,10 @@ class TridentIslandEnv(gym.Env):
         
         return observation, reward, terminated, truncated, info
     
+
+    # def _update_target_groups(self):
+    #     pass
+
     def _get_observation(self) -> np.ndarray:
         """Extract observation from current simulation state.
         
@@ -402,7 +407,6 @@ class TridentIslandEnv(gym.Env):
             return False
     
         # Check if any detected targets are valid for this entity
-        # TODO: Is this correct check?
         for target_group in self.target_groups.values():
             is_enemy = target_group.faction.value != self.config.our_faction
             if is_enemy:
@@ -430,7 +434,6 @@ class TridentIslandEnv(gym.Env):
         for entity in self.entities.values():
             if not self._is_controllable_entity(entity):
                 continue
-    
             if entity.domain == EntityDomain.AIR:
                 valid_actions.update({1, 6})  # move, rtb
             if self._entity_can_engage(entity):
@@ -503,6 +506,7 @@ class TridentIslandEnv(gym.Env):
         Returns:
             Dictionary containing detailed environment state information
         """
+        print("building info")
         controllable = self._get_controllable_entities_set()
         detected = self._get_detected_targets_set()
         return {
@@ -631,8 +635,12 @@ class TridentIslandEnv(gym.Env):
             self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
             return
 
+        if isinstance(event.entity, TargetGroup):
+            print("target group spawned")
+            return
+
         # Only track entities that behave like units (must have these attributes)
-        if not isinstance(entity, ControllableEntity):
+        if not isinstance(entity, ControllableEntity) or entity.faction.value != self.config.our_faction:
             return
 
         ptr = id(entity)
@@ -650,11 +658,12 @@ class TridentIslandEnv(gym.Env):
     
     def _adversary_contact(self, event):
         """Handle adversary contact events and assign stable target group IDs."""
-        # TODO: Is this the right check for target group?
-        group = getattr(event, "target_group", None)
+        
+        group = event.entity.TargetGroup
         if group is None:
             return
 
+        print("spawning target group")
         ptr = id(group)
         if ptr in self._target_group_id_by_ptr:
             group_id = self._target_group_id_by_ptr[ptr]

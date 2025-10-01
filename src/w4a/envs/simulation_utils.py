@@ -84,9 +84,6 @@ def _setup_agents(env):
     Args:
         env: The environment instance (TridentIslandEnv)
     """
-    # TODO: @Sanjna initialize the actual RL agents here
-    # env.legacy_agent = SimpleAgent(Faction.LEGACY)
-    # env.dynasty_agent = SimpleAgent(Faction.DYNASTY)
 
     env.simulation.add_agent(env.legacy_agent)
     env.simulation.add_agent(env.dynasty_agent)
@@ -290,8 +287,6 @@ def process_simulation_events(env, events):
         if handler:
             handler(event)
         else:
-            # Uncomment for debugging:
-            # print(f"Frame {getattr(env.simulation, 'frame_index', 0)}: Unhandled {event.__class__.__name__}")
             pass
 
 def pre_simulation_tick(env):

@@ -137,7 +137,7 @@ class RLEnvWrapper(gym.Wrapper):
 
     def _setup_agents(self):
 
-        is_legacy = getattr(self.env.config, "our_faction", 0) == 1
+        is_legacy = self.env.config.our_faction == 0
         user_faction = Faction.LEGACY if is_legacy else Faction.DYNASTY
         opponent_faction = Faction.DYNASTY if is_legacy else Faction.LEGACY
 
