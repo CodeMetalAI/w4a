@@ -57,20 +57,22 @@ def compute_observation(env: Any) -> np.ndarray:
         Normalized observation vector with values in [0, 1]
     """
     # Compute feature groups
-    global_features = _compute_global_features(env)
-    friendly_features = _compute_friendly_features(env)
-    enemy_features = _compute_enemy_features(env)
+    # global_features = _compute_global_features(env)
+    # friendly_features = _compute_friendly_features(env)
+    # enemy_features = _compute_enemy_features(env)
     
     # Concatenate all features
     # Currently only globals are implemented. Future per-entity/group features should
     # be ID-indexed arrays (see build_observation_space note above).
-    obs = np.concatenate([
-        global_features,
-        # friendly_features,  # TODO: Uncomment when implemented
-        # enemy_features,     # TODO: Uncomment when implemented
-    ], dtype=np.float32)
+    # obs = np.concatenate([
+    #     # global_features,
+    #     # friendly_features,  # TODO: Uncomment when implemented
+    #     # enemy_features,     # TODO: Uncomment when implemented
+    # ], dtype=np.float32)
     
-    return obs
+    # return obs
+
+    return np.zeros(env.observation_space.shape, dtype=np.float32)
 
 
 def _compute_global_features(env: Any) -> np.ndarray:
@@ -600,6 +602,7 @@ def _awacs_alive(env: Any) -> bool:
         
     TODO: Determine correct way to identify AWACS entities.
     """
+    # TODO: Is this correct?
     our_faction = env.config.our_faction
     for entity in env.entities.values():
         if (entity.is_alive and 

@@ -140,6 +140,31 @@ def _execute_force_laydown(env, force_laydowns):
         env: The environment instance (TridentIslandEnv)
         force_laydowns: Force laydowns for all factions
     """
+    # Debug: report agent capabilities and laydown contents
+    legacy_has_finalize = callable(getattr(env.legacy_agent, 'finalize_force_laydown', None))
+    dynasty_has_finalize = callable(getattr(env.dynasty_agent, 'finalize_force_laydown', None))
+
+    try:
+        legacy_laydown = force_laydowns[Faction.LEGACY]
+        dynasty_laydown = force_laydowns[Faction.DYNASTY]
+        def _counts(l):
+            return (
+                len(getattr(l, 'ground_forces_entities', [])),
+                len(getattr(l, 'sea_forces_entities', [])),
+                len(getattr(l, 'air_force_squadrons', [])),
+                len(getattr(l, 'air_force_packages', [])),
+            )
+        lg, ls, la, lp = _counts(legacy_laydown)
+        dg, ds, da, dp = _counts(dynasty_laydown)
+        print(f"[LAYDOWN] Legacy finalize={legacy_has_finalize} counts: ground={lg} sea={ls} air_squadrons={la} air_packages={lp}")
+        print(f"[LAYDOWN] Dynasty finalize={dynasty_has_finalize} counts: ground={dg} sea={ds} air_squadrons={da} air_packages={dp}")
+    except Exception as _e:
+        # Non-fatal; diagnostics only
+        pass
+
+    # Ensure passive agents expose minimal laydown hooks so the simulation can query them
+    _ensure_passive_agent_laydown(env)
+
     # Start force laydown phase
     env.simulation.start_force_laydown(force_laydowns)
     
@@ -148,8 +173,67 @@ def _execute_force_laydown(env, force_laydowns):
 
     sim_data = env.sim_data
 
+    # Debug: report event summary from finalize
+    try:
+        events = getattr(sim_data, 'simulation_events', [])
+        print(f"[LAYDOWN] finalize produced {len(events)} events")
+    except Exception:
+        pass
+
     # Process all events coming out of this
     process_simulation_events(env, sim_data.simulation_events)
+
+
+def _ensure_passive_agent_laydown(env):
+    """
+    Attach minimal start/finalize force laydown hooks to agents that don't implement them,
+    so spawning is driven by the environment (not the agent wrapper) while keeping RL agents passive.
+    """
+
+    def _attach(agent):
+        has_start = callable(getattr(agent, 'start_force_laydown', None))
+        has_finalize = callable(getattr(agent, 'finalize_force_laydown', None))
+        if has_start and has_finalize:
+            return
+
+        def start_force_laydown(self, force_laydown):
+            setattr(self, '_force_laydown', force_laydown)
+
+        def finalize_force_laydown(self):
+            laydown = getattr(self, '_force_laydown', None)
+            if laydown is None:
+                return []
+
+            entities = []
+
+            for entity in getattr(laydown, 'ground_forces_entities', []):
+                loc = laydown.get_random_ground_force_spawn_location()
+                entity.pos = loc.pos
+                entity.rot = loc.rot
+                entities.append(entity)
+
+            for entity in getattr(laydown, 'sea_forces_entities', []):
+                loc = laydown.get_random_sea_force_spawn_location()
+                entity.pos = loc.pos
+                entity.rot = loc.rot
+                entities.append(entity)
+
+            # Spawn individual air units as controllable entities
+            for unit in getattr(laydown, 'air_force_units', []):
+                loc = laydown.get_random_air_force_spawn_location()
+                unit.pos = loc.pos
+                unit.rot = loc.rot
+                entities.append(unit)
+
+            # Packages (if any) are handled by SimpleAgent; keep RL side minimal
+            return entities
+
+        # Bind methods to instance
+        setattr(agent, 'start_force_laydown', start_force_laydown.__get__(agent, agent.__class__))
+        setattr(agent, 'finalize_force_laydown', finalize_force_laydown.__get__(agent, agent.__class__))
+
+    _attach(env.legacy_agent)
+    _attach(env.dynasty_agent)
 
 
 def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list_path, 

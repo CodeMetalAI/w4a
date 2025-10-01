@@ -37,6 +37,10 @@ class RLAgent(SimAgent):
         # actions to coordinate multiple agents inside the simulation loop.
         simulation_data.player_events = []
 
+    def tick(self, simulation_data):
+        # No-op tick for passive RL agent; environment controls events
+        simulation_data.player_events = []
+
 
 class RLEnvWrapper(gym.Wrapper):
     """
@@ -97,9 +101,10 @@ class RLEnvWrapper(gym.Wrapper):
 
     def _setup_agents(self):
 
-        is_legacy = getattr(self.env.config, "our_faction", 0) == 1
-        user_faction = Faction.LEGACY if is_legacy else Faction.DYNASTY
-        opponent_faction = Faction.DYNASTY if not is_legacy else Faction.LEGACY
+        # our_faction: 0 = LEGACY, 1 = DYNASTY
+        our_faction_value = getattr(self.env.config, "our_faction", 0)
+        user_faction = Faction.LEGACY if our_faction_value == 0 else Faction.DYNASTY
+        opponent_faction = Faction.DYNASTY if our_faction_value == 0 else Faction.LEGACY
 
         # User agent: provided or passive RLAgent
         user_agent = self.agent or RLAgent(self.env.config, faction=user_faction)
@@ -110,7 +115,8 @@ class RLEnvWrapper(gym.Wrapper):
         else:
             opponent_agent = RLAgent(self.env.config, faction=opponent_faction)
 
-        if is_legacy:
+        # Ensure mapping is by faction name, not by who is user/opponent
+        if user_faction == Faction.LEGACY:
             self.env.legacy_agent = user_agent
             self.env.dynasty_agent = opponent_agent
         else:

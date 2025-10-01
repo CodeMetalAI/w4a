@@ -187,33 +187,7 @@ class TridentIslandEnv(gym.Env):
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
 
-        # Set up simulation using JSON files if available
-        if self.force_config_paths:
-            self.simulation = simulation_utils.setup_simulation_from_json(
-                self, 
-                self.force_config_paths['legacy_entity_list'],
-                self.force_config_paths['dynasty_entity_list'],
-                self.force_config_paths['legacy_spawn_data'],
-                self.force_config_paths['dynasty_spawn_data'],
-                seed=seed
-            )
-        else:
-            # Use default paths from scenario directory
-            legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
-            dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
-            legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
-            dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
-            
-            simulation_utils.setup_simulation_from_json(
-                self, 
-                str(legacy_entity_list),
-                str(dynasty_entity_list),
-                str(legacy_spawn_data),
-                str(dynasty_spawn_data),
-                seed=seed
-            )
-        
-        # Reset state tracking
+        # Reset state tracking BEFORE creating a new simulation so spawn events populate fresh state
         self.current_step = 0
         self.FrameIndex = 0
         self.time_elapsed = 0.0
@@ -239,6 +213,32 @@ class TridentIslandEnv(gym.Env):
         self.last_action_by_entity = {}
         # Applied: last action that passed validation and was applied
         self.last_action_applied_by_entity = {}
+
+        # Set up simulation using JSON files if available
+        if self.force_config_paths:
+            simulation_utils.setup_simulation_from_json(
+                self, 
+                self.force_config_paths['legacy_entity_list'],
+                self.force_config_paths['dynasty_entity_list'],
+                self.force_config_paths['legacy_spawn_data'],
+                self.force_config_paths['dynasty_spawn_data'],
+                seed=seed
+            )
+        else:
+            # Use default paths from scenario directory
+            legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
+            dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
+            legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
+            dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
+            
+            simulation_utils.setup_simulation_from_json(
+                self, 
+                str(legacy_entity_list),
+                str(dynasty_entity_list),
+                str(legacy_spawn_data),
+                str(dynasty_spawn_data),
+                seed=seed
+            )
 
         observation = self._get_observation()
         info = self._build_info()
@@ -589,24 +589,17 @@ class TridentIslandEnv(gym.Env):
         capture_win = self.capture_timer_progress >= self.config.capture_required_seconds and self.capture_possible
         kill_ratio = self._compute_kill_ratio()
         kill_ratio_win = kill_ratio >= self.config.kill_ratio_threshold
-        print("Capture win: ", capture_win)
-        print("Kill ratio win: ", kill_ratio_win)
 
         if capture_win or kill_ratio_win:
-            print("Win conditions met")
             return "win"
 
         # Loss conditions
         no_capture_path = (not self.capture_possible)
         inverse_threshold = 1.0 / max(1e-6, self.config.kill_ratio_threshold)
         kill_ratio_loss = kill_ratio <= inverse_threshold
-        print("No capture path: ", no_capture_path)
-        print("Kill ratio loss: ", kill_ratio_loss)
         if no_capture_path and kill_ratio_loss:
-            print("Loss conditions met")
             return "loss"
 
-        print("Ongoing")
         return "ongoing"
 
     def _did_win(self) -> bool:
@@ -623,6 +616,11 @@ class TridentIslandEnv(gym.Env):
         try:
             entity = event.entity
         except Exception:
+            return
+
+        # TODO: This isn't the correct check?
+        # Only track entities that behave like units (must have these attributes)
+        if not entity.is_controllable:
             return
 
         ptr = id(entity)
