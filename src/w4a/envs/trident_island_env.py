@@ -34,11 +34,15 @@ from pathlib import Path
 
 import SimulationInterface
 from SimulationInterface import (
-    Simulation, SimulationConfig, SimulationData, Faction,
+    Simulation, SimulationConfig, SimulationData, Faction, Flag,
     EntitySpawned, Victory, AdversaryContact,
     Entity, ControllableEntity, Unit, EntityDomain,
     EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
+
+
+FACTION_FLAG_IDS = { Faction.LEGACY: 2, Faction.DYNASTY: 1, Faction.NEUTRAL: 3 } #Ideally, we would not hardcode this
+CENTER_ISLAND_FLAG_ID = FACTION_FLAG_IDS[Faction.NEUTRAL]
 
 
 class TridentIslandEnv(gym.Env):
@@ -101,7 +105,7 @@ class TridentIslandEnv(gym.Env):
         }
 
         # Stable ID tracking for the duration of an episode
-        # Entities: Dict[id -> entity], includes all factions and keeps entries after death
+        # Entities: Dict[id -> entity], includes self factions and keeps entries after death
         self.entities = {}
         self._entity_id_by_ptr = {}  # Dict[id(entity_ptr) -> entity_id]
         self._next_entity_id = 0
@@ -110,6 +114,8 @@ class TridentIslandEnv(gym.Env):
         self.target_groups = {}
         self._target_group_id_by_ptr = {}  # Dict[id(group_ptr) -> group_id]
         self._next_target_group_id = 0
+
+        self.flags = {}
         
         # Calculate grid dimensions for discretized positioning
         map_size_km = self.config.map_size_km[0]
@@ -264,7 +270,7 @@ class TridentIslandEnv(gym.Env):
         self._record_last_intended_action(action)
 
         # Execute action (minimal enforcement inside action system; masks are advisory only)
-        player_events = actions.execute_action(action, self.entities, self.target_groups, self.config)
+        player_events = actions.execute_action(action, self.entities, self.target_groups, self.flags, self.config)
         print(f"Player events: {player_events}")
         # Prepare simulation step data
         sim_data = SimulationData()
@@ -411,7 +417,6 @@ class TridentIslandEnv(gym.Env):
         Returns:
             True if entity is capable of capturing objectives
         """
-        # TODO: Check if its settler 
         return entity.can_capture
     
     def _get_valid_action_types(self) -> set:
@@ -434,7 +439,7 @@ class TridentIslandEnv(gym.Env):
                 valid_actions.add(5)  # capture
             if entity.has_radar:
                 valid_actions.update({3, 4})  # stealth, sense
-            if entity.can_refuel: # TODO: Can all air units refuel?
+            if entity.can_refuel:
                 valid_actions.add(7)  # refuel
     
         return valid_actions
@@ -622,9 +627,11 @@ class TridentIslandEnv(gym.Env):
         except Exception:
             return
 
-        # TODO: This isn't the correct check?
-        # Only track entities that behave like units (must have these attributes)
+        if isinstance(event.entity, Flag):
+            self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
+            return
 
+        # Only track entities that behave like units (must have these attributes)
         if not isinstance(entity, ControllableEntity):
             return
 

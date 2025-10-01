@@ -73,7 +73,8 @@ def test_env_reset_step_cycle():
     assert isinstance(info, dict)
     
     # Test multiple steps
-    for _ in range(5):
+    for i in range(100):
+        print(f"Step {i}")
         action = wrapped.action_space.sample()
         obs, reward, terminated, truncated, info = wrapped.step(action)
         
@@ -85,6 +86,9 @@ def test_env_reset_step_cycle():
         assert isinstance(terminated, bool)
         assert isinstance(truncated, bool)
         assert isinstance(info, dict)
+
+        print("Terminated: ", terminated)
+        print("Truncated: ", truncated)
         
         if terminated or truncated:
             break

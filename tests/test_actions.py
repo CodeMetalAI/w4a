@@ -6,7 +6,6 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_island_env import TridentIslandEnv
-#from w4a.wrappers.wrapper import EnvWrapper
 from w4a.training.evaluation import RandomAgent, evaluate
 from w4a.training.replay import ReplayRecorder
 
@@ -39,10 +38,11 @@ def test_move_action():
     entity = create_test_entity()
 
     entities = { 1: entity}
-
+    flags = {}
+    
     action = {"entity_id": 1, "action_type": 1, "move_center_grid": 10, "move_short_axis_km": 10, "move_long_axis_km": 100, "move_axis_angle": 0}
 
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
     cap = execute_move_action(1, action, entities, Config())
 
@@ -65,13 +65,14 @@ def test_rtb_action():
     entity = create_test_entity()
     flag = create_player_flag()
 
-    entities = { 33: entity, FACTION_FLAG_IDS[Faction.LEGACY]: flag}
+    entities = { 33: entity}
+    flags = { FACTION_FLAG_IDS[Faction.LEGACY]: flag}
 
     action = {"entity_id": 33, "action_type": 6 }
 
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
-    event = execute_rtb_action(33, action, entities)
+    event = execute_rtb_action(33, action, entities, flags)
 
     assert event
     assert event.flag == flag
@@ -82,9 +83,10 @@ def test_set_radar_focus_action():
     entity = create_test_entity()
 
     entities = { 1: entity}
+    flags = {}
 
     action = {"entity_id": 1, "action_type": 4, "sensing_position_grid": 10 }  
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
 
     event = execute_set_radar_focus_action(1, action, entities, Config())
@@ -97,10 +99,11 @@ def test_stealth_action():
     entity = create_test_entity()
 
     entities = { 1: entity}
+    flags = {}
 
     action = {"entity_id": 1, "action_type": 3, "stealth_enabled": True }
 
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
     event = execute_stealth_action(1, action, entities, Config())
 
@@ -113,13 +116,14 @@ def test_capture_action():
     entity = create_capture_entity()
     flag = create_neutral_flag()
 
-    entities = { 33: entity, FACTION_FLAG_IDS[Faction.NEUTRAL]: flag}
+    entities = { 33: entity}
+    flags = {FACTION_FLAG_IDS[Faction.NEUTRAL]: flag}
 
     action = {"entity_id": 33, "action_type": 5 }
 
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
-    event = execute_capture_action(33, action, entities)
+    event = execute_capture_action(33, action, entities, flags)
 
     assert event
     assert event.flag == flag
@@ -131,10 +135,11 @@ def test_refuel_action():
     refueling_entity = create_refueling_entity()
 
     entities = { 1: entity, 2: refueling_entity}
+    flags = {}
 
     action = {"entity_id": 1, "action_type": 7, "refuel_target_id": 2 }
 
-    assert is_valid_action(action, entities, {}, Config())
+    assert is_valid_action(action, entities, {}, flags, Config())
 
     event = execute_refuel_action(1, action, entities)
 

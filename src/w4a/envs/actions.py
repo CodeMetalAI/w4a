@@ -22,6 +22,8 @@ from ..config import Config
 
 import math
 
+from .trident_island_env import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
+
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
@@ -29,10 +31,7 @@ from SimulationInterface import (
     Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
-FACTION_FLAG_IDS = { Faction.LEGACY: 2, Faction.DYNASTY: 1, Faction.NEUTRAL: 3 } #Ideally, we would not hardcode this
-CENTER_ISLAND_FLAG_ID = FACTION_FLAG_IDS[Faction.NEUTRAL]
-
-def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> List:
+def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dict, config: Config) -> List:
     """Execute a hierarchical action and return corresponding player events.
     
     Validates the action against current game state and entity capabilities,
@@ -50,39 +49,37 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, config: Co
     action_type = action["action_type"]
     entity_id = action["entity_id"]
 
-    player_event = []
-    
-    if not is_valid_action(action, entities, target_groups, config):
-        return player_event
-    
+    if not is_valid_action(action, entities, target_groups, flags, config):
+        return []
+
     if action_type == 0:  # No-op
-        return player_event
+        return []
     elif action_type == 1:  # Move
         event = execute_move_action(entity_id, action, entities, config)
-        player_event = event
+        return [event]
     elif action_type == 2:  # Engage
         event = execute_engage_action(entity_id, action, entities, target_groups)
-        player_event = event
+        return [event]
     elif action_type == 3:  # Stealth
-        event = execute_stealth_action(entity_id, action, entities)
-        player_event = event
+        event = execute_stealth_action(entity_id, action, entities, config)
+        return [event]
     elif action_type == 4:  # Sensing Direction
         event = execute_set_radar_focus_action(entity_id, action, entities, config)
-        player_event = event
+        return [event]
     elif action_type == 5:  # Capture
-        event = execute_capture_action(entity_id, action, entities)
-        player_event = event
+        event = execute_capture_action(entity_id, action, entities, flags)
+        return [event]
     elif action_type == 6:  # RTB
-        event = execute_rtb_action(entity_id, action, entities)
-        player_event = event
+        event = execute_rtb_action(entity_id, action, entities, flags)
+        return [event]
     elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
-        player_event = event
+        return [event]
     
-    return player_event
+    return []
 
 
-def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: Config) -> bool:
+def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dict, config: Config) -> bool:
     """Validate action against simulation constraints and current game state.
     
     Performs comprehensive validation including entity existence, capability checks,
@@ -113,9 +110,9 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, config: C
     elif action_type == 4:  # Sensing Position
         return validate_sensing_position_action(action, entities, config)
     elif action_type == 5:  # Capture
-        return validate_capture_action(action, entities)
+        return validate_capture_action(action, entities, flags)
     elif action_type == 6:  # RTB
-        return validate_rtb_action(action, entities)
+        return validate_rtb_action(action, entities, flags)
     elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
     
@@ -250,10 +247,10 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     
     return event
 
-def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
+def execute_capture_action(entity_id: int, action: Dict, entities: Dict, flags: Dict):
     # """Execute land action - land at nearest friendly airbase"""
     entity = entities[entity_id]
-    flag = entities[FACTION_FLAG_IDS[Faction.NEUTRAL]]
+    flag = flags[FACTION_FLAG_IDS[Faction.NEUTRAL]]
 
     event = CaptureFlag()
     event.entity = entity
@@ -261,10 +258,10 @@ def execute_capture_action(entity_id: int, action: Dict, entities: Dict):
 
     return event
 
-def execute_rtb_action(entity_id: int, action: Dict, entities: Dict):
+def execute_rtb_action(entity_id: int, action: Dict, entities: Dict, flags: Dict):
     """Execute RTB action - return to base"""
     entity = entities[entity_id]
-    flag = entities[FACTION_FLAG_IDS[entity.faction]]
+    flag = flags[FACTION_FLAG_IDS[entity.faction]]
 
     event = RTBManouver()
     event.entity = entity
@@ -458,7 +455,7 @@ def validate_sensing_position_action(action: Dict, entities: Dict, config: Confi
     
     return True
 
-def validate_capture_action(action: Dict, entities: Dict) -> bool:
+def validate_capture_action(action: Dict, entities: Dict, flags: Dict) -> bool:
     """Validate capture action parameters and entity capability.
     
     Args:
@@ -472,7 +469,7 @@ def validate_capture_action(action: Dict, entities: Dict) -> bool:
     entity = entities[entity_id]
 
     flag_id = FACTION_FLAG_IDS[Faction.NEUTRAL]
-    flag = entities[flag_id]
+    flag = flags[flag_id]
     
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
@@ -489,7 +486,7 @@ def validate_capture_action(action: Dict, entities: Dict) -> bool:
     return True
 
 
-def validate_rtb_action(action: Dict, entities: Dict) -> bool:
+def validate_rtb_action(action: Dict, entities: Dict, flags: Dict) -> bool:
     """Validate return-to-base action parameters.
     
     Args:
@@ -503,8 +500,7 @@ def validate_rtb_action(action: Dict, entities: Dict) -> bool:
     entity = entities[entity_id]
 
     flag_id = FACTION_FLAG_IDS[entity.faction]
-    flag = entities[flag_id]
-    
+    flag = flags[flag_id]
     # Check entity is aircraft
     if entity.domain != EntityDomain.AIR:
         return False
