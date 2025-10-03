@@ -659,7 +659,7 @@ class TridentIslandEnv(gym.Env):
     def _adversary_contact(self, event):
         """Handle adversary contact events and assign stable target group IDs."""
         
-        group = event.entity.TargetGroup
+        group = event.target_group
         if group is None:
             return
 
