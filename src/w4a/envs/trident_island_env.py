@@ -330,7 +330,7 @@ class TridentIslandEnv(gym.Env):
             Normalized observation vector for the agent
         """
         # Update globals that depend on per-step conditions
-        return observations.compute_observation(self)
+        return observations.compute_observation(self)   # @Sanjna: we should ask the agents to do this
     
     def _calculate_reward(self) -> float:
         """Return the base per-step reward.

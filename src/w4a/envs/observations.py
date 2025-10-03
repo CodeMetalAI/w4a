@@ -72,6 +72,8 @@ def compute_observation(env: Any) -> np.ndarray:
     
     # return obs
 
+    # @Sanjna: not sure what to do here. My thinking would be that we make (per faction) a list of friendly entities and a list of target groups. The agent can track this data, and pass it to here.
+
     return np.zeros(env.observation_space.shape, dtype=np.float32)
 
 
