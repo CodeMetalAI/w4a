@@ -34,33 +34,6 @@ class SimpleAgent(Agent, LoggingMixin):
 	def finalize_force_laydown(self):
 		force_laydown = self.force_laydown
 
-		# Create airforce packages
-		package = SpawnPackage()
-		package.faction = self.faction
-
-		air_forces_entities = []
-
-		for package in force_laydown.air_force_packages:
-			air_forces_entities.append(package)
-
-		for squadron in force_laydown.air_force_squadrons:
-			package.add_entity(squadron)
-
-			if len(package.spawn_entities) == 2:
-				package.identifier = f"{squadron.identifier}_Package"
-				package.apply_auto_formation_offsets()
-
-				air_forces_entities.append(package)
-
-				package = SpawnPackage()
-				package.faction = self.faction
-
-		if len(package.spawn_entities) > 0:
-			package.identifier = "Remainder_Package"
-			package.apply_auto_formation_offsets()
-
-			air_forces_entities.append(package)
-
 		entities = []
 
 		for entity in force_laydown.ground_forces_entities:
@@ -79,7 +52,7 @@ class SimpleAgent(Agent, LoggingMixin):
 
 			entities.append(entity)
 
-		for entity in air_forces_entities:
+		for entity in force_laydown.air_forces_entities:
 			spawn_location = force_laydown.get_random_air_force_spawn_location()
 
 			entity.pos = spawn_location.pos
@@ -89,9 +62,6 @@ class SimpleAgent(Agent, LoggingMixin):
 				CAPManouver.create_from_spline_points(force_laydown.get_random_cap().spline_points))
 
 			entities.append(entity)
-
-		for unit in force_laydown.air_force_units:
-			air_forces_entities.append(unit)
 
 		return entities	# We create no packages at the moment, but just place stuff on the map as is.
 
