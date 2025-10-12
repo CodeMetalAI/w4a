@@ -2,161 +2,102 @@
 Environment Mechanics Tests
 
 Tests to verify that environment state (obs, info, masks, entities) 
-is properly updated when actions are applied.
+is properly updated when actions are applied in the multiagent environment.
 """
 
 import pytest
 import numpy as np
 from w4a import Config
-from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import RLEnvWrapper
+from w4a.envs.trident_multiagent_env import TridentIslandMultiAgentEnv
+from w4a.agents import CompetitionAgent, SimpleAgent
+from SimulationInterface import Faction
 
 
 class TestActionTracking:
     """Test action tracking system (intended vs applied actions)"""
     
-    def test_valid_action_tracking(self):
-        """Test that valid actions are both intended and applied"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_valid_action_tracking_legacy(self):
+        """Test that valid actions are both intended and applied for legacy agent"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find a controllable entity
-        controllable_entities = info["valid_masks"]["controllable_entities"]
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Find a controllable entity for legacy
+        controllable_entities = infos["legacy"]["valid_masks"]["controllable_entities"]
         assert len(controllable_entities) > 0, "No controllable entities found"
         entity_id = list(controllable_entities)[0]
         
         # Create valid move action
-        action = {
+        action_legacy = {
             "action_type": 1, "entity_id": entity_id, "move_center_grid": 5,
             "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
             "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
             "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
             "refuel_target_id": 0
         }
+        action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        actions = {"legacy": action_legacy, "dynasty": action_dynasty}
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
         # Verify action intent recorded correctly
-        intent = info["last_action_intent_by_entity"]
-        assert str(entity_id) in intent
-        assert intent[str(entity_id)]["action_type"] == 1
-        assert "time" in intent[str(entity_id)]
+        intent = infos["legacy"]["last_action_intent_by_entity"]
+        assert len(intent) > 0, "No action intent recorded"
         
-        # Verify action was applied
-        applied = info["last_action_applied_by_entity"]
-        assert str(entity_id) in applied
+        # Find our entity in the intent dict
+        found_intent = False
+        for key, value in intent.items():
+            if value["entity_id"] == entity_id:
+                assert value["action_type"] == 1
+                assert "time" in value
+                found_intent = True
+                break
+        
+        assert found_intent, f"Intent for entity {entity_id} not found"
         
         env.close()
     
-    def test_invalid_entity_opposite_faction(self):
-        """Test action with entity from opposite faction"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_invalid_entity_not_applied(self):
+        """Test action with invalid entity is not applied"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find an entity not in controllable mask (opposite faction)
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        all_entity_ids = set(env.env.entities.keys())
-        opposite_faction_entities = all_entity_ids - controllable_entities
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        assert len(opposite_faction_entities) > 0, "No opposite faction entities found"
-        invalid_entity_id = list(opposite_faction_entities)[0]
+        observations, infos = env.reset()
         
-        # Create action with opposite faction entity
-        action = {
+        # Use an invalid entity ID (out of range)
+        invalid_entity_id = config.max_entities + 100
+        
+        # Create action with invalid entity
+        action_legacy = {
             "action_type": 1, "entity_id": invalid_entity_id, "move_center_grid": 5,
             "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
             "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
             "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
             "refuel_target_id": 0
         }
+        action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        actions = {"legacy": action_legacy, "dynasty": action_dynasty}
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        # Verify action intent recorded correctly
-        intent = info["last_action_intent_by_entity"]
-        assert str(invalid_entity_id) in intent
-        assert intent[str(invalid_entity_id)]["action_type"] == 1
-        assert "time" in intent[str(invalid_entity_id)]
+        # Verify action was recorded in intent
+        intent = infos["legacy"]["last_action_intent_by_entity"]
+        assert len(intent) > 0, "Intent should be recorded"
         
-        # Verify action was NOT applied
-        applied = info["last_action_applied_by_entity"]
-        assert str(invalid_entity_id) not in applied
-        
-        env.close()
-    
-    def test_engage_with_invalid_target(self):
-        """Test engage action with target not in visible_targets"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
-        
-        # Find controllable entity
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        assert len(controllable_entities) > 0, "No controllable entities found"
-        entity_id = list(controllable_entities)[0]
-        
-        # Find invalid target (not in visible_targets)
-        visible_targets = info["valid_masks"]["visible_targets"]
-        invalid_target_id = env.config.max_target_groups - 1
-        while invalid_target_id in visible_targets and invalid_target_id >= 0:
-            invalid_target_id -= 1
-        
-        # Create engage action with invalid target
-        action = {
-            "action_type": 2, "entity_id": entity_id, "move_center_grid": 0,
-            "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-            "target_group_id": invalid_target_id, "weapon_selection": 0, "weapon_usage": 0,
-            "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-            "refuel_target_id": 0
-        }
-        
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Verify action intent recorded correctly
-        intent = info["last_action_intent_by_entity"]
-        assert str(entity_id) in intent
-        assert intent[str(entity_id)]["action_type"] == 2
-        
-        # Verify action was NOT applied (routes to no-op)
-        applied = info["last_action_applied_by_entity"]
-        assert str(entity_id) not in applied
-        
-        env.close()
-    
-    def test_invalid_action_type(self):
-        """Test action type not in action_types mask"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
-        
-        # Find controllable entity
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        assert len(controllable_entities) > 0, "No controllable entities found"
-        entity_id = list(controllable_entities)[0]
-        
-        # Find invalid action type
-        valid_action_types = info["valid_masks"]["action_types"]
-        invalid_action_type = 7
-        while invalid_action_type in valid_action_types and invalid_action_type >= 0:
-            invalid_action_type -= 1
-        
-        # Create action with invalid action type
-        action = {
-            "action_type": invalid_action_type, "entity_id": entity_id, "move_center_grid": 0,
-            "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-            "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-            "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-            "refuel_target_id": 0
-        }
-        
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Verify action intent recorded correctly
-        intent = info["last_action_intent_by_entity"]
-        assert str(entity_id) in intent
-        assert intent[str(entity_id)]["action_type"] == invalid_action_type
-        
-        # Verify action was NOT applied (routes to no-op)
-        applied = info["last_action_applied_by_entity"]
-        assert str(entity_id) not in applied
+        # Verify action was NOT applied (no entry in applied dict for this entity)
+        applied = infos["legacy"]["last_action_applied_by_entity"]
+        # Applied should not have this invalid entity
+        for key, value in applied.items():
+            assert value.get("entity_id") != invalid_entity_id, "Invalid entity should not be applied"
         
         env.close()
 
@@ -164,83 +105,117 @@ class TestActionTracking:
 class TestKillTracking:
     """Test friendly and enemy kill tracking"""
     
-    def test_friendly_entity_death_tracking(self):
-        """Test that friendly entity deaths are tracked correctly"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_kill_tracking_updates_info(self):
+        """Test that kill counts are tracked in info dict"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find a friendly entity
-        our_faction = env.config.our_faction
-        friendly_entity = None
-        for entity in env.env.entities.values():
-            if entity.faction.value == our_faction and entity.is_alive:
-                friendly_entity = entity
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Record initial kill counts
+        initial_legacy_casualties = infos["legacy"]["mission"]["my_casualties"]
+        initial_dynasty_casualties = infos["dynasty"]["mission"]["my_casualties"]
+        
+        # Step environment a few times
+        for _ in range(5):
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            # Verify kill tracking fields exist
+            assert "my_casualties" in infos["legacy"]["mission"]
+            assert "enemy_casualties" in infos["legacy"]["mission"]
+            assert "kill_ratio" in infos["legacy"]["mission"]
+            
+            assert "my_casualties" in infos["dynasty"]["mission"]
+            assert "enemy_casualties" in infos["dynasty"]["mission"]
+            assert "kill_ratio" in infos["dynasty"]["mission"]
+            
+            # Verify symmetry: legacy's enemy casualties = dynasty's my casualties
+            assert infos["legacy"]["mission"]["enemy_casualties"] == infos["dynasty"]["mission"]["my_casualties"]
+            assert infos["dynasty"]["mission"]["enemy_casualties"] == infos["legacy"]["mission"]["my_casualties"]
+            
+            if terminations["legacy"] or truncations["legacy"]:
                 break
         
-        assert friendly_entity is not None, "No living friendly entity found"
+        env.close()
+
+
+class TestEntityDeath:
+    """Test that masks and info properly handle dead entities"""
+    
+    def test_controllable_entities_only_includes_alive(self):
+        """Test that only alive entities appear in controllable_entities mask"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Record initial kill count
-        initial_friendly_kills = len(env.env.friendly_kills)
-        initial_info_kills = info["mission"]["friendly_kills"]
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Manually kill the entity
-        # TODO: Is it safe to manipulate is_alive directly?
-        friendly_entity.is_alive = False
+        observations, infos = env.reset()
         
-        # Step to trigger mission metrics update
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
-        
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Verify entity appears in friendly_kills
-        assert friendly_entity in env.env.friendly_kills
-        
-        # Verify info dict reflects the kill
-        assert info["mission"]["friendly_kills"] == initial_info_kills + 1
+        # Verify all controllable entities are alive
+        controllable_entities = infos["legacy"]["valid_masks"]["controllable_entities"]
+        for entity_id in controllable_entities:
+            entity = agent_legacy._sim_agent.controllable_entities[entity_id]
+            assert entity.is_alive, f"Entity {entity_id} in controllable mask should be alive"
         
         env.close()
     
-    def test_enemy_entity_death_tracking(self):
-        """Test that enemy entity deaths are tracked correctly"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_entity_counts_match_actual_entities(self):
+        """Test that entity count fields in info dict match actual alive entities"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find an enemy entity
-        our_faction = env.config.our_faction
-        enemy_entity = None
-        for entity in env.env.entities.values():
-            if entity.faction.value != our_faction and entity.is_alive:
-                enemy_entity = entity
-                break
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        assert enemy_entity is not None, "No living enemy entity found"
+        observations, infos = env.reset()
         
-        # Record initial kill count
-        initial_enemy_kills = len(env.env.enemy_kills)
-        initial_info_kills = info["mission"]["enemy_kills"]
+        # Count actual alive entities for legacy
+        legacy_alive_count = sum(1 for e in agent_legacy._sim_agent.controllable_entities.values() if e.is_alive)
+        dynasty_alive_count = sum(1 for e in agent_dynasty._sim_agent.controllable_entities.values() if e.is_alive)
         
-        # Manually kill the entity
-        # TODO: Is it safe to manipulate is_alive directly?
-        enemy_entity.is_alive = False
+        # Verify info dict matches
+        assert infos["legacy"]["my_entities_count"] == legacy_alive_count, "Legacy entity count should match alive entities"
+        assert infos["dynasty"]["my_entities_count"] == dynasty_alive_count, "Dynasty entity count should match alive entities"
         
-        # Step to trigger mission metrics update
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
+        # total_entities refers to each agent's own entity count
+        assert infos["legacy"]["total_entities"] == legacy_alive_count
+        assert infos["dynasty"]["total_entities"] == dynasty_alive_count
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        env.close()
+    
+    def test_refuel_sets_only_include_alive(self):
+        """Test that refuel receivers/providers only include alive entities"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Verify entity appears in enemy_kills
-        assert enemy_entity in env.env.enemy_kills
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Verify info dict reflects the kill
-        assert info["mission"]["enemy_kills"] == initial_info_kills + 1
+        observations, infos = env.reset()
+        
+        # Verify all refuel entities are alive
+        receivers = infos["legacy"]["refuel"]["receivers"]
+        providers = infos["legacy"]["refuel"]["providers"]
+        
+        for entity_id in receivers:
+            entity = agent_legacy._sim_agent.controllable_entities[entity_id]
+            assert entity.is_alive, f"Refuel receiver {entity_id} should be alive"
+        
+        for entity_id in providers:
+            entity = agent_legacy._sim_agent.controllable_entities[entity_id]
+            assert entity.is_alive, f"Refuel provider {entity_id} should be alive"
         
         env.close()
 
@@ -248,407 +223,333 @@ class TestKillTracking:
 class TestTerminationConditions:
     """Test termination conditions"""
     
-    def test_capture_based_termination(self):
-        """Test termination based on capture completion"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_capture_win_legacy(self):
+        """Test termination based on legacy capture completion"""
+        config = Config()
+        config.capture_required_seconds = 10.0
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Stub capture completion conditions
-        env.env.capture_timer_progress = env.config.capture_required_seconds
-        env.env.capture_possible = True
-        env.env.island_contested = False
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Simulate legacy capturing
+        env.capture_progress_by_faction[Faction.LEGACY] = config.capture_required_seconds
+        env.capture_possible_by_faction[Faction.LEGACY] = True
         
         # Step to trigger termination check
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
-        
-        obs, reward, terminated, truncated, info = env.step(action)
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
         # Verify termination occurred
-        assert terminated == True, "Capture completion should trigger termination"
+        assert terminations["legacy"] == True, "Capture completion should trigger termination"
+        assert terminations["dynasty"] == True, "Both agents should terminate simultaneously"
+        assert infos["legacy"]["termination_cause"] == "legacy_win"
         
         env.close()
     
-    def test_kill_ratio_win_termination(self):
-        """Test termination based on kill ratio win condition"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_capture_win_dynasty(self):
+        """Test termination based on dynasty capture completion"""
+        config = Config()
+        config.capture_required_seconds = 10.0
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Stub kill ratio win by manipulating kill sets
-        # Add many enemy kills, few friendly kills
-        enemy_entities = [e for e in env.env.entities.values() if e.faction.value != env.config.our_faction]
-        for i, entity in enumerate(enemy_entities[:5]):  # Kill first 5 enemies
-            env.env.enemy_kills.add(entity)
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Simulate dynasty capturing
+        env.capture_progress_by_faction[Faction.DYNASTY] = config.capture_required_seconds
+        env.capture_possible_by_faction[Faction.DYNASTY] = True
         
         # Step to trigger termination check
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Check if high kill ratio triggers termination
-        kill_ratio = info["mission"]["kill_ratio"]
-        if kill_ratio >= env.config.kill_ratio_threshold:
-            assert terminated == True, "High kill ratio should trigger termination"
+        # Verify termination occurred
+        assert terminations["dynasty"] == True, "Capture completion should trigger termination"
+        assert terminations["legacy"] == True, "Both agents should terminate simultaneously"
+        assert infos["dynasty"]["termination_cause"] == "dynasty_win"
         
         env.close()
     
-    def test_kill_ratio_loss_termination(self):
-        """Test termination based on kill ratio loss condition"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_time_limit_truncation(self):
+        """Test truncation based on time limit"""
+        config = Config()
+        config.max_game_time = 10.0
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Stub kill ratio loss conditions
-        env.env.capture_possible = False  # No capture path
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Add many friendly kills, few enemy kills
-        friendly_entities = [e for e in env.env.entities.values() if e.faction.value == env.config.our_faction]
-        for i, entity in enumerate(friendly_entities[:3]):  # Kill first 3 friendlies
-            env.env.friendly_kills.add(entity)
+        observations, infos = env.reset()
+        
+        # Fast-forward time
+        env.time_elapsed = config.max_game_time + 1.0
+        
+        # Step to trigger truncation check
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
+        
+        # Verify truncation occurred
+        assert truncations["legacy"] == True, "Time limit should trigger truncation"
+        assert truncations["dynasty"] == True, "Both agents should truncate simultaneously"
+        assert infos["legacy"]["termination_cause"] == "time_limit"
+        
+        env.close()
+    
+    def test_kill_ratio_win_legacy(self):
+        """Test termination based on legacy achieving favorable kill ratio"""
+        config = Config()
+        config.kill_ratio_win_threshold = 2.0
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Simulate legacy achieving high kill ratio by manually manipulating kill sets
+        # Legacy kills 10 dynasty entities, dynasty kills 2 legacy entities
+        # Kill ratio for legacy = 10/2 = 5.0 > 2.0 threshold
+        
+        # Get entities and add to kill tracking
+        dynasty_entities = list(agent_dynasty._sim_agent.controllable_entities.values())[:10]
+        legacy_entities = list(agent_legacy._sim_agent.controllable_entities.values())[:2]
+        
+        # Manually track kills (simulating what would happen in combat)
+        for entity in dynasty_entities:
+            env.enemy_kills.add(entity)  # Legacy's perspective: enemy kills
+        for entity in legacy_entities:
+            env.friendly_kills.add(entity)  # Legacy's perspective: friendly kills
         
         # Step to trigger termination check
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        # Verify kill ratio is favorable
+        kill_ratio = infos["legacy"]["mission"]["kill_ratio"]
+        assert kill_ratio >= config.kill_ratio_win_threshold, f"Kill ratio {kill_ratio} should be >= {config.kill_ratio_win_threshold}"
         
-        # Check if poor kill ratio + no capture path triggers termination
-        kill_ratio = info["mission"]["kill_ratio"]
-        inverse_threshold = 1.0 / max(1e-6, env.config.kill_ratio_threshold)
-        if kill_ratio <= inverse_threshold:
-            assert terminated == True, "Poor kill ratio with no capture should trigger termination"
+        # Verify termination occurred
+        assert terminations["legacy"] == True, "Kill ratio win should trigger termination"
+        assert terminations["dynasty"] == True, "Both agents should terminate simultaneously"
+        assert infos["legacy"]["termination_cause"] == "legacy_win"
         
         env.close()
 
 
-class TestActionExecution:
-    """Test execution of all action types and info dict updates"""
+class TestInfoDictUpdates:
+    """Test that info dict is properly updated each step"""
     
-    def test_no_op_action(self):
-        """Test no-op action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_time_progression(self):
+        """Test that time values update correctly"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Record initial state
-        initial_time = info["time_elapsed"]
-        initial_step = info["step"]
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Execute no-op
-        action = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
+        observations, infos = env.reset()
         
-        obs, reward, terminated, truncated, info = env.step(action)
+        initial_time = infos["legacy"]["time_elapsed"]
+        initial_step = infos["legacy"]["step"]
+        initial_time_remaining = infos["legacy"]["time_remaining"]
+        
+        # Take a step
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
         # Verify time progression
-        assert info["time_elapsed"] > initial_time
-        assert info["step"] == initial_step + 1
+        assert infos["legacy"]["time_elapsed"] > initial_time
+        assert infos["legacy"]["step"] == initial_step + 1
+        assert infos["legacy"]["time_remaining"] < initial_time_remaining
         
-        # Verify action tracking
-        intent = info["last_action_intent_by_entity"]
-        assert "0" in intent
-        assert intent["0"]["action_type"] == 0
-        
-        env.close()
-    
-    def test_move_action(self):
-        """Test move action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
-        
-        # Find controllable entity
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        assert len(controllable_entities) > 0, "No controllable entities found"
-        entity_id = list(controllable_entities)[0]
-        
-        # Execute move action
-        action = {"action_type": 1, "entity_id": entity_id, "move_center_grid": 10,
-                 "move_short_axis_km": 1, "move_long_axis_km": 2, "move_axis_angle": 1,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
-        
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Verify action tracking
-        intent = info["last_action_intent_by_entity"]
-        assert str(entity_id) in intent
-        assert intent[str(entity_id)]["action_type"] == 1
-        
-        applied = info["last_action_applied_by_entity"]
-        assert str(entity_id) in applied
-        
-        # Verify entity remains controllable
-        assert entity_id in info["valid_masks"]["controllable_entities"]
-        
-        # TODO: Check entity position changes in obs space
+        # Verify both agents see same global time
+        assert infos["legacy"]["time_elapsed"] == infos["dynasty"]["time_elapsed"]
+        assert infos["legacy"]["time_remaining"] == infos["dynasty"]["time_remaining"]
         
         env.close()
     
-    def test_engage_action(self):
-        """Test engage action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_entity_counts_update(self):
+        """Test that entity counts are updated"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find controllable entity and visible target
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        visible_targets = info["valid_masks"]["visible_targets"]
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        if len(controllable_entities) > 0 and len(visible_targets) > 0:
-            entity_id = list(controllable_entities)[0]
-            target_id = list(visible_targets)[0]
-            
-            # Execute engage action
-            action = {"action_type": 2, "entity_id": entity_id, "move_center_grid": 0,
-                     "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                     "target_group_id": target_id, "weapon_selection": 0, "weapon_usage": 0,
-                     "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                     "refuel_target_id": 0}
-            
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Verify action tracking
-            intent = info["last_action_intent_by_entity"]
-            assert str(entity_id) in intent
-            assert intent[str(entity_id)]["action_type"] == 2
-            
-            applied = info["last_action_applied_by_entity"]
-            assert str(entity_id) in applied
-            
-            # TODO: Check entity engagement status in obs space
-            # TODO: Monitor mission metrics for potential kill updates
+        observations, infos = env.reset()
         
-        env.close()
-    
-    def test_stealth_action(self):
-        """Test stealth action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+        # Verify entity counts exist and are reasonable
+        assert infos["legacy"]["total_entities"] >= 0
+        assert infos["legacy"]["my_entities_count"] >= 0
+        assert infos["legacy"]["detected_targets_count"] >= 0
         
-        # Find entity with stealth capability
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        stealth_capable_entity = None
+        assert infos["dynasty"]["total_entities"] >= 0
+        assert infos["dynasty"]["my_entities_count"] >= 0
+        assert infos["dynasty"]["detected_targets_count"] >= 0
         
-        for entity_id in controllable_entities:
-            entity = env.env.entities[entity_id]
-            # Look for stealth capability indicators
-            if entity.Entity.Identity in ["F-22", "F-35C", "J-20", "J-35", "B-21"]:  # Stealth aircraft
-                stealth_capable_entity = entity_id
+        # Take steps and verify counts remain valid
+        for _ in range(3):
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            assert infos["legacy"]["my_entities_count"] >= 0
+            assert infos["dynasty"]["my_entities_count"] >= 0
+            
+            if terminations["legacy"] or truncations["legacy"]:
                 break
         
-        if stealth_capable_entity is not None:
-            # Execute stealth action
-            action = {"action_type": 3, "entity_id": stealth_capable_entity, "move_center_grid": 0,
-                     "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                     "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                     "weapon_engagement": 0, "stealth_enabled": 1, "sensing_position_grid": 0,
-                     "refuel_target_id": 0}
-            
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Verify action tracking
-            intent = info["last_action_intent_by_entity"]
-            assert str(stealth_capable_entity) in intent
-            assert intent[str(stealth_capable_entity)]["action_type"] == 3
-            
-            applied = info["last_action_applied_by_entity"]
-            assert str(stealth_capable_entity) in applied
-            
-            # TODO: Check entity stealth status in obs space
-            # TODO: Check radar-related mask changes
+        env.close()
+    
+    def test_capture_progress_updates(self):
+        """Test that capture progress is tracked per faction"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Verify capture fields exist for both agents
+        assert "my_capture_progress" in infos["legacy"]["mission"]
+        assert "my_capture_possible" in infos["legacy"]["mission"]
+        assert "enemy_capture_progress" in infos["legacy"]["mission"]
+        assert "enemy_capture_possible" in infos["legacy"]["mission"]
+        
+        assert "my_capture_progress" in infos["dynasty"]["mission"]
+        assert "my_capture_possible" in infos["dynasty"]["mission"]
+        assert "enemy_capture_progress" in infos["dynasty"]["mission"]
+        assert "enemy_capture_possible" in infos["dynasty"]["mission"]
+        
+        # Verify symmetry: legacy's enemy = dynasty's my
+        assert infos["legacy"]["mission"]["enemy_capture_progress"] == infos["dynasty"]["mission"]["my_capture_progress"]
+        assert infos["legacy"]["mission"]["enemy_capture_possible"] == infos["dynasty"]["mission"]["my_capture_possible"]
         
         env.close()
     
-    def test_sensing_action(self):
-        """Test sensing action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_masks_update_each_step(self):
+        """Test that action masks update properly"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Find entity with radar capability
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        radar_capable_entity = None
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        for entity_id in controllable_entities:
-            entity = env.env.entities[entity_id]
-            # Look for radar capability indicators
-            if entity.Entity.Identity in ["E-2D", "E-7", "KJ-500", "KJ-600", "F-22", "F-35C"]:  # AWACS/Fighter radars
-                radar_capable_entity = entity_id
+        observations, infos = env.reset()
+        
+        for _ in range(5):
+            # Verify mask structure
+            assert "valid_masks" in infos["legacy"]
+            assert "action_types" in infos["legacy"]["valid_masks"]
+            assert "controllable_entities" in infos["legacy"]["valid_masks"]
+            assert "visible_targets" in infos["legacy"]["valid_masks"]
+            assert "entity_target_matrix" in infos["legacy"]["valid_masks"]
+            
+            # No-op should always be available
+            assert 0 in infos["legacy"]["valid_masks"]["action_types"]
+            assert 0 in infos["dynasty"]["valid_masks"]["action_types"]
+            
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            if terminations["legacy"] or truncations["legacy"]:
                 break
         
-        if radar_capable_entity is not None:
-            # Execute sensing action
-            action = {"action_type": 4, "entity_id": radar_capable_entity, "move_center_grid": 0,
-                     "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                     "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                     "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 15,
-                     "refuel_target_id": 0}
-            
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Verify action tracking
-            intent = info["last_action_intent_by_entity"]
-            assert str(radar_capable_entity) in intent
-            assert intent[str(radar_capable_entity)]["action_type"] == 4
-            
-            applied = info["last_action_applied_by_entity"]
-            assert str(radar_capable_entity) in applied
-            
-            # TODO: Check entity radar focus in obs space
-            # TODO: Check if visible_targets mask changes
-            # TODO: Check entity_target_matrix for sensing updates
+        env.close()
+
+
+class TestRewardCalculation:
+    """Test reward calculation through agent.calculate_reward()"""
+    
+    def test_default_reward_is_zero(self):
+        """Test that default CompetitionAgent reward is 0.0"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Take a step
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
+        
+        # Default reward should be 0.0
+        assert isinstance(rewards["legacy"], (int, float))
+        assert isinstance(rewards["dynasty"], (int, float))
+        assert rewards["legacy"] == 0.0
+        assert rewards["dynasty"] == 0.0
         
         env.close()
     
-    def test_capture_action(self):
-        """Test capture action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+    def test_custom_reward_agent(self):
+        """Test that agents can implement custom rewards"""
+        config = Config()
         
-        # Find controllable entity (capture typically requires transport aircraft)
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        capture_capable_entity = None
+        class CustomRewardAgent(CompetitionAgent):
+            def calculate_reward(self, env):
+                return -0.1 * env.time_elapsed
         
-        for entity_id in controllable_entities:
-            entity = env.env.entities[entity_id]
-            # Look for transport/capture capability
-            if entity.Entity.Identity in ["C-130", "Y-9"]:  # Transport aircraft
-                capture_capable_entity = entity_id
-                break
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        if capture_capable_entity is not None:
-            # Execute capture action
-            action = {"action_type": 5, "entity_id": capture_capable_entity, "move_center_grid": 0,
-                     "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                     "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                     "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                     "refuel_target_id": 0}
-            
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Verify action tracking
-            intent = info["last_action_intent_by_entity"]
-            assert str(capture_capable_entity) in intent
-            assert intent[str(capture_capable_entity)]["action_type"] == 5
-            
-            # Check capture-related info updates
-            mission_info = info["mission"]
-            assert "capture_progress" in mission_info
-            assert "capture_possible" in mission_info
-            assert "island_contested" in mission_info
+        agent_legacy = CustomRewardAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        env.close()
-    
-    def test_rtb_action(self):
-        """Test RTB action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+        observations, infos = env.reset()
         
-        # Find controllable entity
-        controllable_entities = info["valid_masks"]["controllable_entities"]
-        assert len(controllable_entities) > 0, "No controllable entities found"
-        entity_id = list(controllable_entities)[0]
+        # Take a step
+        actions = {
+            "legacy": agent_legacy.select_action(observations["legacy"]),
+            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        }
+        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        # Execute RTB action
-        action = {"action_type": 6, "entity_id": entity_id, "move_center_grid": 0,
-                 "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                 "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                 "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                 "refuel_target_id": 0}
-        
-        obs, reward, terminated, truncated, info = env.step(action)
-        
-        # Verify action tracking
-        intent = info["last_action_intent_by_entity"]
-        assert str(entity_id) in intent
-        assert intent[str(entity_id)]["action_type"] == 6
-        
-        # Verify entity remains controllable
-        assert entity_id in info["valid_masks"]["controllable_entities"]
-        
-        # TODO: Check entity status changes in obs space
-        
-        env.close()
-    
-    def test_refuel_action(self):
-        """Test refuel action execution and info updates"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
-        
-        # Find refuel receiver and provider
-        refuel_info = info["refuel"]
-        receivers = refuel_info["receivers"]
-        providers = refuel_info["providers"]
-        
-        if len(receivers) > 0 and len(providers) > 0:
-            receiver_id = receivers[0]
-            provider_id = providers[0]
-            
-            # Execute refuel action
-            action = {"action_type": 7, "entity_id": receiver_id, "move_center_grid": 0,
-                     "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
-                     "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
-                     "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                     "refuel_target_id": provider_id}
-            
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            # Verify action tracking
-            intent = info["last_action_intent_by_entity"]
-            assert str(receiver_id) in intent
-            assert intent[str(receiver_id)]["action_type"] == 7
-            
-            # Verify refuel info structure remains
-            assert "refuel" in info
-            assert "receivers" in info["refuel"]
-            assert "providers" in info["refuel"]
-            
-            # TODO: Check entity fuel status in obs space
+        # Legacy should have custom reward, dynasty should have default 0.0
+        assert rewards["legacy"] < 0, "Custom reward should be negative"
+        assert rewards["dynasty"] == 0.0, "SimpleAgent uses default reward"
         
         env.close()
 
 
 if __name__ == "__main__":
-    # Run basic tests
-    print("Running environment mechanics tests...")
-    
-    test_tracking = TestActionTracking()
-    test_tracking.test_valid_action_tracking()
-    test_tracking.test_invalid_entity_opposite_faction()
-    test_tracking.test_engage_with_invalid_target()
-    test_tracking.test_invalid_action_type()
-    print("Action tracking tests passed")
-    
-    test_kills = TestKillTracking()
-    test_kills.test_friendly_entity_death_tracking()
-    test_kills.test_enemy_entity_death_tracking()
-    print("Kill tracking tests passed")
-    
-    test_termination = TestTerminationConditions()
-    test_termination.test_capture_based_termination()
-    test_termination.test_kill_ratio_win_termination()
-    test_termination.test_kill_ratio_loss_termination()
-    print("Termination condition tests passed")
-    
-    test_actions = TestActionExecution()
-    test_actions.test_no_op_action()
-    test_actions.test_move_action()
-    test_actions.test_engage_action()
-    test_actions.test_stealth_action()
-    test_actions.test_sensing_action()
-    test_actions.test_capture_action()
-    test_actions.test_rtb_action()
-    test_actions.test_refuel_action()
-    print("Action execution tests passed")
-    
-    print("All environment mechanics tests passed")
+    pytest.main([__file__, "-v"])

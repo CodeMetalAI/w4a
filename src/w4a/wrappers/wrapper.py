@@ -11,6 +11,8 @@ from typing import Optional
 from SimulationInterface import Agent as SimAgent
 from SimulationInterface import (Faction, CAPManouver, NonCombatManouverQueue)
 
+from SimulationInterface import (EntitySpawned, ControllableEntity)
+
 # Simple built-in adversary
 from .simple_agent import SimpleAgent
 
@@ -31,6 +33,11 @@ class RLAgent(SimAgent):
             self.faction = Faction.DYNASTY if getattr(config, "our_faction", 0) == 1 else Faction.LEGACY
         else:
             self.faction = faction
+
+        self.simulation_event_handlers = {
+            EntitySpawned: self.__entity_spawned,
+        }
+
 
     def start_force_laydown(self, force_laydown):
         self.force_laydown = force_laydown
@@ -72,10 +79,38 @@ class RLAgent(SimAgent):
     def pre_simulation_tick(self, simulation_data):
         # Passive during training; in eval/competition this can compile PlayerEvents from policy
         # actions to coordinate multiple agents inside the simulation loop.
+        self.__process_simulation_events(simulation_data.simulation_events)
+
         pass
 
     def tick(self, simulation_data):
+        self.__process_simulation_events(simulation_data.simulation_events)
+
         pass
+
+    def __process_simulation_events(self, events):
+        for event in events:
+            handler = self.simulation_event_handlers.get(type(event))
+
+            if handler:
+                handler(event)
+            else:
+                #self.log(f"Unhandled {event.__class__.__name__}")
+                
+                pass
+
+    def __entity_spawned(self, event):
+        if issubclass(event.entity.__class__, ControllableEntity):
+            self.__controllable_entity_spawned(event)
+
+    def __controllable_entity_spawned(self, event):
+        if event.entity.has_parent:
+            return
+
+        identifier = event.entity.identifier
+
+        print(f"{event.entity.__class__.__name__} {event.entity.identifier} spawned")
+
 
 
 class RLEnvWrapper(gym.Wrapper):

@@ -330,7 +330,7 @@ class TridentIslandEnv(gym.Env):
             Normalized observation vector for the agent
         """
         # Update globals that depend on per-step conditions
-        return observations.compute_observation(self)
+        return observations.compute_observation(self)   # @Sanjna: we should ask the agents to do this
     
     def _calculate_reward(self) -> float:
         """Return the base per-step reward.
@@ -659,7 +659,7 @@ class TridentIslandEnv(gym.Env):
     def _adversary_contact(self, event):
         """Handle adversary contact events and assign stable target group IDs."""
         
-        group = event.entity.TargetGroup
+        group = event.target_group
         if group is None:
             return
 

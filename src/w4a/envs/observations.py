@@ -44,41 +44,35 @@ def build_observation_space(config) -> spaces.Box:
     return spaces.Box(low=low, high=high, dtype=np.float32)
 
 
-def compute_observation(env: Any) -> np.ndarray:
-    """Compute the complete observation vector from current environment state.
+def compute_observation(env: Any, agent: Any) -> np.ndarray:
+    """
+    Compute observation for a specific agent.
     
-    Extracts and normalizes all relevant features from the simulation state,
-    combining global mission status with entity-specific information.
+    Extracts and normalizes features from the agent's perspective, including
+    only entities and target groups visible to that agent.
     
     Args:
-        env: Environment instance containing simulation state
+        env: Environment instance (for global info like time, flags)
+        agent: CompetitionAgent instance to compute observation for
         
     Returns:
         Normalized observation vector with values in [0, 1]
     """
-    # Compute feature groups
-    # global_features = _compute_global_features(env)
-    # friendly_features = _compute_friendly_features(env)
-    # enemy_features = _compute_enemy_features(env)
+    # TODO: Implement full observation encoding using agent's visible state
+    # Available from agent:
+    # - agent._sim_agent.controllable_entities: Dict[entity_id -> entity] for this agent
+    # - agent._sim_agent.target_groups: Dict[group_id -> target_group] detected by this agent
+    # - agent._sim_agent.flags: Flags visible to this agent
     
-    # Concatenate all features
-    # Currently only globals are implemented. Future per-entity/group features should
-    # be ID-indexed arrays (see build_observation_space note above).
-    # obs = np.concatenate([
-    #     # global_features,
-    #     # friendly_features,  # TODO: Uncomment when implemented
-    #     # enemy_features,     # TODO: Uncomment when implemented
-    # ], dtype=np.float32)
-    
-    # return obs
-
-    return np.zeros(env.observation_space.shape, dtype=np.float32)
+    # For now, return zeros (minimal implementation for test)
+    obs_space = env.observation_spaces[agent.faction.name.lower()]
+    return np.zeros(obs_space.shape, dtype=np.float32)
 
 
-def _compute_global_features(env: Any) -> np.ndarray:
-    """Compute global mission state features.
+def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
+    """Compute global mission state features for a specific agent.
     
-    Extracts high-level mission status that affects overall tactical decisions.
+    Extracts high-level mission status from the agent's perspective.
     All features are normalized to [0,1] for consistent learning.
     
     Features:
@@ -86,9 +80,13 @@ def _compute_global_features(env: Any) -> np.ndarray:
     - friendly_kills_norm: Our casualties normalized by max entities
     - enemy_kills_norm: Enemy casualties normalized by max entities
     - awacs_alive_flag: AWACS availability [0,1]
-    - capture_progress_norm: Objective capture progress [0,1]
+    - capture_progress_norm: Our objective capture progress [0,1]
     - island_contested_flag: Area contestation status [0,1]
-    - capture_possible_flag: Capture capability status [0,1]
+    - capture_possible_flag: Our capture capability status [0,1]
+    
+    Args:
+        env: Environment instance
+        agent: CompetitionAgent instance (to get faction-specific capture info)
     
     Returns:
         Array of shape (7,) with normalized values in [0,1]
@@ -107,17 +105,17 @@ def _compute_global_features(env: Any) -> np.ndarray:
     # AWACS alive flag
     awacs_alive_flag = 1.0 if _awacs_alive(env) else 0.0
 
-    # Capture progress normalized by required capture time
+    # Capture progress normalized by required capture time (agent-specific)
     required_capture_time = env.config.capture_required_seconds
-    capture_timer_progress = float(env.capture_timer_progress)
+    my_capture_progress = float(env.capture_progress_by_faction[agent.faction])
     if required_capture_time <= 0.0:
         capture_progress_norm = 0.0  # 0.0 = "no capture mechanic"
     else:
-        capture_progress_norm = float(np.clip(capture_timer_progress / required_capture_time, 0.0, 1.0))
+        capture_progress_norm = float(np.clip(my_capture_progress / required_capture_time, 0.0, 1.0))
 
-    # Island contested and capture possible flags
+    # Island contested and capture possible flags (agent-specific)
     island_contested_flag = 1.0 if env.island_contested else 0.0
-    capture_possible_flag = 1.0 if env.capture_possible else 0.0
+    capture_possible_flag = 1.0 if env.capture_possible_by_faction[agent.faction] else 0.0
 
     return np.array([
         time_remaining_norm,
@@ -136,6 +134,8 @@ def _get_friendly_entities(env: Any) -> list:
     Returns:
         List of entities belonging to our faction
     """
+    # TODO: This can be queried from the agent the entities see
+    # TODO: Think about the env operating for two agents simulating
     return [entity for entity in env.entities.values() if entity.faction.value == env.config.our_faction]
 
 
