@@ -9,24 +9,23 @@ __version__ = "0.1.0"
 # Core exports
 from .constants import *
 from .config import Config
-
-from .envs.trident_island_env import TridentIslandEnv
-from .envs.force_design_env import ForceDesignEnv
-from .envs.actions import *
-from .wrappers.wrapper import RLEnvWrapper  
-from .training.replay import ReplayRecorder
-from .training.evaluation import RandomAgent, evaluate
+from .envs.trident_multiagent_env import TridentIslandMultiAgentEnv
+from .agents import CompetitionAgent, SimpleAgent
+from .replay import ReplayRecorder, visualize_replay, record_multiagent_episode
+from .training.evaluation import evaluate, print_evaluation_results
 
 from .entities import w4a_entities
 
-# TODO: Decide public api
 __all__ = [
     "__version__",
     "Config",
-    "TridentIslandEnv",
-    "ForceDesignEnv", 
-    "RLEnvWrapper",
+    "TridentIslandMultiAgentEnv",
+    "CompetitionAgent",
+    "SimpleAgent",
     "ReplayRecorder",
-    "RandomAgent",
+    "visualize_replay",
+    "record_multiagent_episode",
     "evaluate",
+    "print_evaluation_results",
+    "w4a_entities",
 ]

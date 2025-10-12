@@ -16,7 +16,7 @@ class CompetitionAgent:
     
     Users inherit this class and override methods to implement their AI strategy.
     
-    Basic Training Example:
+    Basic Usage Example:
         ```python
         from w4a.agents import CompetitionAgent, SimpleAgent
         from w4a.envs import TridentIslandMultiAgentEnv
@@ -37,65 +37,6 @@ class CompetitionAgent:
             obs, rewards, terminated, truncated, info = env.step(actions)
             if terminated["legacy"]:
                 obs, info = env.reset()
-        ```
-    
-    Training with Ray RLlib:
-        ```python
-        from ray.rllib.env.wrappers.pettingzoo_env import ParallelPettingZooEnv
-        from ray.rllib.algorithms.ppo import PPOConfig
-        from w4a.envs import TridentIslandMultiAgentEnv
-        from w4a.agents import SimpleAgent
-        from SimulationInterface import Faction
-        
-        # Create environment factory
-        def env_creator(env_config):
-            env = TridentIslandMultiAgentEnv()
-            # Set agents (train legacy, fixed opponent)
-            trainable_agent = CompetitionAgent(Faction.LEGACY, env.config)
-            opponent = SimpleAgent(Faction.DYNASTY, env.config)
-            env.set_agents(trainable_agent, opponent)
-            return env
-        
-        # Wrap for RLlib
-        env = ParallelPettingZooEnv(env_creator({}))
-        
-        # Configure PPO
-        config = (
-            PPOConfig()
-            .environment(env=ParallelPettingZooEnv, env_config={})
-            .framework("torch")
-            .rollouts(num_rollout_workers=4)
-            .training(
-                train_batch_size=4000,
-                sgd_minibatch_size=128,
-                num_sgd_iter=10,
-            )
-            .multi_agent(
-                policies={"legacy", "dynasty"},
-                policy_mapping_fn=lambda agent_id, *args, **kwargs: agent_id,
-                policies_to_train=["legacy"],  # Only train legacy agent
-            )
-        )
-        
-        # Train
-        algo = config.build()
-        for i in range(100):
-            result = algo.train()
-            print(f"Iteration {i}: reward={result['episode_reward_mean']}")
-            
-            if i % 10 == 0:
-                algo.save(f"./checkpoints/checkpoint_{i}")
-        ```
-    
-    Custom Reward Shaping:
-        ```python
-        class MyRLAgent(CompetitionAgent):
-            def calculate_reward(self, env):
-                # Custom reward shaping
-                reward = 0.0
-                reward += 0.1 * len(self.get_entities())  # alive units
-                reward -= 0.2 * len(env.enemy_kills)      # casualties
-                return reward
         ```
     """
     
@@ -184,7 +125,6 @@ class CompetitionAgent:
         
         Returns:
             List of ControllableEntity objects that are alive.
-            Returns list (not set) for deterministic ordering and indexing.
         """
         return [entity for entity in self._sim_agent.controllable_entities.values() 
                 if entity.is_alive]
@@ -195,7 +135,6 @@ class CompetitionAgent:
         
         Returns:
             List of TargetGroup objects visible to this agent.
-            Returns list (not set) for deterministic ordering and indexing.
         """
         return list(self._sim_agent.target_groups.values())
     

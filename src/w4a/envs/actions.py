@@ -22,7 +22,7 @@ from ..config import Config
 
 import math
 
-from .trident_island_env import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
+from .trident_multiagent_env import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
