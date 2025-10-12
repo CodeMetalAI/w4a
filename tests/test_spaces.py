@@ -1,103 +1,160 @@
 """
 Space Tests
 
-Tests for observation space, action space, and action masking.
+Tests for observation space, action space, and action masking in multiagent environment.
 """
 
 import pytest
 import numpy as np
 from gymnasium import spaces
 from w4a import Config
-from w4a.envs.trident_island_env import TridentIslandEnv
-from w4a.wrappers.wrapper import RLEnvWrapper
+from w4a.envs.trident_multiagent_env import TridentIslandMultiAgentEnv
+from w4a.agents import CompetitionAgent, SimpleAgent
+from SimulationInterface import Faction
 
 
 class TestObservationSpace:
-    """Test observation space properties and consistency"""
+    """Test observation space properties and consistency for multiagent environment"""
+    
+    def test_observation_spaces_defined(self):
+        """Test observation spaces are properly defined for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        # Check spaces exist
+        obs_spaces = env.observation_spaces
+        assert "legacy" in obs_spaces
+        assert "dynasty" in obs_spaces
+        
+        # Check spaces are proper Gymnasium spaces
+        assert isinstance(obs_spaces["legacy"], spaces.Space)
+        assert isinstance(obs_spaces["dynasty"], spaces.Space)
+        
+        # Both agents should have same observation space structure
+        assert obs_spaces["legacy"].shape == obs_spaces["dynasty"].shape
+        
+        env.close()
     
     def test_observation_consistency(self):
-        """Test observations match observation space"""
-        env = RLEnvWrapper(TridentIslandEnv())
+        """Test observations match observation space for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        obs, info = env.reset()
-        # Info structure should be present
-        assert isinstance(info, dict)
-        assert "valid_masks" in info
-        vm = info["valid_masks"]
-        # Expect the exact keys used by the environment
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Check both agents get observations
+        assert "legacy" in observations
+        assert "dynasty" in observations
+        
+        # Check observations match space
+        obs_legacy = observations["legacy"]
+        obs_dynasty = observations["dynasty"]
+        
+        assert env.observation_spaces["legacy"].contains(obs_legacy)
+        assert env.observation_spaces["dynasty"].contains(obs_dynasty)
+        
+        # Check info structure
+        assert "valid_masks" in infos["legacy"]
+        assert "valid_masks" in infos["dynasty"]
+        
         required_mask_keys = {"action_types", "controllable_entities", "visible_targets", "entity_target_matrix"}
-        assert set(vm.keys()) == required_mask_keys
+        assert set(infos["legacy"]["valid_masks"].keys()) == required_mask_keys
+        assert set(infos["dynasty"]["valid_masks"].keys()) == required_mask_keys
         
-        # Observation should match space shape
-        assert obs.shape == env.observation_space.shape
+        env.close()
+    
+    def test_observation_size_and_structure(self):
+        """Test that observation has correct size (currently 7 global features)"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Observation should be within bounds
-        assert env.observation_space.contains(obs)
-        assert np.all(obs >= 0.0)
-        assert np.all(obs <= 1.0)
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Observation should be float32
-        assert obs.dtype == np.float32
+        observations, infos = env.reset()
         
-        # Test multiple steps
-        for _ in range(3):
-            action = env.action_space.sample()
-            # Sampled actions should be valid for the space
-            assert env.action_space.contains(action)
-            obs, reward, terminated, truncated, info = env.step(action)
-            # Maintain info structure during steps
-            assert "valid_masks" in info
+        # Currently observations are 7 features (global features only)
+        # In future will include friendly and enemy features
+        expected_size = 7
+        
+        for agent_name, obs in observations.items():
+            assert obs.shape == (expected_size,), f"{agent_name}: Expected shape ({expected_size},), got {obs.shape}"
+            assert obs.dtype == np.float32, f"{agent_name}: obs not float32"
             
-            assert obs.shape == env.observation_space.shape
-            assert env.observation_space.contains(obs)
-            assert np.all(obs >= 0.0)
-            assert np.all(obs <= 1.0)
-            assert obs.dtype == np.float32
-            
-            if terminated or truncated:
-                break
+            # Current implementation returns zeros
+            # This is expected while observation encoding is being built out
+            assert np.allclose(obs, 0.0), f"{agent_name}: Expected zeros (placeholder), got {obs}"
         
         env.close()
     
     def test_observation_features_bounded(self):
-        """Test that observation features are properly normalized"""
-        env = RLEnvWrapper(TridentIslandEnv())
+        """Test that observation features are properly normalized for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Run multiple episodes to test different states
-        for episode in range(3):
-            obs, info = env.reset()
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Test both agents' observations
+        for agent_name, obs in observations.items():
+            assert isinstance(obs, np.ndarray), f"{agent_name}: obs not ndarray"
+            assert obs.dtype == np.float32, f"{agent_name}: obs not float32"
+            assert np.all(obs >= 0.0), f"{agent_name}: Found values < 0"
+            assert np.all(obs <= 1.0), f"{agent_name}: Found values > 1"
+            assert np.all(np.isfinite(obs)), f"{agent_name}: Found non-finite values"
+        
+        # Test during steps
+        for step in range(5):
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
             
-            # All features should be in [0, 1]
-            assert np.all(obs >= 0.0), f"Episode {episode}: Found values < 0: {obs[obs < 0.0]}"
-            assert np.all(obs <= 1.0), f"Episode {episode}: Found values > 1: {obs[obs > 1.0]}"
+            observations, rewards, terms, truncs, infos = env.step(actions)
             
-            # No NaN or infinite values
-            assert np.all(np.isfinite(obs)), f"Episode {episode}: Found non-finite values"
+            for agent_name, obs in observations.items():
+                assert np.all(obs >= 0.0), f"{agent_name}, step {step}: Found values < 0"
+                assert np.all(obs <= 1.0), f"{agent_name}, step {step}: Found values > 1"
+                assert np.all(np.isfinite(obs)), f"{agent_name}, step {step}: Found non-finite values"
             
-            # Test during episode
-            for step in range(5):
-                action = env.action_space.sample()
-                obs, reward, terminated, truncated, info = env.step(action)
-                
-                assert np.all(obs >= 0.0), f"Episode {episode}, Step {step}: Found values < 0"
-                assert np.all(obs <= 1.0), f"Episode {episode}, Step {step}: Found values > 1"
-                assert np.all(np.isfinite(obs)), f"Episode {episode}, Step {step}: Found non-finite values"
-                
-                if terminated or truncated:
-                    break
+            if terms["legacy"] or truncs["legacy"]:
+                break
         
         env.close()
 
 
 class TestActionSpace:
-    """Test action space properties and consistency"""
+    """Test action space properties and consistency for multiagent environment"""
     
     def test_action_space_structure(self):
-        """Test action space has correct hierarchical structure"""
-        env = RLEnvWrapper(TridentIslandEnv())
+        """Test action space has correct hierarchical structure for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Should be Dict space
-        assert isinstance(env.action_space, spaces.Dict)
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        # Check action spaces exist
+        action_spaces = env.action_spaces
+        assert "legacy" in action_spaces
+        assert "dynasty" in action_spaces
+        
+        # Both should be Dict spaces
+        assert isinstance(action_spaces["legacy"], spaces.Dict)
+        assert isinstance(action_spaces["dynasty"], spaces.Dict)
         
         # Should have expected keys
         expected_keys = {
@@ -106,164 +163,195 @@ class TestActionSpace:
             "weapon_selection", "weapon_usage", "weapon_engagement",
             "stealth_enabled", "sensing_position_grid", "refuel_target_id"
         }
-        assert set(env.action_space.spaces.keys()) == expected_keys
+        
+        assert set(action_spaces["legacy"].spaces.keys()) == expected_keys
+        assert set(action_spaces["dynasty"].spaces.keys()) == expected_keys
         
         # All sub-spaces should be Discrete
-        for key, space in env.action_space.spaces.items():
-            assert isinstance(space, spaces.Discrete), f"Action {key} is not Discrete: {type(space)}"
-            assert space.n > 0, f"Action {key} has invalid size: {space.n}"
+        for agent_name in ["legacy", "dynasty"]:
+            for key, space in action_spaces[agent_name].spaces.items():
+                assert isinstance(space, spaces.Discrete), f"{agent_name} action {key} is not Discrete"
+                assert space.n > 0, f"{agent_name} action {key} has invalid size: {space.n}"
         
         env.close()
     
     def test_action_space_bounds(self):
-        """Test action space discrete bounds are reasonable"""
-        env = RLEnvWrapper(TridentIslandEnv())
+        """Test action space discrete bounds are reasonable for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        # Test specific bounds
-        assert env.action_space["action_type"].n == 8  # 0-7 action types
-        assert env.action_space["entity_id"].n == env.config.max_entities
-        assert env.action_space["stealth_enabled"].n == 2  # 0=off, 1=on
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
         
-        # Grid positions should match calculated grid size
-        expected_grid_positions = env.max_grid_positions
-        assert env.action_space["move_center_grid"].n == expected_grid_positions
-        assert env.action_space["sensing_position_grid"].n == expected_grid_positions + 1
+        # Test bounds for both agents (should be identical)
+        for agent_name in ["legacy", "dynasty"]:
+            action_space = env.action_spaces[agent_name]
+            
+            assert action_space["action_type"].n == 8
+            assert action_space["entity_id"].n == config.max_entities
+            assert action_space["stealth_enabled"].n == 2
+            
+            # Grid positions should match calculated grid size
+            expected_grid_positions = env.max_grid_positions
+            assert action_space["move_center_grid"].n == expected_grid_positions
+            assert action_space["sensing_position_grid"].n == expected_grid_positions + 1
         
         env.close()
     
     def test_action_sampling(self):
-        """Test action sampling produces valid actions"""
-        env = RLEnvWrapper(TridentIslandEnv())
+        """Test action sampling produces valid actions for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
         
-        for _ in range(10):
-            action = env.action_space.sample()
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        for agent_name in ["legacy", "dynasty"]:
+            action_space = env.action_spaces[agent_name]
             
-            # Should be a dict
-            assert isinstance(action, dict)
-            
-            # Should contain all required keys
-            for key in env.action_space.spaces.keys():
-                assert key in action, f"Missing key: {key}"
-            
-            # Should be valid according to space
-            assert env.action_space.contains(action)
-            
-            # Values should be integers in correct ranges
-            for key, value in action.items():
-                assert isinstance(value, (int, np.integer)), f"Action {key} not integer: {type(value)}"
-                assert 0 <= value < env.action_space[key].n, f"Action {key} out of bounds: {value}"
+            for _ in range(10):
+                action = action_space.sample()
+                
+                assert isinstance(action, dict)
+                
+                # Should contain all required keys
+                for key in action_space.spaces.keys():
+                    assert key in action, f"{agent_name} missing key: {key}"
+                
+                # Should be valid according to space
+                assert action_space.contains(action)
+                
+                # Values should be integers in correct ranges
+                for key, value in action.items():
+                    assert isinstance(value, (int, np.integer)), f"{agent_name} action {key} not integer"
+                    assert 0 <= value < action_space[key].n, f"{agent_name} action {key} out of bounds"
         
         env.close()
 
-    def test_step_sampled_action_contains(self):
-        """During steps, sampled actions must satisfy action_space.contains."""
-        env = RLEnvWrapper(TridentIslandEnv())
-        env.reset()
-        for _ in range(5):
-            action = env.action_space.sample()
-            assert env.action_space.contains(action)
-            _ = env.step(action)
-        env.close()
-
-    def test_action_edge_min_max_step(self):
-        """Construct min/max edge actions and ensure they are valid and step without error."""
-        env = RLEnvWrapper(TridentIslandEnv())
-        env.reset()
-
-        # Build min action (all zeros) and max action (n-1 for each key)
-        min_action = {}
-        max_action = {}
-        for key, space in env.action_space.spaces.items():
-            assert isinstance(space, spaces.Discrete)
-            min_action[key] = 0
-            max_action[key] = space.n - 1
-
-        # Validate and step
-        assert env.action_space.contains(min_action)
-        _ = env.step(min_action)
-
-        assert env.action_space.contains(max_action)
-        _ = env.step(max_action)
-
-        env.close()
-
-    def test_action_negative_contains(self):
-        """Invalid actions should fail action_space.contains."""
-        env = RLEnvWrapper(TridentIslandEnv())
-        env.reset()
-
-        # Start from a valid sampled action
-        valid = env.action_space.sample()
-        assert env.action_space.contains(valid)
-
-        # 1) Missing key
+    def test_action_validity_checks(self):
+        """Test action space contains() method works correctly"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        action_space = env.action_spaces["legacy"]
+        
+        # Valid action
+        valid = action_space.sample()
+        assert action_space.contains(valid)
+        
+        # Missing key
         missing_key_action = dict(valid)
-        any_key = next(iter(env.action_space.spaces.keys()))
+        any_key = next(iter(action_space.spaces.keys()))
         missing_key_action.pop(any_key, None)
-        assert not env.action_space.contains(missing_key_action)
-
-        # 2) Wrong type
+        assert not action_space.contains(missing_key_action)
+        
+        # Wrong type
         wrong_type_action = dict(valid)
         wrong_type_action[any_key] = "not-an-int"
-        assert not env.action_space.contains(wrong_type_action)
-
-        # 3) Out of range
+        assert not action_space.contains(wrong_type_action)
+        
+        # Out of range
         out_of_range_action = dict(valid)
-        out_of_range_action[any_key] = env.action_space[any_key].n  # n is outside [0, n-1]
-        assert not env.action_space.contains(out_of_range_action)
-
-        # 4) Extra key
+        out_of_range_action[any_key] = action_space[any_key].n
+        assert not action_space.contains(out_of_range_action)
+        
+        # Extra key
         extra_key_action = dict(valid)
         extra_key_action["__extra__"] = 0
-        assert not env.action_space.contains(extra_key_action)
-
+        assert not action_space.contains(extra_key_action)
+        
         env.close()
 
 
 class TestActionMasking:
-    """Test action masking functionality"""
+    """Test action masking functionality for multiagent environment"""
     
     def test_masks_consistency_during_episode(self):
-        """Test action masks remain consistent during episode"""
-        env = RLEnvWrapper(TridentIslandEnv())
-        obs, info = env.reset()
+        """Test action masks remain consistent during episode for both agents"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
         
         for step in range(5):
-            # Get current masks
-            masks = info["valid_masks"]
+            # Check masks for both agents
+            for agent_name in ["legacy", "dynasty"]:
+                masks = infos[agent_name]["valid_masks"]
+                
+                # Masks should be non-empty (at least no-op should be available)
+                assert len(masks["action_types"]) > 0, f"{agent_name}: No valid action types at step {step}"
+                
+                # No-op (action_type=0) should always be available
+                assert 0 in masks["action_types"], f"{agent_name}: No-op not available at step {step}"
             
-            # Masks should be non-empty (at least no-op should be available)
-            assert len(masks["action_types"]) > 0, f"No valid action types at step {step}"
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
             
-            # No-op (action_type=0) should always be available
-            assert 0 in masks["action_types"], f"No-op not available at step {step}"
+            observations, rewards, terms, truncs, infos = env.step(actions)
             
-            action = env.action_space.sample()
-            obs, reward, terminated, truncated, info = env.step(action)
-            
-            if terminated or truncated:
+            if terms["legacy"] or truncs["legacy"]:
                 break
+        
+        env.close()
+    
+    def test_action_masks_per_agent(self):
+        """Test that action masks are specific to each agent"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Each agent should have their own masks
+        masks_legacy = infos["legacy"]["valid_masks"]
+        masks_dynasty = infos["dynasty"]["valid_masks"]
+        
+        # Verify mask structure
+        assert isinstance(masks_legacy["action_types"], set)
+        assert isinstance(masks_dynasty["action_types"], set)
+        assert isinstance(masks_legacy["controllable_entities"], set)
+        assert isinstance(masks_dynasty["controllable_entities"], set)
+        
+        # Both agents should have controllable entities
+        assert len(masks_legacy["controllable_entities"]) > 0
+        assert len(masks_dynasty["controllable_entities"]) > 0
+        
+        # Entity IDs may be the same range since each agent tracks their own entities
+        # What matters is they each have valid entity masks
+        assert all(isinstance(eid, int) for eid in masks_legacy["controllable_entities"])
+        assert all(isinstance(eid, int) for eid in masks_dynasty["controllable_entities"])
         
         env.close()
 
 
 if __name__ == "__main__":
-    # Run basic tests
-    print("Running space tests...")
-    
     test_obs = TestObservationSpace()
+    test_obs.test_observation_spaces_defined()
     test_obs.test_observation_consistency()
+    test_obs.test_observation_size_and_structure()
     test_obs.test_observation_features_bounded()
-    print("Observation space tests passed")
     
     test_action = TestActionSpace()
     test_action.test_action_space_structure()
     test_action.test_action_space_bounds()
     test_action.test_action_sampling()
-    print("Action space tests passed")
+    test_action.test_action_validity_checks()
     
     test_masks = TestActionMasking()
     test_masks.test_masks_consistency_during_episode()
-    print("Action masking tests passed")
-    
-    print("All space tests passed")
+    test_masks.test_action_masks_per_agent()

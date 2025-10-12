@@ -310,10 +310,6 @@ def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
         return False
     
     entity = entities[entity_id]
-    
-    # Check entity is controllable
-    if not isinstance(entity, ControllableEntity):
-        return False
         
     # Check entity is alive
     if not entity.is_alive:
