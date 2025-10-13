@@ -342,7 +342,12 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
     health_ok = 1.0 if entity.is_alive else 0.0
     radar_on = 1.0 if entity.radar_enabled else 0.0
     max_grid = calculate_max_grid_positions(env.config)
-    radar_focus_grid = entity.get_radar_focus_position  # TODO: Erwin, does this exist?
+
+    if entity.has_radar_focus_position:
+        radar_focus_grid = entity.radar_focus_position
+    else:
+        radar_focus_grid = Vector(0, 0, 0) # @Sanjna: Not sure what we should do here
+
     radar_focus_grid_norm = float(radar_focus_grid) / float(max_grid) if max_grid > 0 else 0.0
     
     fuel_norm = entity.relative_fuel_left
@@ -393,10 +398,9 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         Array of shape (6,) with engagement status and target information
     """
     # Check if entity is currently engaging by examining current_manouver
-    # TODO: Erwin, how do we check if current_manouver is a Commit?
-    current_manouver = entity.current_manouver
-    # TODO: Check if current manouver is a Commit, then extract target_group. Next lines are placeholders.
-    target_group = current_manouver.target_group if current_manouver is not None else None
+    engaging = entity.current_manouver == ControllableEntityManouver.COMBAT
+
+    target_group = entity.current_target_group if engaging else None
     currently_engaging = 1.0 if target_group is not None else 0.0
     
     if target_group is not None:
@@ -434,19 +438,18 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
     time_until_shoot_norm = np.clip(time_until_shoot / 60.0, 0.0, 1.0)  # Normalize to 1 minute max
 
     # Relative velocity toward/away from target
-    # TODO: Erwin, does TargetGroup have velocity?
-    # closure_rate = calculate_closure_rate(entity.vel, target_group.vel) if target_group else 0.0
+    # @Sanjna: I added it in 0f4aee4ffc9cd56ef2f6342fd1e10cb94d9d8941
+    closure_rate = calculate_closure_rate(entity.vel, target_group.vel) if target_group else 0.0
 
     # Weapons usage mode (one-hot encoding: tight/selective/free)
     weapons_mode = entity.weapons_usage_mode
-    weapons_tight = 1.0 if weapons_mode == 'tight' else 0.0
-    weapons_selective = 1.0 if weapons_mode == 'selective' else 0.0  
-    weapons_free = 1.0 if weapons_mode == 'free' else 0.0
+    weapons_tight = 1.0 if weapons_mode == 0 else 0.0
+    weapons_selective = 1.0 if weapons_mode == 1 else 0.0  
+    weapons_free = 1.0 if weapons_mode == 2 else 0.0
     
     # Shots fired this engagement/commit
-    # TODO: Erwin, is there a shots_fired counter we can access?
-    # shots_fired_this_commit = entity.shots_fired_current_engagement if hasattr(entity, 'shots_fired_current_engagement') else 0
-    # shots_fired_norm = np.clip(shots_fired_this_commit / 10.0, 0.0, 1.0)  # Normalize to max 10 shots
+    shots_fired_this_commit = entity.num_shots_fired    # @Sanjna: This number is only valid during an engagement.
+    shots_fired_norm = np.clip(shots_fired_this_commit / 10.0, 0.0, 1.0)  # Normalize to max 10 shots
     
     return np.array([
         currently_engaging,
@@ -509,7 +512,7 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         # Count (1 feature)
         # Number of known alive units from TargetGroup.num_known_alive_units
         num_units = float(target_group.num_known_alive_units)
-        num_units_norm = np.clip(num_units / 10.0, 0.0, 1.0)  # Normalize to max 10 units
+        num_units_norm = np.clip(num_units / 10.0, 0.0, 1.0)  # Normalize to max 10 units @Sanjna: 10 is a little low. Typically we should see max 16 (4 squadrons of 4)
         
         # Egocentric (2 features)
         # Distance and bearing to center island objective

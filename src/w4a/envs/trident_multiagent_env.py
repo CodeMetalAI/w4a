@@ -77,7 +77,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
-        self.max_ammo = 50.0  # TODO: Erwin, is this correct?
+        self.max_ammo = 50.0  # TODO: Erwin, is this correct? @Sanjna: yes that's fine.
 
         # Set up paths
         self.scenario_path = Path(__file__).parent.parent / "scenarios"

@@ -71,6 +71,9 @@ def update_capture_progress(env: Any) -> None:
             old_progress = env.capture_progress_by_faction[faction]
             new_progress = old_progress + time_delta
             env.capture_progress_by_faction[faction] = min(new_progress, required_time)
+
+            # @Sanjna: on the flag: can_be_captured, capturing_faction, is_captured, is_being_captured, capture_progress
+
             
             # Track when faction first completes capture (crosses threshold)
             if old_progress < required_time and new_progress >= required_time:
