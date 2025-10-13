@@ -493,6 +493,9 @@ class TestInfoDictUpdates:
             }
             observations, rewards, terminations, truncations, infos = env.step(actions)
             
+            # Check that target groups is not None
+            # print(f"Legacy target_groups: {env.agent_legacy.get_target_groups()}")
+            
             assert infos["legacy"]["my_entities_count"] >= 0
             assert infos["dynasty"]["my_entities_count"] >= 0
             

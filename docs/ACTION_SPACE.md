@@ -18,7 +18,7 @@ action = {
     'move_axis_angle': int,          # Rotation angle of patrol pattern
     
     # Engage action parameters (used when action_type=2)
-    'target_group_id': int,          # Which enemy group to engage
+    'target_group_id': int,          # Which detected target group to engage (represents enemy forces)
     'weapon_selection': int,         # Weapon combination to use
     'weapon_usage': int,             # How many shots per target
     'weapon_engagement': int,        # Engagement aggressiveness
@@ -79,7 +79,7 @@ Command an entity to engage enemy target group with weapons.
 
 **Parameters used**:
 - `entity_id`: Which entity fires
-- `target_group_id`: Which detected enemy group to engage
+- `target_group_id`: Which detected target group to engage
 - `weapon_selection`: Combination of weapons to use
 - `weapon_usage`: 0=1 shot per unit, 1=1 shot per adversary, 2=2 shots per adversary
 - `weapon_engagement`: 0=defensive, 1=cautious, 2=assertive, 3=offensive

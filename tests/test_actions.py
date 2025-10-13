@@ -58,7 +58,7 @@ class TestActionVisibilityAtReset:
         print(f"[t=1] Legacy can see {len(legacy_target_groups)} target group objects")
         print(f"[t=1] Dynasty can see {len(dynasty_target_groups)} target group objects")
         
-        # Verify target groups are enemy faction
+        # Verify target groups belong to same faction (represent enemies visible to that faction)
         for tg in legacy_target_groups:
             assert tg.faction == Faction.LEGACY, f"Legacy should only see Legacy targets, got {tg.faction}"
             print(f"  - Legacy sees target group: faction={tg.faction.name}")
@@ -111,13 +111,16 @@ class TestActionVisibilityAtReset:
         print(f"[t=1] Legacy has engageable targets: {legacy_has_engageable}")
         print(f"[t=1] Dynasty has engageable targets: {dynasty_has_engageable}")
         
-        if legacy_has_engageable:
-            assert 2 in legacy_action_types, "Engage should be available when targets are engageable"
-            print("[t=1] Legacy CAN engage - action type 2 is available")
+        # Assert that both sides have engageable targets at t=1
+        assert legacy_has_engageable, f"Expected Legacy to have engageable targets at t=1. Matrix: {legacy_matrix}"
+        assert dynasty_has_engageable, f"Expected Dynasty to have engageable targets at t=1. Matrix: {dynasty_matrix}"
         
-        if dynasty_has_engageable:
-            assert 2 in dynasty_action_types, "Engage should be available when targets are engageable"
-            print("[t=1] Dynasty CAN engage - action type 2 is available")
+        # Verify engage action is available
+        assert 2 in legacy_action_types, "Engage should be available when targets are engageable"
+        assert 2 in dynasty_action_types, "Engage should be available when targets are engageable"
+        
+        print("[t=1] Legacy CAN engage - action type 2 is available")
+        print("[t=1] Dynasty CAN engage - action type 2 is available")
         
         env.close()
 
@@ -207,11 +210,7 @@ class TestEngageAction:
                 target_id = list(targets)[0]
                 break
         
-        if entity_id is None:
-            print("\n[ENGAGE] No engageable entities found at t=1, skipping test")
-            env.close()
-            pytest.skip("No engageable entities at t=1")
-            return
+        assert entity_id is not None, f"Expected engageable entities at t=1 but found none. Matrix: {matrix}"
         
         print(f"\n[ENGAGE] Testing engage action at t=1: entity {entity_id} -> target {target_id}")
         

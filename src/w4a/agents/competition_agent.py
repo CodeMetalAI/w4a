@@ -89,7 +89,7 @@ class CompetitionAgent:
         The observation is normalized to [0, 1] and includes:
         - Global mission state (time, kills, capture progress)
         - This agent's controllable entities (filtered by fog-of-war)
-        - Detected enemy target groups (filtered by fog-of-war)
+        - Detected target groups representing enemy forces (filtered by fog-of-war)
         
         Users can override to customize observation format.
         See OBSERVATION_SPACE.md for detailed documentation.
@@ -132,7 +132,10 @@ class CompetitionAgent:
     
     def get_target_groups(self) -> List:
         """
-        Get list of detected enemy target groups.
+        Get list of detected target groups.
+        
+        Target groups represent enemy forces visible to this agent. Each target group
+        is tagged with this agent's faction ID (e.g., Legacy sees groups with faction=LEGACY).
         
         Returns:
             List of TargetGroup objects visible to this agent.
