@@ -9,8 +9,16 @@ The observation system encodes three main categories:
 - Friendly features: our units' capabilities, positions, and status
 - Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-The current implementation focuses on global features with structured placeholders
-for entity-level features that can be expanded as needed.
+Current Implementation Status:
+- build_observation_space(): ACTIVE - Returns Box space with 12 global features
+- compute_observation(): PLACEHOLDER - Returns zeros, awaiting full implementation
+- _compute_global_features(): IMPLEMENTED - 12 global mission state features
+- _compute_friendly_features(): IMPLEMENTED - 28 features per friendly entity (ready to use)
+- _compute_enemy_features(): IMPLEMENTED - 10 features per enemy target group (ready to use)
+
+The infrastructure for entity-level and target group features is complete but not yet
+integrated into compute_observation(). When ready, simply call the helper functions
+and concatenate their outputs.
 """
 
 from typing import Any

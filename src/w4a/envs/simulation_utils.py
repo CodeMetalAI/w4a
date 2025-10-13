@@ -29,8 +29,7 @@ def _load_scenario_data(legacy_entity_list_path, dynasty_entity_list_path,
     Returns:
         tuple: (mission_events_data, faction_entity_spawn_data, faction_entity_data)
     """
-    # TODO: This file loading and json parsing should be done in a preprocess step instead of repeating it every time
-    scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"   # TODO: this should not be hardcoded here
+    scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"
 
     # Load scenario data (base mission setup and spawn data per faction)
     with open(scenario_path / "MissionEvents.json") as f:
@@ -51,8 +50,6 @@ def _load_scenario_data(legacy_entity_list_path, dynasty_entity_list_path,
 
     with open(dynasty_entity_list_path) as f:
         faction_entity_data[Faction.DYNASTY] = EntityList().load_json(f.read())
-
-    # TODO: All stuff above should be part of the preprocess step
     
     return mission_events_data, faction_entity_spawn_data, faction_entity_data
 
