@@ -113,3 +113,28 @@ w4a/
 ├── docs/                    # Documentation
 └── SimulationInterface/     # Simulation Engine Python bindings
 ```
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run specific test file
+pytest tests/test_actions.py -v
+
+# Run with output
+pytest tests/ -v -s
+```
+
+## Learn More
+
+For game-specific information and gameplay details, visit [war.game](https://war.game).
+
+## Support
+
+If you encounter bugs or have questions, please file an issue on our [GitHub repository](https://github.com/CodeMetalAI/w4a/issues).
+
+## Author
+
+Sanjna Ravichandar - [sanjna@codemetal.ai](mailto:sanjna@codemetal.ai)
