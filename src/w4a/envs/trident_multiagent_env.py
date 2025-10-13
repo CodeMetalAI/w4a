@@ -605,9 +605,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             
             valid_targets = set()
             for tg_id, target_group in agent._sim_agent.target_groups.items():
-                if target_group.faction == agent.faction:
-                    continue  # Skip friendly targets
-                
+                # Target groups are already filtered by faction (agent only sees their own faction's target groups)
+                # Target group with faction=LEGACY means "targets visible to Legacy" (which are Dynasty enemies)
                 available_weapons = entity.select_weapons(target_group, False)
                 if len(available_weapons) > 0:
                     valid_targets.add(tg_id)
@@ -690,36 +689,21 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         if isinstance(entity, Flag):
             self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
         
-        # # Route to both agents for entity tracking
-        # if self.agent_legacy:
-        #     self.agent_legacy._sim_agent._on_entity_spawned(event)
-        # if self.agent_dynasty:
-        #     self.agent_dynasty._sim_agent._on_entity_spawned(event)
-    
+
     def _on_adversary_contact(self, event):
         """
         Handle AdversaryContact events for target detection.
         
-        Routes to both agents so each can track enemy target groups.
+        Routes to both agents so each can track detected targets.
         """
-        # Route to both agents for target group tracking
-        # if self.agent_legacy:
-        #     self.agent_legacy._sim_agent._on_adversary_contact(event)
-        # if self.agent_dynasty:
-        #     self.agent_dynasty._sim_agent._on_adversary_contact(event)
-    
+        pass
     def _on_victory(self, event):
         """
         Handle Victory events.
         
         Routes to both agents and environment for mission completion tracking.
         """
-        # Route to both agents
-        # if self.agent_legacy:
-        #     self.agent_legacy._sim_agent._on_victory(event)
-        # if self.agent_dynasty:
-        #     self.agent_dynasty._sim_agent._on_victory(event)
-    
+  
     def _record_last_intended_action(self, action: Dict, agent_name: str) -> None:
         """Record last action issued (pre-validation) per entity for debugging and analysis.
         
@@ -768,9 +752,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             return False
         
         # Check if any detected targets are valid for this entity
+        # Target groups belong to the same faction as the agent (they represent enemies visible to that faction)
         for target_group in agent._sim_agent.target_groups.values():
-            is_enemy = target_group.faction != agent.faction
-            if is_enemy:
+            # Target group faction matches agent faction (Legacy sees target groups with faction=LEGACY)
+            if target_group.faction == agent.faction:
                 available_weapons = entity.select_weapons(target_group, False)
                 if len(available_weapons) > 0:
                     return True

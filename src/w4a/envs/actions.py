@@ -380,8 +380,10 @@ def validate_engage_action(action: Dict, entities: Dict, target_groups: Dict) ->
     
     target_group = target_groups[target_group_id]
     
-    # Check target group is enemy faction
-    if target_group.faction.value == entity.faction.value:
+    # Target group faction matches the agent's faction (Legacy sees target groups with faction=LEGACY)
+    # The target group represents enemy entities visible to that faction
+    # Verify target group belongs to the entity's faction
+    if target_group.faction.value != entity.faction.value:
         return False
     
     # Check entity has weapons compatible with target

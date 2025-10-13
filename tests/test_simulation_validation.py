@@ -95,7 +95,7 @@ class TestSimulationIsActuallyRunning:
                     for tg in legacy_target_groups:
                         assert tg is not None
                         assert hasattr(tg, 'faction')
-                        assert tg.faction == Faction.LEGACY, "Target should be enemy"
+                        assert tg.faction == Faction.LEGACY, "Target group belongs to same faction (represents enemies visible to that faction)"
                 
                 if len(dynasty_targets) > 0:
                     dynasty_target_groups = agent_dynasty.get_target_groups()
@@ -104,7 +104,7 @@ class TestSimulationIsActuallyRunning:
                     for tg in dynasty_target_groups:
                         assert tg is not None
                         assert hasattr(tg, 'faction')
-                        assert tg.faction == Faction.DYNASTY, "Target should be enemy"
+                        assert tg.faction == Faction.DYNASTY, "Target group belongs to same faction (represents enemies visible to that faction)"
                 
                 break
             
@@ -123,6 +123,8 @@ class TestSimulationIsActuallyRunning:
         env.set_agents(agent_legacy, agent_dynasty)
         
         observations, infos = env.reset()
+        
+        found_engageable_targets = False
         
         # Step forward to build engagement opportunities
         for step in range(20):
@@ -152,16 +154,22 @@ class TestSimulationIsActuallyRunning:
                         assert isinstance(target_id, int), "Target ID should be int"
                         assert target_id in visible, f"Target {target_id} not in visible targets"
             
-            # If we found any engageable targets, test is successful
+            # Check if we found any engageable targets
             if any(len(targets) > 0 for targets in legacy_matrix.values()):
+                found_engageable_targets = True
                 # Verify engage action is available
                 assert 2 in infos["legacy"]["valid_masks"]["action_types"], \
                     "Engage should be available when entities can engage"
-                env.close()
-                return
+                print(f"\n[ENGAGEMENT MATRIX] Found engageable targets at step {step}")
+                break
             
             if terminations["legacy"] or truncations["legacy"]:
                 break
+        
+        # Assert that we found engageable targets during the test
+        assert found_engageable_targets, \
+            f"Expected to find engageable targets within 20 steps but found none. " \
+            f"Last legacy matrix: {legacy_matrix}, Last dynasty matrix: {dynasty_matrix}"
         
         env.close()
     

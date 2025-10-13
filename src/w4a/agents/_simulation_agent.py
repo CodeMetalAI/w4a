@@ -179,7 +179,7 @@ class _SimulationAgentImpl(SimAgent):
         assert group.faction == self.faction, f"Agent {self.faction.name} got a target group despawn of faction {group.faction}"
 
         if ptr in self._target_group_id_by_ptr:
-            group_id = _target_group_id_by_ptr[ptr] # TODO: We should recycle this number
+            group_id = self._target_group_id_by_ptr[ptr] # TODO: We should recycle this number
 
             del self._target_group_id_by_ptr[ptr]  # Is this ok to do? 
             del self.target_groups[group_id]  # Is this ok to do? 

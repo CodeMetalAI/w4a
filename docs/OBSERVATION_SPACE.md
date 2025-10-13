@@ -4,7 +4,7 @@
 
 Each agent receives observations from their own perspective, filtered by fog-of-war. Agents only observe:
 - Their own controllable entities
-- Enemy units they have detected (via radar, visual contact, etc.)
+- Enemy units they have detected (via radar, visual contact, etc.), represented as "target groups". These target groups belong to the faction that detected the group.
 - Shared objective flags
 
 ## Observation Format
