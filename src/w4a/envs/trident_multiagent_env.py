@@ -736,7 +736,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         Routes to both agents and environment for mission completion tracking.
         """
-  
+        pass
     def _record_last_intended_action(self, action: Dict, agent_name: str) -> None:
         """Record last action issued (pre-validation) per entity for debugging and analysis.
         
