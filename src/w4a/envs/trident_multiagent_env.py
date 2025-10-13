@@ -690,11 +690,11 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         if isinstance(entity, Flag):
             self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
         
-        # Route to both agents for entity tracking
-        if self.agent_legacy:
-            self.agent_legacy._sim_agent._on_entity_spawned(event)
-        if self.agent_dynasty:
-            self.agent_dynasty._sim_agent._on_entity_spawned(event)
+        # # Route to both agents for entity tracking
+        # if self.agent_legacy:
+        #     self.agent_legacy._sim_agent._on_entity_spawned(event)
+        # if self.agent_dynasty:
+        #     self.agent_dynasty._sim_agent._on_entity_spawned(event)
     
     def _on_adversary_contact(self, event):
         """
@@ -703,10 +703,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Routes to both agents so each can track enemy target groups.
         """
         # Route to both agents for target group tracking
-        if self.agent_legacy:
-            self.agent_legacy._sim_agent._on_adversary_contact(event)
-        if self.agent_dynasty:
-            self.agent_dynasty._sim_agent._on_adversary_contact(event)
+        # if self.agent_legacy:
+        #     self.agent_legacy._sim_agent._on_adversary_contact(event)
+        # if self.agent_dynasty:
+        #     self.agent_dynasty._sim_agent._on_adversary_contact(event)
     
     def _on_victory(self, event):
         """
@@ -715,10 +715,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Routes to both agents and environment for mission completion tracking.
         """
         # Route to both agents
-        if self.agent_legacy:
-            self.agent_legacy._sim_agent._on_victory(event)
-        if self.agent_dynasty:
-            self.agent_dynasty._sim_agent._on_victory(event)
+        # if self.agent_legacy:
+        #     self.agent_legacy._sim_agent._on_victory(event)
+        # if self.agent_dynasty:
+        #     self.agent_dynasty._sim_agent._on_victory(event)
     
     def _record_last_intended_action(self, action: Dict, agent_name: str) -> None:
         """Record last action issued (pre-validation) per entity for debugging and analysis.

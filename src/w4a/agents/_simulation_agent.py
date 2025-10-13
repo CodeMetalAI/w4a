@@ -7,7 +7,7 @@ processing, entity tracking, and force laydown.
 
 from SimulationInterface import Agent as SimAgent
 from SimulationInterface import (
-    Faction, EntitySpawned, AdversaryContact, Victory, ControllableEntity, 
+    Faction, EntitySpawned, EntityDespawned, AdversaryContact, Victory, ControllableEntity, 
     TargetGroup, Flag, CAPManouver, NonCombatManouverQueue
 )
 
@@ -44,8 +44,19 @@ class _SimulationAgentImpl(SimAgent):
         # Event handlers
         self.simulation_event_handlers = {
             EntitySpawned: self._on_entity_spawned,
+            EntityDespawned: self._on_entity_despawned,
             AdversaryContact: self._on_adversary_contact,
             Victory: self._on_victory,
+        }
+
+        self.entity_spawned_handlers = {
+            ControllableEntity: self._on_controllable_entity_spawned,
+            TargetGroup: self._on_target_group_spawned,
+            Flag: self._on_flag_spawned
+        }
+
+        self.entity_despawned_handlers = {
+            TargetGroup: self._on_target_group_despawned, # Nothing else despawns at this moment
         }
     
     def start_force_laydown(self, force_laydown):
@@ -117,22 +128,69 @@ class _SimulationAgentImpl(SimAgent):
         and are actually controllable (excludes carriers, stationary objects, etc).
         Assigns stable entity IDs that persist across the episode.
         """
+
+        cls = type(event.entity)
+
+        while cls != None:
+            handler = self.entity_spawned_handlers.get(cls)
+
+            if handler:
+                handler(event)
+                return
+            else:
+                cls = cls.__base__
+
+    def _on_entity_despawned(self, event):
+        handler = self.entity_despawned_handlers.get(type(event.entity))
+
+        if handler:
+            handler(event)
+
         entity = event.entity
         
+    def _on_flag_spawned(self, event):
+        flag = event.entity
+
         # Handle flags (shared resource, track separately)
-        if isinstance(entity, Flag):
-            self.flags[entity.faction] = entity
-            return
+        self.flags[flag.faction] = flag
+
+    def _on_target_group_spawned(self, event):
+        """
+        Track enemy target groups detected by this faction.
         
-        # Only track our faction's controllable entities
-        if not isinstance(entity, ControllableEntity):
-            return
-        
-        if entity.faction != self.faction:
-            return
-        
+        Assigns stable target group IDs that persist across the episode.
+        """
+
+        group = event.entity
+        ptr = id(group)
+
+        assert group.faction == self.faction, f"Agent {self.faction.name} got a target group spawn of faction {group.faction}"
+
+        if ptr not in self._target_group_id_by_ptr:
+            group_id = self._next_target_group_id
+            self._next_target_group_id += 1
+            self._target_group_id_by_ptr[ptr] = group_id
+            self.target_groups[group_id] = group
+
+    def _on_target_group_despawned(self, event):
+        group = event.entity
+        ptr = id(group)
+
+        assert group.faction == self.faction, f"Agent {self.faction.name} got a target group despawn of faction {group.faction}"
+
+        if ptr in self._target_group_id_by_ptr:
+            group_id = _target_group_id_by_ptr[ptr] # TODO: We should recycle this number
+
+            del self._target_group_id_by_ptr[ptr]  # Is this ok to do? 
+            del self.target_groups[group_id]  # Is this ok to do? 
+
+    def _on_controllable_entity_spawned(self, event):
+        entity = event.entity
+
+        assert entity.faction == self.faction, f"Agent {self.faction.name} got an entity spawn of faction {entity.faction} {entity.identifier}"
+                
         # Only track entities that are actually controllable (not stationary/carriers)
-        if not entity.Controllable:
+        if not entity.Controllable: # @Sanjna: I think this is always true in the current setup.
             return
         
         # Assign stable ID
@@ -142,28 +200,9 @@ class _SimulationAgentImpl(SimAgent):
             self._next_entity_id += 1
             self._entity_id_by_ptr[ptr] = entity_id
             self.controllable_entities[entity_id] = entity
-    
+
     def _on_adversary_contact(self, event):
-        """
-        Track enemy target groups detected by this faction.
-        
-        Assigns stable target group IDs that persist across the episode.
-        """
-        group = event.target_group
-        if group is None:
-            return
-        
-        # Don't track our own faction's groups
-        if group.faction == self.faction:
-            return
-        
-        # Assign stable ID
-        ptr = id(group)
-        if ptr not in self._target_group_id_by_ptr:
-            group_id = self._next_target_group_id
-            self._next_target_group_id += 1
-            self._target_group_id_by_ptr[ptr] = group_id
-            self.target_groups[group_id] = group
+        pass    # Nothing to do here, since we moved the logic to the targetgroup spawned (easier to manage)
     
     def _on_victory(self, event):
         """Handle victory events."""

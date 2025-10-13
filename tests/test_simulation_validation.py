@@ -95,7 +95,7 @@ class TestSimulationIsActuallyRunning:
                     for tg in legacy_target_groups:
                         assert tg is not None
                         assert hasattr(tg, 'faction')
-                        assert tg.faction != Faction.LEGACY, "Target should be enemy"
+                        assert tg.faction == Faction.LEGACY, "Target should be enemy"
                 
                 if len(dynasty_targets) > 0:
                     dynasty_target_groups = agent_dynasty.get_target_groups()
@@ -104,7 +104,7 @@ class TestSimulationIsActuallyRunning:
                     for tg in dynasty_target_groups:
                         assert tg is not None
                         assert hasattr(tg, 'faction')
-                        assert tg.faction != Faction.DYNASTY, "Target should be enemy"
+                        assert tg.faction == Faction.DYNASTY, "Target should be enemy"
                 
                 break
             

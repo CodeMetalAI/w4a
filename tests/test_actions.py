@@ -60,11 +60,11 @@ class TestActionVisibilityAtReset:
         
         # Verify target groups are enemy faction
         for tg in legacy_target_groups:
-            assert tg.faction == Faction.DYNASTY, f"Legacy should only see Dynasty targets, got {tg.faction}"
+            assert tg.faction == Faction.LEGACY, f"Legacy should only see Legacy targets, got {tg.faction}"
             print(f"  - Legacy sees target group: faction={tg.faction.name}")
         
         for tg in dynasty_target_groups:
-            assert tg.faction == Faction.LEGACY, f"Dynasty should only see Legacy targets, got {tg.faction}"
+            assert tg.faction == Faction.DYNASTY, f"Dynasty should only see Dynasty targets, got {tg.faction}"
             print(f"  - Dynasty sees target group: faction={tg.faction.name}")
         
         env.close()
