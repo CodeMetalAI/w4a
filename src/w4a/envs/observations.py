@@ -151,7 +151,6 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     enemy_capture_possible_flag = 1.0 if env.capture_possible_by_faction[enemy_faction] else 0.0
     
     # Center island coordinates (from neutral flag)
-    # TODO: Erwin is this correct?
     island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
     island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
 
@@ -341,12 +340,12 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
         Array of shape (4,) with normalized status indicators
     """
     health_ok = 1.0 if entity.is_alive else 0.0
-    radar_on = 1.0 if entity.radar_active else 0.0 # TODO: Erwin, does this exist?
+    radar_on = 1.0 if entity.radar_enabled else 0.0
     max_grid = calculate_max_grid_positions(env.config)
     radar_focus_grid = entity.get_radar_focus_position  # TODO: Erwin, does this exist?
     radar_focus_grid_norm = float(radar_focus_grid) / float(max_grid) if max_grid > 0 else 0.0
     
-    fuel_norm = entity.relative_fuel_left # TODO: Erwin, does this exist?
+    fuel_norm = entity.relative_fuel_left
     
     return np.array([health_ok, radar_on, radar_focus_grid_norm, fuel_norm], dtype=np.float32)
     
@@ -363,28 +362,19 @@ def compute_friendly_weapon_features(entity: Any, env: Any) -> np.ndarray:
         env: Environment instance (for config to get max_ammo)
     
     Returns:
-        Array of shape (4,) with weapon capability and ammo status
+        Array of shape (3,) with weapon capability and ammo status
     """
 
-    # TODO: Erwin, what is weapon_identifier? 
     # Check if entity can engage air targets (using target_domains property)
     has_air_weapons = 1.0 if EntityDomain.AIR in entity.target_domains else 0.0
     
     # Check if entity can engage surface targets (using target_domains property)
     has_surface_weapons = 1.0 if EntityDomain.SURFACE in entity.target_domains else 0.0
     
-    # Ammunition status (normalized by max ammo)
-    # TODO: Erwin, is this correct? Using entity.ammo as a single number normalized against max_ammo=50
-
-    # TODO: Erwin, can we separate between air and surface ammo?
     total_ammo = float(entity.ammo) if entity.ammo is not None else 0.0
     ammo_norm = np.clip(total_ammo / env.max_ammo, 0.0, 1.0)
     
-    # TODO: For now, using same ammo value for both air and surface since we can't separate them
-    air_ammo_norm = ammo_norm if has_air_weapons > 0.5 else 0.0
-    surface_ammo_norm = ammo_norm if has_surface_weapons > 0.5 else 0.0
-    
-    return np.array([has_air_weapons, has_surface_weapons, air_ammo_norm, surface_ammo_norm], dtype=np.float32)
+    return np.array([has_air_weapons, has_surface_weapons, ammo_norm], dtype=np.float32)
 
 
 def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
@@ -439,25 +429,19 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         target_domain_surface = 0.0
         target_domain_land = 0.0
     
-    # Time since last weapon firing
-    # TODO: Does this exist? Need to keep track of this in env?
-    # time_since_shot_norm = entity.time_since_shot / max_reload_time else 1.0
-    
     # Time on target information
-    # TODO: Erwin, do we need to track time_on_target separately?
-    # time_on_target = entity.time_tracking_current_target if entity.target_group else 0.0
-    # time_on_target_norm = np.clip(time_on_target / 60.0, 0.0, 1.0)  # Normalize to 1 minute max
-    
+    time_until_shoot = entity.get_estimated_time_until_shoot(target_group)
+    time_until_shoot_norm = np.clip(time_until_shoot / 60.0, 0.0, 1.0)  # Normalize to 1 minute max
+
     # Relative velocity toward/away from target
     # TODO: Erwin, does TargetGroup have velocity?
     # closure_rate = calculate_closure_rate(entity.vel, target_group.vel) if target_group else 0.0
 
     # Weapons usage mode (one-hot encoding: tight/selective/free)
-    # TODO: Erwin, does entity.weapons_usage_mode exist and what are its values?
-    # weapons_mode = entity.weapons_usage_mode if hasattr(entity, 'weapons_usage_mode') else 'selective'
-    # weapons_tight = 1.0 if weapons_mode == 'tight' else 0.0
-    # weapons_selective = 1.0 if weapons_mode == 'selective' else 0.0  
-    # weapons_free = 1.0 if weapons_mode == 'free' else 0.0
+    weapons_mode = entity.weapons_usage_mode
+    weapons_tight = 1.0 if weapons_mode == 'tight' else 0.0
+    weapons_selective = 1.0 if weapons_mode == 'selective' else 0.0  
+    weapons_free = 1.0 if weapons_mode == 'free' else 0.0
     
     # Shots fired this engagement/commit
     # TODO: Erwin, is there a shots_fired counter we can access?
