@@ -5,7 +5,7 @@ This module provides pure utility functions used across multiple environment mod
 
 """
 
-from typing import Set
+from typing import Set, Tuple, Any
 from SimulationInterface import Entity
 
 
@@ -24,18 +24,53 @@ def get_time_elapsed(frame_index: int) -> float:
     return frame_index / 60  # seconds
 
 
-def get_settler_units(entities, our_faction) -> Set[Entity]:
-    """Get all settler units belonging to our faction.
-    
-    Settler units are entities capable of capturing objectives in the mission.
-    This function filters the entity collection to find only alive settler units
-    from the specified faction.
+def calculate_max_grid_positions(config: Any) -> int:
+    """Calculate maximum number of grid positions for the map.
     
     Args:
-        entities: Dictionary of all entities in the simulation
-        our_faction: Faction value to filter for
+        config: Environment configuration with map and grid parameters
         
     Returns:
-        Set of settler entities that are alive and belong to our faction
+        Total number of discrete grid positions available
     """
-    return {entity for entity in entities.values() if entity.is_alive and entity.faction.value == our_faction and entity.can_capture}
+    grid_size = int((config.map_size_km[0]) / config.grid_resolution_km)
+    return grid_size * grid_size
+
+
+def grid_to_position(grid_index: int, config: Any) -> Tuple[float, float]:
+    """Convert discrete grid index to world coordinates.
+    
+    Transforms the agent's discrete position choice into continuous
+    world coordinates for use in the simulation.
+    
+    Args:
+        grid_index: Discrete grid position index
+        config: Environment configuration with grid parameters
+        
+    Returns:
+        Tuple of (x, y) world coordinates in meters
+    """
+    grid_size = int(config.map_size_km[0] / config.grid_resolution_km)  # Grid size in cells
+    
+    grid_x = grid_index % grid_size
+    grid_y = grid_index // grid_size
+    
+    # Convert to world coordinates (meters)
+    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] // 2)
+    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] // 2)
+    
+    return world_x, world_y
+
+
+def position_in_bounds(x: float, y: float, config: Any) -> bool:
+    """Check if world position is within map boundaries.
+    
+    Args:
+        x, y: World coordinates in meters
+        config: Environment configuration with map size
+        
+    Returns:
+        True if position is within map bounds
+    """
+    half_map = config.map_size_km[0] * 1000 // 2
+    return abs(x) <= half_map and abs(y) <= half_map

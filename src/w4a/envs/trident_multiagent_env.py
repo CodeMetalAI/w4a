@@ -21,6 +21,7 @@ from . import observations
 from . import simulation_utils
 from . import mission_metrics
 from .utils import get_time_elapsed
+from .constants import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
 
 import SimulationInterface
 from SimulationInterface import (
@@ -29,10 +30,6 @@ from SimulationInterface import (
     Entity, ControllableEntity, Unit, EntityDomain,
     EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
-
-
-FACTION_FLAG_IDS = {Faction.LEGACY: 2, Faction.DYNASTY: 1, Faction.NEUTRAL: 3}
-CENTER_ISLAND_FLAG_ID = FACTION_FLAG_IDS[Faction.NEUTRAL]
 
 
 class TridentIslandMultiAgentEnv(ParallelEnv):
@@ -80,6 +77,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
+        self.max_ammo = 50.0  # TODO: Erwin, is this correct?
+
         # Set up paths
         self.scenario_path = Path(__file__).parent.parent / "scenarios"
         
@@ -147,8 +146,25 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         }
         
         # Mission metrics (for termination and rewards)
-        self.friendly_kills = []
-        self.enemy_kills = []
+        # Per-faction dead entity tracking (single source of truth)
+        self.dead_entities_by_faction = {
+            Faction.LEGACY: set(),
+            Faction.DYNASTY: set()
+        }
+        
+        # Per-faction kill tracking (cached in mission_metrics)
+        self.kill_ratio_by_faction = {
+            Faction.LEGACY: 0.0,
+            Faction.DYNASTY: 0.0
+        }
+        self.casualties_by_faction = {
+            Faction.LEGACY: 0,
+            Faction.DYNASTY: 0
+        }
+        self.kills_by_faction = {
+            Faction.LEGACY: 0,
+            Faction.DYNASTY: 0
+        }
         
         # Per-faction capture tracking (agent-agnostic multiagent design)
         self.capture_progress_by_faction = {
@@ -158,6 +174,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.capture_possible_by_faction = {
             Faction.LEGACY: True,
             Faction.DYNASTY: True
+        }
+        self.capture_completed_at_step = {
+            Faction.LEGACY: None,  # Step number when capture completed (None = not completed)
+            Faction.DYNASTY: None
         }
         self.island_contested = False
         
@@ -388,8 +408,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 termination_cause = "legacy_win"
             elif outcome == "dynasty_win":
                 termination_cause = "dynasty_win"
+            elif outcome == "draw":
+                termination_cause = "draw"
             else:
-                termination_cause = "terminated"
+                termination_cause = "terminated"  # Fallback (shouldn't happen)
         elif truncated:
             termination_cause = "time_limit"
         else:
@@ -427,10 +449,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Check if the mission should terminate early.
         
         Returns:
-            True if episode should end due to win/loss conditions
+            True if episode should end due to win/loss conditions (including draws)
         """
         outcome = self._evaluate_outcome()
-        return outcome in ("legacy_win", "dynasty_win")
+        return outcome in ("legacy_win", "dynasty_win", "draw")
     
     def _evaluate_outcome(self) -> str:
         """
@@ -442,7 +464,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         3. Kill ratio loss: Suffering unfavorable kill:death ratio
         
         Returns:
-            "legacy_win", "dynasty_win", or "ongoing"
+            "legacy_win", "dynasty_win", "draw", or "ongoing"
         """
         # Capture win condition (per-faction, agent-agnostic)
         legacy_capture_progress = self.capture_progress_by_faction[Faction.LEGACY]
@@ -450,19 +472,33 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         legacy_can_capture = self.capture_possible_by_faction[Faction.LEGACY]
         dynasty_can_capture = self.capture_possible_by_faction[Faction.DYNASTY]
         
-        if legacy_capture_progress >= self.config.capture_required_seconds and legacy_can_capture:
+        # Check if factions have completed capture
+        legacy_captured = legacy_capture_progress >= self.config.capture_required_seconds and legacy_can_capture
+        dynasty_captured = dynasty_capture_progress >= self.config.capture_required_seconds and dynasty_can_capture
+        
+        # Determine winner based on who completed FIRST (tracked by step number)
+        if legacy_captured and dynasty_captured:
+            # Both completed - check who finished first
+            legacy_step = self.capture_completed_at_step[Faction.LEGACY]
+            dynasty_step = self.capture_completed_at_step[Faction.DYNASTY]
+            
+            if legacy_step is not None and dynasty_step is not None:
+                if legacy_step < dynasty_step:
+                    return "legacy_win"  # Legacy completed first
+                elif dynasty_step < legacy_step:
+                    return "dynasty_win"  # Dynasty completed first
+                else:
+                    return "draw"  # Completed at exact same step (rare)
+            # Fallback if completion steps not tracked properly
+            return "draw"
+        elif legacy_captured:
             return "legacy_win"
-        if dynasty_capture_progress >= self.config.capture_required_seconds and dynasty_can_capture:
+        elif dynasty_captured:
             return "dynasty_win"
         
-        # Calculate kill ratios for both factions
-        legacy_casualties = len([k for k in self.friendly_kills if k.faction == Faction.LEGACY])
-        dynasty_casualties = len([k for k in self.friendly_kills if k.faction == Faction.DYNASTY])
-        legacy_kills = len([k for k in self.enemy_kills if k.faction == Faction.DYNASTY])
-        dynasty_kills = len([k for k in self.enemy_kills if k.faction == Faction.LEGACY])
-        
-        legacy_kill_ratio = legacy_kills / max(1, legacy_casualties)
-        dynasty_kill_ratio = dynasty_kills / max(1, dynasty_casualties)
+        # Get cached kill ratios (computed in mission_metrics.update_kill_ratios)
+        legacy_kill_ratio = self.kill_ratio_by_faction[Faction.LEGACY]
+        dynasty_kill_ratio = self.kill_ratio_by_faction[Faction.DYNASTY]
         
         threshold = self.config.kill_ratio_threshold
         
@@ -633,19 +669,16 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         return providers
     
     def _get_casualties_count_for_faction(self, faction: Faction) -> int:
-        """Get casualty count for a specific faction."""
-        return len([k for k in self.friendly_kills if k.faction == faction])
+        """Get casualty count for a specific faction (cached in mission_metrics)."""
+        return self.casualties_by_faction[faction]
     
     def _get_casualties_count_for_enemy(self, faction: Faction) -> int:
-        """Get enemy casualty count from a faction's perspective."""
-        enemy_faction = Faction.DYNASTY if faction == Faction.LEGACY else Faction.LEGACY
-        return len([k for k in self.enemy_kills if k.faction == enemy_faction])
+        """Get enemy casualty count from a faction's perspective (cached in mission_metrics)."""
+        return self.kills_by_faction[faction]
     
     def _compute_kill_ratio_for_faction(self, faction: Faction) -> float:
-        """Compute kill ratio for a specific faction."""
-        my_casualties = self._get_casualties_count_for_faction(faction)
-        enemy_casualties = self._get_casualties_count_for_enemy(faction)
-        return float(enemy_casualties) / max(1, my_casualties)
+        """Get kill ratio for a specific faction (cached in mission_metrics)."""
+        return self.kill_ratio_by_faction[faction]
     
     def _get_noop_action(self) -> Dict:
         """Get a no-op action."""

@@ -17,12 +17,12 @@ Action types supported:
 - Objectives: Capture and hold operations
 """
 
-from typing import Dict, List, Tuple
-from ..config import Config
-
 import math
+from typing import Dict, List, Tuple
 
-from .trident_multiagent_env import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
+from ..config import Config
+from .constants import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
+from .utils import calculate_max_grid_positions, grid_to_position, position_in_bounds
 
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
@@ -600,54 +600,3 @@ def get_valid_weapon_combinations(available_weapons: Dict) -> List[int]:
     return list(range(max_combinations))  # [0, 1, 2, ...] for selection indices
 
 
-def grid_to_position(grid_index: int, config: Config) -> Tuple[float, float]:
-    """Convert discrete grid index to world coordinates.
-    
-    Transforms the agent's discrete position choice into continuous
-    world coordinates for use in the simulation.
-    
-    Args:
-        grid_index: Discrete grid position index
-        config: Environment configuration with grid parameters
-        
-    Returns:
-        Tuple of (x, y) world coordinates in meters
-    """
-
-    grid_size = int(config.map_size_km[0] / config.grid_resolution_km)  # Grid size in cells
-    
-    grid_x = grid_index % grid_size
-    grid_y = grid_index // grid_size
-    
-    # Convert to world coordinates (meters)
-    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] // 2)
-    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] // 2)
-    
-    return world_x, world_y
-
-
-def position_in_bounds(x: float, y: float, config: Config) -> bool:
-    """Check if world position is within map boundaries.
-    
-    Args:
-        x, y: World coordinates in meters
-        config: Environment configuration with map size
-        
-    Returns:
-        True if position is within map bounds
-    """
-    half_map = config.map_size_km[0] * 1000 // 2
-    return abs(x) <= half_map and abs(y) <= half_map
-
-
-def calculate_max_grid_positions(config: Config) -> int:
-    """Calculate maximum number of grid positions for the map.
-    
-    Args:
-        config: Environment configuration with map and grid parameters
-        
-    Returns:
-        Total number of discrete grid positions available
-    """
-    grid_size = int((config.map_size_km[0]) / config.grid_resolution_km)
-    return grid_size * grid_size
