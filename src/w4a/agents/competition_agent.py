@@ -51,11 +51,15 @@ class CompetitionAgent:
         # Internal simulation agent (HIDDEN from users)
         self._sim_agent = _SimulationAgentImpl(faction, config)
         self._env = None
+        self.cached_faction = faction
         
     @property
     def faction(self) -> Faction:
         """The faction this agent controls (read-only)."""
-        return self._sim_agent.faction
+
+        return self.cached_faction
+
+        #return self._sim_agent.faction
         
     @property
     def config(self):
