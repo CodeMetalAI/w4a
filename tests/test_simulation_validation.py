@@ -221,8 +221,8 @@ class TestSimulationIsActuallyRunning:
         
         # Current observation implementation returns zeros (placeholder)
         # This test will need to be updated when observations are implemented
-        assert observations["legacy"].shape == (7,), "Observation should be 7 features"
-        assert observations["dynasty"].shape == (7,), "Observation should be 7 features"
+        assert observations["legacy"].shape == (12,), "Observation should be 12 features"
+        assert observations["dynasty"].shape == (12,), "Observation should be 12 features"
         
         # For now, verify that observations are at least well-formed
         assert observations["legacy"].dtype == np.float32
@@ -380,18 +380,20 @@ class TestCaptureProgress:
         env.capture_progress_by_faction[Faction.DYNASTY] = 2.0
         
         # Step to update info
+        # Note: update_capture_progress() will advance progress by time_delta (10 seconds) if settlers present
         actions = {
             "legacy": agent_legacy.select_action(observations["legacy"]),
             "dynasty": agent_dynasty.select_action(observations["dynasty"])
         }
         observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        # Verify each faction sees their own progress
-        assert infos["legacy"]["mission"]["my_capture_progress"] == 5.0
-        assert infos["legacy"]["mission"]["enemy_capture_progress"] == 2.0
+        # Verify each faction sees their own progress (advanced by 10 seconds)
+        # Legacy: 5.0 + 10.0 = 15.0, Dynasty: 2.0 + 10.0 = 12.0
+        assert infos["legacy"]["mission"]["my_capture_progress"] == 15.0
+        assert infos["legacy"]["mission"]["enemy_capture_progress"] == 12.0
         
-        assert infos["dynasty"]["mission"]["my_capture_progress"] == 2.0
-        assert infos["dynasty"]["mission"]["enemy_capture_progress"] == 5.0
+        assert infos["dynasty"]["mission"]["my_capture_progress"] == 12.0
+        assert infos["dynasty"]["mission"]["enemy_capture_progress"] == 15.0
         
         env.close()
     

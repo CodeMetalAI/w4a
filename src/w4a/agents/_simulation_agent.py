@@ -67,12 +67,7 @@ class _SimulationAgentImpl(SimAgent):
         """
         Spawn entities for this faction.
         
-        This is the default force laydown implementation reused from the
-        existing RLAgent code.
-        
-        TODO: Verify that JSON loading should go in here.
-        Consider allowing force_config_json and spawn_config_json to be
-        passed to the agent for more flexible scenario configuration.
+        This is the default force laydown implementation.
         """
         force_laydown = self.force_laydown
         entities = []

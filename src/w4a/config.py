@@ -40,7 +40,7 @@ class Config:
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
     
     # Faction configuration
-    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY # TODO: Make this configurable per scenario
+    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
     max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  

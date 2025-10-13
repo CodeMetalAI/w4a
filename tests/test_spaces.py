@@ -82,9 +82,9 @@ class TestObservationSpace:
         
         observations, infos = env.reset()
         
-        # Currently observations are 7 features (global features only)
+        # Currently observations are 12 features (global features only)
         # In future will include friendly and enemy features
-        expected_size = 7
+        expected_size = 12
         
         for agent_name, obs in observations.items():
             assert obs.shape == (expected_size,), f"{agent_name}: Expected shape ({expected_size},), got {obs.shape}"
