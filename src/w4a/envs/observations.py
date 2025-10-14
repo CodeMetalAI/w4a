@@ -287,10 +287,10 @@ def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
     
     # Rotation quaternion (4 features)
     # Clip quaternion components to [-1, 1], then convert to [0, 1]
-    rot_x_norm = (np.clip(entity.rot.x, -1.0, 1.0) + 1.0) / 2.0
-    rot_y_norm = (np.clip(entity.rot.y, -1.0, 1.0) + 1.0) / 2.0
-    rot_z_norm = (np.clip(entity.rot.z, -1.0, 1.0) + 1.0) / 2.0
-    rot_w_norm = (np.clip(entity.rot.w, -1.0, 1.0) + 1.0) / 2.0
+    rot_x_norm = (entity.rot.x + 1.0) / 2.0
+    rot_y_norm = (entity.rot.y + 1.0) / 2.0
+    rot_z_norm = (entity.rot.z + 1.0) / 2.0
+    rot_w_norm = (entity.rot.w + 1.0) / 2.0
     
     return np.array([grid_x_norm, grid_y_norm, 
                      vel_x_norm, vel_y_norm, vel_z_norm,
