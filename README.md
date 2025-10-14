@@ -10,6 +10,7 @@ W4A enables reinforcement learning research on realistic tactical scenarios incl
 
 - Python 3.9 (required for SimulationInterface compatibility)
 - Simulation engine with SimulationInterface bindings
+- MacOS (ARM64), Linux (x64), Windows (x64)
 
 ## Installation
 
