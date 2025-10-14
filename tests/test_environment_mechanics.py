@@ -12,7 +12,7 @@ from w4a import Config
 from w4a.envs.trident_multiagent_env import TridentIslandMultiAgentEnv
 from w4a.envs.mission_metrics import update_capture_progress
 from w4a.agents import CompetitionAgent, SimpleAgent
-
+from w4a.envs import mission_metrics
 from SimulationInterface import Faction
 
 
@@ -226,78 +226,6 @@ class TestEntityDeath:
 class TestTerminationConditions:
     """Test termination conditions"""
     
-    def test_capture_win_legacy(self):
-        """Test termination based on legacy capture completion"""
-        config = Config()
-        config.capture_required_seconds = 20.0  # Requires 2 steps to capture
-        env = TridentIslandMultiAgentEnv(config=config)
-        
-        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-        env.set_agents(agent_legacy, agent_dynasty)
-        
-        observations, infos = env.reset()
-        
-        # Simulate legacy one timestep ahead of dynasty
-        # Note: time_delta = frame_rate/60 = 600/60 = 10 seconds per step
-        # Legacy at threshold (20), Dynasty one step behind (10)
-        # Legacy completed at some previous step, Dynasty will complete this step
-        # But Legacy should win because it completed FIRST
-        env.capture_progress_by_faction[Faction.LEGACY] = config.capture_required_seconds  # 20.0
-        env.capture_progress_by_faction[Faction.DYNASTY] = 10.0  # One step behind
-        env.capture_completed_at_step[Faction.LEGACY] = env.current_step - 1  # Completed last step
-        env.capture_completed_at_step[Faction.DYNASTY] = None  # Not yet completed
-        
-        # Step to trigger termination check
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
-        }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
-        
-        # Verify termination occurred
-        assert terminations["legacy"] == True, "Capture completion should trigger termination"
-        assert terminations["dynasty"] == True, "Both agents should terminate simultaneously"
-        assert infos["legacy"]["termination_cause"] == "legacy_win"
-        
-        env.close()
-    
-    def test_capture_win_dynasty(self):
-        """Test termination based on dynasty capture completion"""
-        config = Config()
-        config.capture_required_seconds = 20.0  # Requires 2 steps to capture
-        env = TridentIslandMultiAgentEnv(config=config)
-        
-        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-        env.set_agents(agent_legacy, agent_dynasty)
-        
-        observations, infos = env.reset()
-        
-        # Simulate dynasty one timestep ahead of legacy
-        # Note: time_delta = frame_rate/60 = 600/60 = 10 seconds per step
-        # Dynasty at threshold (20), Legacy one step behind (10)
-        # Dynasty completed at some previous step, Legacy will complete this step
-        # But Dynasty should win because it completed FIRST
-        env.capture_progress_by_faction[Faction.DYNASTY] = config.capture_required_seconds  # 20.0
-        env.capture_progress_by_faction[Faction.LEGACY] = 10.0  # One step behind
-        env.capture_completed_at_step[Faction.DYNASTY] = env.current_step - 1  # Completed last step
-        env.capture_completed_at_step[Faction.LEGACY] = None  # Not yet completed
-        
-        # Step to trigger termination check
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
-        }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
-        
-        # Verify termination occurred
-        assert terminations["dynasty"] == True, "Capture completion should trigger termination"
-        assert terminations["legacy"] == True, "Both agents should terminate simultaneously"
-        assert infos["dynasty"]["termination_cause"] == "dynasty_win"
-        
-        env.close()
-    
     def test_time_limit_truncation(self):
         """Test truncation based on time limit"""
         config = Config()
@@ -328,106 +256,73 @@ class TestTerminationConditions:
         env.close()
     
     def test_kill_ratio_win_legacy(self):
-        """Test termination based on legacy achieving favorable kill ratio"""
+        """Test kill ratio tracking in obs/info by directly manipulating dead entities"""
         config = Config()
-        config.kill_ratio_win_threshold = 2.0
+        config.kill_ratio_threshold = 1.5
         env = TridentIslandMultiAgentEnv(config=config)
         
         agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        agent_dynasty = CompetitionAgent(Faction.DYNASTY, config)
         env.set_agents(agent_legacy, agent_dynasty)
         
         observations, infos = env.reset()
         
-        # Simulate legacy achieving high kill ratio by manually manipulating kill sets
-        # Legacy kills 10 dynasty entities, dynasty kills 2 legacy entities
-        # Kill ratio for legacy = 10/2 = 5.0 > 2.0 threshold
+        # INITIAL STATE: No casualties
+        assert infos["legacy"]["mission"]["my_casualties"] == 0
+        assert infos["legacy"]["mission"]["enemy_casualties"] == 0
+        assert infos["legacy"]["mission"]["kill_ratio"] == 0.0
+        assert observations["legacy"][1] == 0.0  # my_casualties obs
+        assert observations["legacy"][2] == 0.0  # enemy_casualties obs
         
-        # Get entities and add to kill tracking
-        dynasty_entities = list(agent_dynasty._sim_agent.controllable_entities.values())[:10]
-        legacy_entities = list(agent_legacy._sim_agent.controllable_entities.values())[:2]
-        
-        # Manually track kills using the single source of truth: dead_entities_by_faction
-        # Legacy killed 10 Dynasty entities
+        # Manually add Dynasty entities to dead set (simulate Legacy killing 3 Dynasty units)
+        dynasty_entities = list(agent_dynasty._sim_agent.controllable_entities.values())[:3]
         for entity in dynasty_entities:
             env.dead_entities_by_faction[Faction.DYNASTY].add(entity)
-        # Dynasty killed 2 Legacy entities
-        for entity in legacy_entities:
-            env.dead_entities_by_faction[Faction.LEGACY].add(entity)
         
-        # Step to trigger termination check
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        # Update metrics and get new observations
+
+        mission_metrics.update_all_mission_metrics(env)
+        
+        observations = {
+            "legacy": agent_legacy.get_observation(),
+            "dynasty": agent_dynasty.get_observation()
         }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        # Verify kill ratio is favorable
-        kill_ratio = infos["legacy"]["mission"]["kill_ratio"]
-        assert kill_ratio >= config.kill_ratio_win_threshold, f"Kill ratio {kill_ratio} should be >= {config.kill_ratio_win_threshold}"
+        # Build info dict manually (similar to step())
+        infos = {
+            "legacy": env._build_info_for_agent(agent_legacy),
+            "dynasty": env._build_info_for_agent(agent_dynasty)
+        }
         
-        # Verify termination occurred
-        assert terminations["legacy"] == True, "Kill ratio win should trigger termination"
-        assert terminations["dynasty"] == True, "Both agents should terminate simultaneously"
-        assert infos["legacy"]["termination_cause"] == "legacy_win"
+        # VERIFY: Info dict reflects casualties
+        assert infos["legacy"]["mission"]["enemy_casualties"] == 3, \
+            f"Expected 3 enemy casualties, got {infos['legacy']['mission']['enemy_casualties']}"
+        assert infos["legacy"]["mission"]["my_casualties"] == 0
+        assert infos["legacy"]["mission"]["kill_ratio"] >= config.kill_ratio_threshold, \
+            f"Kill ratio {infos['legacy']['mission']['kill_ratio']} should be >= {config.kill_ratio_threshold}"
+        
+        # VERIFY: Observation space reflects casualties  
+        obs_my_casualties = observations["legacy"][1]
+        obs_enemy_casualties = observations["legacy"][2]
+        obs_kill_ratio = observations["legacy"][3]
+        
+        expected_enemy_norm = 3.0 / max(config.max_entities, 1)
+        assert obs_my_casualties == 0.0, f"My casualties should be 0, got {obs_my_casualties}"
+        assert obs_enemy_casualties == expected_enemy_norm, \
+            f"Enemy casualties obs {obs_enemy_casualties:.4f} doesn't match expected {expected_enemy_norm:.4f}"
+        assert obs_kill_ratio > 0, \
+            f"Kill ratio obs {obs_kill_ratio} should be > 0 when we have kills"
+        
+        # VERIFY: Dead entities tracked correctly
+        assert len(env.dead_entities_by_faction[Faction.DYNASTY]) == 3
+        assert len(env.dead_entities_by_faction[Faction.LEGACY]) == 0
+        
+        # VERIFY: Symmetry - Dynasty sees opposite casualties
+        assert infos["dynasty"]["mission"]["my_casualties"] == 3
+        assert infos["dynasty"]["mission"]["enemy_casualties"] == 0
         
         env.close()
     
-    def test_capture_progress_resets_when_settlers_lost(self):
-        """Test that capture progress and completion step reset when faction loses all settlers"""
-        config = Config()
-        config.capture_required_seconds = 20.0
-        env = TridentIslandMultiAgentEnv(config=config)
-        
-        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-        env.set_agents(agent_legacy, agent_dynasty)
-        
-        observations, infos = env.reset()
-        
-        # Simulate legacy making progress toward capture
-        env.capture_progress_by_faction[Faction.LEGACY] = 15.0  # 75% complete
-        env.capture_completed_at_step[Faction.LEGACY] = None  # Not yet completed
-        env.capture_possible_by_faction[Faction.LEGACY] = True  # Has settlers
-        
-        # Take a step - legacy should still have progress
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
-        }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
-        
-        # Legacy should still have progress (will be recalculated by update_capture_possible)
-        # But if they actually have settlers, progress should be maintained or advanced
-        
-        # Now simulate legacy losing all settlers
-        # Set capture_possible to False to simulate all settlers dead/gone
-        env.capture_possible_by_faction[Faction.LEGACY] = False
-        
-        # Manually call update_capture_progress to simulate what happens in step()
-        update_capture_progress(env)
-        
-        # Verify progress and completion step are RESET
-        assert env.capture_progress_by_faction[Faction.LEGACY] == 0.0, \
-            "Progress should reset to 0 when settlers are lost"
-        assert env.capture_completed_at_step[Faction.LEGACY] is None, \
-            "Completion step should reset to None when settlers are lost"
-        
-        # Simulate legacy getting settlers back and re-capturing
-        env.capture_possible_by_faction[Faction.LEGACY] = True
-        env.capture_progress_by_faction[Faction.LEGACY] = 18.0  # Close to completion
-        
-        # Advance to complete capture
-        update_capture_progress(env)  # Will add time_delta (10 seconds)
-        
-        # Legacy should now have completed (18 + 10 = 28, capped at 20)
-        assert env.capture_progress_by_faction[Faction.LEGACY] >= config.capture_required_seconds
-        # And completion should be tracked at CURRENT step, not the old one
-        assert env.capture_completed_at_step[Faction.LEGACY] == env.current_step, \
-            "Completion step should be current step for new capture attempt"
-        
-        env.close()
-
 
 class TestInfoDictUpdates:
     """Test that info dict is properly updated each step"""

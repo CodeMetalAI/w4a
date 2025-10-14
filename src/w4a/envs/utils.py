@@ -56,8 +56,9 @@ def grid_to_position(grid_index: int, config: Any) -> Tuple[float, float]:
     grid_y = grid_index // grid_size
     
     # Convert to world coordinates (meters)
-    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] // 2)
-    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] // 2)
+    # First convert grid position to meters, then center by subtracting half map size in meters
+    world_x = (grid_x * config.grid_resolution_km * 1000) - (config.map_size_km[0] * 1000 // 2)
+    world_y = (grid_y * config.grid_resolution_km * 1000) - (config.map_size_km[1] * 1000 // 2)
     
     return world_x, world_y
 

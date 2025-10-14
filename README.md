@@ -65,16 +65,21 @@ env.close()
 ## What's Included
 
 ### Environments
-- **TridentIslandMultiAgentEnv** - PettingZoo Parallel environment for multi agent (two-player) compeitive scenarios
+- **TridentIslandMultiAgentEnv** - PettingZoo Parallel environment for two-player competitive scenarios
 - Gymnasium-compatible observation and action spaces
 - Action masking for valid action selection
 - Fog-of-war filtered observations
+- Observation space contains global mission state, per-entity features, and per-target-group features
 
 ### Agents
 - **CompetitionAgent** - Base class for custom RL agents with clean API
+  - Implement `select_action(observation)` with your AI policy (neural network, random policy, etc.)
+  - Customizable reward shaping via `calculate_reward()`
+  - Customizable observations via `get_observation()`
 - **SimpleAgent** - Rule-based agent for testing and baselines
-- Per-agent entity and target group tracking
-- Customizable reward shaping, observation space implementation, action space implementation
+  - Automatically engages all detected enemies with available weapons
+  - Useful as opponent during training or for baseline comparisons
+- Per-agent entity and target group tracking with fog-of-war
 
 ### Features
 - Multi-domain combat (air, surface)
@@ -114,17 +119,17 @@ w4a/
 └── SimulationInterface/     # Simulation Engine Python bindings
 ```
 
-## Testing
+## Development and Testing
+
+The `tests/` directory contains comprehensive test suites that validate the simulation's behavior during development. These tests are designed to ensure simulation fidelity and API correctness.
+
+**Note for Users**: Tests are development tools for validating the simulation engine. You do not need to worry about tests passing as you modify agents or experiment with the environment. The tests help maintain simulation integrity, but your custom agents and experiments are independent of the test suite.
 
 ```bash
-# Run all tests
-pytest tests/
 
-# Run specific test file
-pytest tests/test_actions.py -v
+# Run specific test file (optional, for development validation)
+pytest tests/test_basic_multiagent.py -v -s
 
-# Run with output
-pytest tests/ -v -s
 ```
 
 ## Learn More

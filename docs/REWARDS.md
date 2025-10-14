@@ -28,18 +28,16 @@ Automatically added when episode ends:
 
 ### Win Conditions
 An agent wins if:
-1. **Capture Victory**: Maintain control of objective for required duration
-2. **Kill Ratio Victory**: Achieve favorable kill ratio (default: destroy 3× more enemies than losses)
+1. **Capture Victory**: Complete capture of the objective flag (progress reaches required duration)
+2. **Kill Ratio Victory**: Achieve favorable kill ratio above threshold (default: 1.2×, configurable)
 
 ### Loss Conditions  
-An agent loses if:
-1. **Cannot Capture**: Lost all capture-capable units AND unfavorable kill ratio
-2. **Inverse Kill Ratio**: Enemy has 3× better kill ratio
+An agent loses if the opponent achieves a win condition.
 
-### Timeout
-If neither side wins/loses before time limit:
+### Draw/Timeout
+If neither side wins before time limit:
 - Episode truncates (not terminated)
-- No terminal reward given
+- Both agents receive `0.0` reward (draw)
 
 ## Custom Per-Step Rewards
 
@@ -55,9 +53,10 @@ class MyAgent(CompetitionAgent):
         my_entities = self.get_entities()
         reward += 0.1 * len(my_entities)
         
-        # Attrition
-        my_casualties = len([k for k in env.friendly_kills if k.faction == self.faction])
-        enemy_casualties = len([k for k in env.enemy_kills if k.faction != self.faction])
+        # Attrition (access from env.dead_entities_by_faction)
+        my_casualties = len(env.dead_entities_by_faction.get(self.faction, []))
+        enemy_faction = Faction.DYNASTY if self.faction == Faction.LEGACY else Faction.LEGACY
+        enemy_casualties = len(env.dead_entities_by_faction.get(enemy_faction, []))
         reward -= 0.5 * my_casualties
         reward += 0.3 * enemy_casualties
         

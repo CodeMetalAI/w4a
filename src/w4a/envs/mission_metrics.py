@@ -2,7 +2,7 @@
 Mission Metrics Management
 
 This module provides functions to track and update mission progress metrics including
-kill counts, capture progress, contestation status, and capture capability. These
+kill counts, capture progress, and capture capability. These
 metrics represent the current tactical situation and progress toward mission objectives.
 
 The metrics are updated each simulation step and used for reward calculation,
@@ -14,6 +14,7 @@ from typing import Dict, List, Set, Any
 from SimulationInterface import Entity, EntityDomain, Faction
 
 from .utils import *
+from .constants import CENTER_ISLAND_FLAG_ID
 
 
 def update_dead_entities(env: Any) -> None:
@@ -52,79 +53,71 @@ def update_dead_entities(env: Any) -> None:
 def update_capture_progress(env: Any) -> None:
     """Update capture timer progress based on current capture conditions.
     
-    Advances capture progress per-faction when that faction has settlers actively
-    capturing. Progress resets if faction loses all settlers. Multiple factions can
-    progress simultaneously. Tracks the step when each faction
-    first completes capture to determine winner in ties.
+    Uses the flag's capture_progress property (0..1) and capturing_faction to track
+    which faction is currently making progress. Only one faction can capture at a time.
+    Tracks the step when each faction first completes capture.
     
     Args:
         env: Environment instance with per-faction capture state
     """
-    # Calculate time delta from simulation parameters
-    time_delta = env.frame_rate / 60.0  # frame_rate frames per step / 60 frames per second
+    flag = env.flags[CENTER_ISLAND_FLAG_ID]
     required_time = env.config.capture_required_seconds
     
-    # Update progress for each faction independently
+    # Get current capture state from flag
+    # flag.capture_progress is normalized 0..1 (0 = not started, 1 = complete)
+    current_progress_normalized = flag.capture_progress  # 0..1
+    current_progress_seconds = current_progress_normalized * required_time  # Convert to seconds
+    
+    # Only the faction currently capturing the flag has progress
+    # All other factions have 0 progress
+    capturing_faction = flag.capturing_faction
+
     for faction in [Faction.LEGACY, Faction.DYNASTY]:
-        if env.capture_possible_by_faction[faction]:
-            # Faction has settlers - advance their capture progress
-            old_progress = env.capture_progress_by_faction[faction]
-            new_progress = old_progress + time_delta
-            env.capture_progress_by_faction[faction] = min(new_progress, required_time)
-            
-            # Track when faction first completes capture (crosses threshold)
-            if old_progress < required_time and new_progress >= required_time:
-                # First time crossing threshold - record the step
-                if env.capture_completed_at_step[faction] is None:
-                    env.capture_completed_at_step[faction] = env.current_step
+        old_progress = env.capture_progress_by_faction[faction]
+        
+        if capturing_faction == faction:
+            # This faction is actively capturing
+            new_progress = current_progress_seconds
         else:
-            # Faction has no settlers - reset EVERYTHING
-            # This handles settlers leaving/dying: they must start over from scratch
-            env.capture_progress_by_faction[faction] = 0.0
-            env.capture_completed_at_step[faction] = None  # Clear completion timestamp
-
-def update_island_contested(env: Any) -> None:
-    """Check if the capture area is contested by enemy forces.
-    
-    The area is considered contested when both factions have settlers
-    present and capable of capturing the objective.
-    
-    Args:
-        env: Environment instance with contestation flag
-    """
-    # Island is contested if BOTH factions have settlers capable of capturing
-    legacy_has_settlers = env.capture_possible_by_faction[Faction.LEGACY]
-    dynasty_has_settlers = env.capture_possible_by_faction[Faction.DYNASTY]
-    
-    env.island_contested = legacy_has_settlers and dynasty_has_settlers
-
-
-
+            # This faction is not capturing - no progress
+            new_progress = 0.0
+        
+        env.capture_progress_by_faction[faction] = new_progress
+        
+        # Track when faction first completes capture (crosses threshold)
+        if old_progress < required_time and new_progress >= required_time:
+            # First time crossing threshold - record the step
+            if env.capture_completed_at_step[faction] is None:
+                env.capture_completed_at_step[faction] = env.current_step
 
 def update_capture_possible(env: Any) -> None:
     """Check if capture is currently possible for each faction.
 
-    Capture is possible per faction when at least one settler unit from that
-    faction is alive and capable of capturing the objective.
+    Capture is possible for a faction when:
+    1. The faction has at least one settler unit alive and capable of capturing
+    2. The flag itself can be captured (neutral, not already captured)
     
     Args:
         env: Environment instance with per-faction capture_possible flags
     """
+    flag = env.flags[CENTER_ISLAND_FLAG_ID]
+    flag_can_be_captured = flag.can_be_captured
+    
     # Check Legacy faction for settler units
-    legacy_can_capture = False
+    legacy_has_settlers = False
     for entity in env.agent_legacy._sim_agent.controllable_entities.values():
         if entity.is_alive and entity.can_capture:
-            legacy_can_capture = True
+            legacy_has_settlers = True
             break
-    env.capture_possible_by_faction[Faction.LEGACY] = legacy_can_capture
+    env.capture_possible_by_faction[Faction.LEGACY] = legacy_has_settlers and flag_can_be_captured
     
     # Check Dynasty faction for settler units
-    dynasty_can_capture = False
+    dynasty_has_settlers = False
     for entity in env.agent_dynasty._sim_agent.controllable_entities.values():
         if entity.is_alive and entity.can_capture:
-            dynasty_can_capture = True
+            dynasty_has_settlers = True
             break
-    env.capture_possible_by_faction[Faction.DYNASTY] = dynasty_can_capture
+    env.capture_possible_by_faction[Faction.DYNASTY] = dynasty_has_settlers and flag_can_be_captured
 
 
 def update_kill_ratios(env: Any) -> None:
@@ -141,7 +134,7 @@ def update_kill_ratios(env: Any) -> None:
     # Count casualties per faction directly from per-faction sets (no filtering!)
     legacy_casualties = len(env.dead_entities_by_faction.get(Faction.LEGACY, set()))
     dynasty_casualties = len(env.dead_entities_by_faction.get(Faction.DYNASTY, set()))
-    
+
     # Kills are the enemy's casualties
     legacy_kills = dynasty_casualties  # Legacy killed Dynasty units
     dynasty_kills = legacy_casualties  # Dynasty killed Legacy units
@@ -171,8 +164,7 @@ def update_all_mission_metrics(env: Any) -> None:
     update_dead_entities(env)
     update_kill_ratios(env)           # Depends on: dead_entities_by_faction
     update_capture_possible(env)       # Depends on: alive entities
-    update_island_contested(env)       # Depends on: capture_possible_by_faction
-    update_capture_progress(env)       # Depends on: capture_possible_by_faction, island_contested
+    update_capture_progress(env)       # Depends on: capture_possible_by_faction
 
 
 def reset_mission_metrics(env: Any) -> None:
@@ -217,4 +209,3 @@ def reset_mission_metrics(env: Any) -> None:
         Faction.LEGACY: None,
         Faction.DYNASTY: None
     }
-    env.island_contested = False

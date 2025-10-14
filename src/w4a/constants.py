@@ -5,7 +5,7 @@ Game constants for the simulation engine.
 """
 
 # Map definition
-TRIDENT_ISLAND_MAP_SIZE = (25_000, 25_000)  # 25km x 25km
+TRIDENT_ISLAND_MAP_SIZE = (2_500, 2_500)
 
 # Game rules
 SIMULATION_VICTORY_THRESHOLD = 0.9  # 90% enemy forces destroyed = victory

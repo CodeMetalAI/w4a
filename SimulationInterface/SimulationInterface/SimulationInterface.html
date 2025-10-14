@@ -172,6 +172,7 @@
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupAdversaryTierChanged">TargetGroupAdversaryTierChanged</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupAdversaryWeaponDataChanged">TargetGroupAdversaryWeaponDataChanged</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupGhostStateChanged">TargetGroupGhostStateChanged</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitOutOfFuel">UnitOutOfFuel</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#Victory">Victory</a>
 </font></dt></dl>
 </dd>
@@ -886,11 +887,23 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 Methods defined here:<br>
 <dl><dt><a name="ControllableEntity-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
+<dl><dt><a name="ControllableEntity-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#ControllableEntity-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="ControllableEntity-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#ControllableEntity-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="ControllableEntity-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#ControllableEntity-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="ControllableEntity-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#ControllableEntity-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="ControllableEntity-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#ControllableEntity-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -914,6 +927,9 @@ Readonly properties defined here:<br>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -922,6 +938,9 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -932,8 +951,14 @@ Readonly properties defined here:<br>
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -1101,11 +1126,23 @@ Readonly properties defined here:<br>
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="ControllableGroupEntity-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#ControllableGroupEntity-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="ControllableGroupEntity-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#ControllableGroupEntity-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="ControllableGroupEntity-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#ControllableGroupEntity-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="ControllableGroupEntity-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#ControllableGroupEntity-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="ControllableGroupEntity-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#ControllableGroupEntity-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -1129,6 +1166,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -1137,6 +1177,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -1147,8 +1190,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -1926,6 +1975,23 @@ Methods defined here:<br>
 <dl><dt><a name="Flag-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>can_be_captured</strong></dt>
+<dd><tt>Boolean&nbsp;indicating&nbsp;whether&nbsp;the&nbsp;flag&nbsp;can&nbsp;be&nbsp;captured.</tt></dd>
+</dl>
+<dl><dt><strong>capture_progress</strong></dt>
+<dd><tt>The&nbsp;progress&nbsp;of&nbsp;the&nbsp;current&nbsp;capture&nbsp;(0..1).</tt></dd>
+</dl>
+<dl><dt><strong>capturing_faction</strong></dt>
+<dd><tt>Faction&nbsp;(if&nbsp;any)&nbsp;that&nbsp;is&nbsp;currently&nbsp;capturing&nbsp;the&nbsp;flag.</tt></dd>
+</dl>
+<dl><dt><strong>is_being_captured</strong></dt>
+<dd><tt>Boolean&nbsp;indicating&nbsp;whether&nbsp;this&nbsp;flag&nbsp;is&nbsp;currently&nbsp;being&nbsp;captured.</tt></dd>
+</dl>
+<dl><dt><strong>is_captured</strong></dt>
+<dd><tt>Boolean&nbsp;indicating&nbsp;whether&nbsp;this&nbsp;flag&nbsp;has&nbsp;been&nbsp;captured.</tt></dd>
+</dl>
+<hr>
 Methods inherited from <a href="SimulationInterface.html#Entity">Entity</a>:<br>
 <dl><dt><a name="Flag-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt><a href="#Flag-__str__">__str__</a>(self:&nbsp;SimulationInterface.<a href="#Entity">Entity</a>)&nbsp;-&gt;&nbsp;str<br>
 &nbsp;<br>
@@ -1990,11 +2056,23 @@ Readonly properties inherited from <a href="SimulationInterface.html#Unit">Unit<
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="Flight-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#Flight-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="Flight-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#Flight-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="Flight-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#Flight-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="Flight-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#Flight-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="Flight-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#Flight-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -2018,6 +2096,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -2026,6 +2107,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -2036,8 +2120,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -2438,11 +2528,23 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="Package-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#Package-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="Package-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#Package-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="Package-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#Package-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="Package-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#Package-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="Package-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#Package-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -2466,6 +2568,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -2474,6 +2579,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -2484,8 +2592,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -3243,11 +3357,23 @@ Readonly properties inherited from <a href="SimulationInterface.html#Unit">Unit<
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="Ship-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#Ship-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="Ship-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#Ship-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="Ship-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#Ship-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="Ship-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#Ship-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="Ship-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#Ship-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -3271,6 +3397,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -3279,6 +3408,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -3289,8 +3421,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -4157,11 +4295,23 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="Squadron-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#Squadron-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="Squadron-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#Squadron-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="Squadron-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#Squadron-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="Squadron-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#Squadron-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="Squadron-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#Squadron-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -4185,6 +4335,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -4193,6 +4346,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -4203,8 +4359,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -4375,6 +4537,9 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>num_known_alive_units</strong></dt>
 <dd><tt>The&nbsp;number&nbsp;of&nbsp;known&nbsp;alive&nbsp;units&nbsp;in&nbsp;this&nbsp;targetgroup.</tt></dd>
+</dl>
+<dl><dt><strong>vel</strong></dt>
+<dd><tt>The&nbsp;sum&nbsp;of&nbsp;the&nbsp;velocity&nbsp;of&nbsp;all&nbsp;targets.</tt></dd>
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#Entity">Entity</a>:<br>
@@ -4650,11 +4815,23 @@ Readonly properties defined here:<br>
 </dl>
 <hr>
 Methods inherited from <a href="SimulationInterface.html#ControllableEntity">ControllableEntity</a>:<br>
+<dl><dt><a name="Unit-get_ammo_for_domain"><strong>get_ammo_for_domain</strong></a>(...)</dt><dd><tt><a href="#Unit-get_ammo_for_domain">get_ammo_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;int<br>
+&nbsp;<br>
+The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd></dl>
+
+<dl><dt><a name="Unit-get_estimated_time_until_shoot"><strong>get_estimated_time_until_shoot</strong></a>(...)</dt><dd><tt><a href="#Unit-get_estimated_time_until_shoot">get_estimated_time_until_shoot</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Retrieve&nbsp;the&nbsp;time&nbsp;it&nbsp;would&nbsp;take&nbsp;until&nbsp;being&nbsp;able&nbsp;to&nbsp;shoot.</tt></dd></dl>
+
 <dl><dt><a name="Unit-get_shoot_distance"><strong>get_shoot_distance</strong></a>(...)</dt><dd><tt><a href="#Unit-get_shoot_distance">get_shoot_distance</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>)&nbsp;-&gt;&nbsp;float<br>
 &nbsp;<br>
 Retrieve&nbsp;the&nbsp;distance&nbsp;at&nbsp;which&nbsp;this&nbsp;entity&nbsp;can&nbsp;shoot&nbsp;at&nbsp;a&nbsp;particular&nbsp;domain.</tt></dd></dl>
 
 <dl><dt><a name="Unit-select_weapons"><strong>select_weapons</strong></a>(...)</dt><dd><tt><a href="#Unit-select_weapons">select_weapons</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimTargetGroup,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
+&nbsp;<br>
+Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
+
+<dl><dt><a name="Unit-select_weapons_for_domain"><strong>select_weapons_for_domain</strong></a>(...)</dt><dd><tt><a href="#Unit-select_weapons_for_domain">select_weapons_for_domain</a>(self:&nbsp;SimulationInterface.<a href="#ControllableEntity">ControllableEntity</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#EntityDomain">EntityDomain</a>,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;dict[str,&nbsp;SimulationInterface.<a href="#UnitWeaponData">UnitWeaponData</a>]<br>
 &nbsp;<br>
 Select&nbsp;the&nbsp;weapons&nbsp;that&nbsp;be&nbsp;used&nbsp;for&nbsp;performing&nbsp;an&nbsp;attack.</tt></dd></dl>
 
@@ -4678,6 +4855,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
 </dl>
+<dl><dt><strong>current_target_group</strong></dt>
+<dd><tt>The&nbsp;current&nbsp;target&nbsp;group&nbsp;we&nbsp;are&nbsp;targeting.&nbsp;(Only&nbsp;valid&nbsp;during&nbsp;committing)</tt></dd>
+</dl>
 <dl><dt><strong>engagement_level</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;engagement&nbsp;level.</tt></dd>
 </dl>
@@ -4686,6 +4866,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>has_radar</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;radars.</tt></dd>
+</dl>
+<dl><dt><strong>has_radar_focus_position</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;has&nbsp;a&nbsp;radar&nbsp;focus&nbsp;position&nbsp;set.</tt></dd>
 </dl>
 <dl><dt><strong>has_reached_base</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;we&nbsp;are&nbsp;currently&nbsp;at&nbsp;the&nbsp;base.</tt></dd>
@@ -4696,8 +4879,14 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>is_dead</strong></dt>
 <dd><tt>A&nbsp;boolean&nbsp;value&nbsp;whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;dead.</tt></dd>
 </dl>
+<dl><dt><strong>num_shots_fired</strong></dt>
+<dd><tt>The&nbsp;number&nbsp;of&nbsp;shots&nbsp;fired&nbsp;by&nbsp;this&nbsp;entity&nbsp;during&nbsp;the&nbsp;current&nbsp;manouver.</tt></dd>
+</dl>
 <dl><dt><strong>parent</strong></dt>
 <dd><tt>The&nbsp;parent&nbsp;entity&nbsp;(if&nbsp;any).</tt></dd>
+</dl>
+<dl><dt><strong>radar_focus_position</strong></dt>
+<dd><tt>The&nbsp;radar&nbsp;focus&nbsp;position&nbsp;(if&nbsp;any).</tt></dd>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
@@ -4851,6 +5040,35 @@ Readonly properties defined here:<br>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="UnitLoadout-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UnitOutOfFuel">class <strong>UnitOutOfFuel</strong></a>(<a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>A&nbsp;unit&nbsp;ran&nbsp;out&nbsp;of&nbsp;fuel.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#UnitOutOfFuel">UnitOutOfFuel</a></dd>
+<dd><a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="UnitOutOfFuel-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>unit</strong></dt>
+<dd><tt>The&nbsp;unit&nbsp;that&nbsp;ran&nbsp;out&nbsp;of&nbsp;fuel.</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="UnitOutOfFuel-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
