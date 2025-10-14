@@ -72,7 +72,7 @@ class TestObservationSpace:
         env.close()
     
     def test_observation_size_and_structure(self):
-        """Test that observation has correct size (currently 7 global features)"""
+        """Test that observation has correct size based on config parameters"""
         config = Config()
         env = TridentIslandMultiAgentEnv(config=config)
         
@@ -82,17 +82,16 @@ class TestObservationSpace:
         
         observations, infos = env.reset()
         
-        # Currently observations are 12 features (global features only)
-        # In future will include friendly and enemy features
-        expected_size = 12
+        # 10 global + (max_entities * 36 friendly) + (max_target_groups * 12 enemy)
+        expected_size = 10 + (config.max_entities * 36) + (config.max_target_groups * 12)
         
         for agent_name, obs in observations.items():
             assert obs.shape == (expected_size,), f"{agent_name}: Expected shape ({expected_size},), got {obs.shape}"
             assert obs.dtype == np.float32, f"{agent_name}: obs not float32"
             
-            # Current implementation returns zeros
-            # This is expected while observation encoding is being built out
-            assert np.allclose(obs, 0.0), f"{agent_name}: Expected zeros (placeholder), got {obs}"
+            # Observations should be finite and within [0, 1] bounds
+            assert np.all(np.isfinite(obs)), f"{agent_name}: Observations should be finite"
+            assert np.all(obs >= 0.0) and np.all(obs <= 1.0), f"{agent_name}: Observations should be in [0, 1]"
         
         env.close()
     

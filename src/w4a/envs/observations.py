@@ -9,7 +9,7 @@ The observation system encodes three main categories:
 - Friendly features: our units' capabilities, positions, and status
 - Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-Total observation size: 10 + (max_entities * 32) + (max_target_groups * 12)
+Total observation size: 10 + (max_entities * 36) + (max_target_groups * 12)
 """
 
 from typing import Any
@@ -29,11 +29,11 @@ def build_observation_space(config) -> spaces.Box:
     
     Observation structure:
     - Global features: 10 (mission state, objectives, time)
-    - Friendly entity features: max_entities * 32 (capabilities, status, engagement)
+    - Friendly entity features: max_entities * 36 (capabilities, kinematics, status, engagement)
     - Enemy target group features: max_target_groups * 12 (position, velocity, domain)
     
     NOTE (ID-indexed layout):
-    - Entities: shape (config.max_entities, 32), row i corresponds to entity_id i
+    - Entities: shape (config.max_entities, 36), row i corresponds to entity_id i
     - Target groups: shape (config.max_target_groups, 12), row j corresponds to target_group_id j
     - Zero rows for IDs that are not assigned/visible
     - This keeps observation indices aligned with action/mask IDs across steps
@@ -42,7 +42,7 @@ def build_observation_space(config) -> spaces.Box:
         Box space with normalized values in [0, 1]
     """
     global_features = 10
-    friendly_features = config.max_entities * 32
+    friendly_features = config.max_entities * 36
     enemy_features = config.max_target_groups * 12
     
     total_features = global_features + friendly_features + enemy_features
@@ -67,8 +67,9 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
         
     Returns:
         Normalized observation vector with values in [0, 1]
-        Shape: (10 + max_entities*32 + max_target_groups*12,)
+        Shape: (10 + max_entities*36 + max_target_groups*12,)
     """
+
     # Compute global features (mission state, objectives, time)
     global_features = _compute_global_features(env, agent)
     
@@ -77,7 +78,7 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
     
     # Compute enemy features (detected target groups)
     enemy_features = _compute_enemy_features(env, agent)
-    
+        
     # Concatenate all features into single observation vector
     observation = np.concatenate([
         global_features,
@@ -127,13 +128,13 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     enemy_casualties = float(env.kills_by_faction[my_faction])  # My kills = enemy casualties
     
     denom = float(max(1, env.config.max_entities))
-    my_casualties_norm = np.clip(my_casualties / denom, 0.0, 1.0)
-    enemy_casualties_norm = np.clip(enemy_casualties / denom, 0.0, 1.0)
+    my_casualties_norm = my_casualties / denom
+    enemy_casualties_norm = enemy_casualties / denom
     
     # Kill ratio normalized by threshold (for win condition awareness)
     kill_ratio = env.kill_ratio_by_faction[my_faction]
     threshold = env.config.kill_ratio_threshold
-    kill_ratio_norm = np.clip(kill_ratio / threshold, 0.0, 1.0)
+    kill_ratio_norm = kill_ratio / threshold
 
     # Capture progress normalized by required capture time (agent-specific)
     required_capture_time = env.config.capture_required_seconds
@@ -144,16 +145,16 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         capture_progress_norm = 0.0  # 0.0 = "no capture mechanic"
         enemy_capture_progress_norm = 0.0
     else:
-        capture_progress_norm = float(np.clip(my_capture_progress / required_capture_time, 0.0, 1.0))
-        enemy_capture_progress_norm = float(np.clip(enemy_capture_progress / required_capture_time, 0.0, 1.0))
+        capture_progress_norm = float(my_capture_progress / required_capture_time)
+        enemy_capture_progress_norm = float(enemy_capture_progress / required_capture_time)
 
     # Capture possible flags
     capture_possible_flag = 1.0 if env.capture_possible_by_faction[my_faction] else 0.0
     enemy_capture_possible_flag = 1.0 if env.capture_possible_by_faction[enemy_faction] else 0.0
     
     # Center island coordinates (from neutral flag)
-    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
-    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
+    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].pos.x
+    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].pos.y
 
     
     # Normalize to [0, 1] based on map bounds
@@ -183,9 +184,9 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
     status, and tactical situation. Features are organized by category
     for each entity up to the maximum entity limit.
     
-    Feature categories per entity (32 features total):
+    Feature categories per entity (36 features total):
     - Identity & Intent: can_engage, can_sense, can_refuel, can_capture, domain (air/surface/land) - 7 features
-    - Kinematics: position, heading, speed - 5 features
+    - Kinematics: position (2), velocity (3), rotation quaternion (4) - 9 features
     - Egocentric: distance/bearing to island - 2 features
     - Status: health, radar state, fuel - 4 features
     - Weapons: weapon types, ammo counts - 3 features
@@ -196,10 +197,10 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
         agent: CompetitionAgent instance (to get controllable entities)
     
     Returns:
-        Array of shape (max_entities * 32,) with zero padding for unused slots
+        Array of shape (max_entities * 36,) with zero padding for unused slots
     """
     # Build an ID-indexed array: row i corresponds to entity_id i. Zero rows for unused IDs.
-    friendly_entity_features = np.zeros((int(env.config.max_entities), 32), dtype=np.float32)
+    friendly_entity_features = np.zeros((int(env.config.max_entities), 36), dtype=np.float32)
 
     # Iterate through agent's controllable entities
     for entity_id, entity in agent._sim_agent.controllable_entities.items():
@@ -226,7 +227,7 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
         if 0 <= entity_id < int(env.config.max_entities):
             friendly_entity_features[entity_id] = features
 
-    # Convert (max_entities, 32) -> (max_entities * 32,)
+    # Convert (max_entities, 36) -> (max_entities * 36,)
     return friendly_entity_features.flatten()
 
 
@@ -241,7 +242,7 @@ def compute_friendly_identity_features(entity: Any) -> np.ndarray:
         Array of shape (7,) with binary capability flags and domain one-hot encoding
     """
 
-    can_engage = 1.0 if entity.can_engage else 0.0
+    can_engage = 1.0 if hasattr(entity, 'can_engage') and entity.can_engage else 0.0 # TODO: Revisit this?
     can_sense = 1.0 if entity.has_radar else 0.0 
     can_refuel = 1.0 if entity.can_refuel else 0.0
     can_capture = 1.0 if entity.can_capture else 0.0
@@ -258,17 +259,18 @@ def compute_friendly_identity_features(entity: Any) -> np.ndarray:
 def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
     """Compute kinematic state features for a friendly entity.
     
-    Encodes position, heading, and speed in a normalized format suitable
+    Encodes position, velocity, and rotation in a normalized format suitable
     for neural networks. Position is discretized to match action space.
     
-    Features: grid_x_norm, grid_y_norm, heading_sin, heading_cos, speed_norm (5 features)
+    Features: grid_x_norm, grid_y_norm, vel_x_norm, vel_y_norm, vel_z_norm,
+              rot_x_norm, rot_y_norm, rot_z_norm, rot_w_norm (9 features)
     
     Returns:
-        Array of shape (5,) with normalized kinematic state
+        Array of shape (9,) with normalized kinematic state
     """
-    # Kinematics (5 features)
+    # Position (2 features)
     # Convert position to grid coordinates (matching action space)
-    grid_index = position_to_grid(entity.position.x, entity.position.y, env.config)
+    grid_index = position_to_grid(entity.pos.x, entity.pos.y, env.config)
     grid_size = env.grid_size
     grid_x = grid_index % grid_size
     grid_y = grid_index // grid_size
@@ -277,14 +279,22 @@ def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
     grid_x_norm = grid_x / (grid_size - 1) if grid_size > 1 else 0.0
     grid_y_norm = grid_y / (grid_size - 1) if grid_size > 1 else 0.0
     
-    # Heading as sin/cos to avoid wraparound issues
-    heading_sin = (np.sin(entity.heading) + 1.0) / 2.0  # [-1,1] -> [0,1]
-    heading_cos = (np.cos(entity.heading) + 1.0) / 2.0  # [-1,1] -> [0,1]
+    # Velocity (3 features)
+    # Normalize by max_velocity, convert from [-1, 1] to [0, 1]
+    vel_x_norm = (entity.vel.x / env.max_velocity + 1.0) / 2.0
+    vel_y_norm = (entity.vel.y / env.max_velocity + 1.0) / 2.0
+    vel_z_norm = (entity.vel.z / env.max_velocity + 1.0) / 2.0
     
-    # Velocity normalized by max vel
-    velocity_norm = entity.vel / entity.max_speed if env.max_velocity > 0 else 0.0
+    # Rotation quaternion (4 features)
+    # Clip quaternion components to [-1, 1], then convert to [0, 1]
+    rot_x_norm = (np.clip(entity.rot.x, -1.0, 1.0) + 1.0) / 2.0
+    rot_y_norm = (np.clip(entity.rot.y, -1.0, 1.0) + 1.0) / 2.0
+    rot_z_norm = (np.clip(entity.rot.z, -1.0, 1.0) + 1.0) / 2.0
+    rot_w_norm = (np.clip(entity.rot.w, -1.0, 1.0) + 1.0) / 2.0
     
-    return np.array([grid_x_norm, grid_y_norm, heading_sin, heading_cos, velocity_norm], dtype=np.float32)
+    return np.array([grid_x_norm, grid_y_norm, 
+                     vel_x_norm, vel_y_norm, vel_z_norm,
+                     rot_x_norm, rot_y_norm, rot_z_norm, rot_w_norm], dtype=np.float32)
     
 
 
@@ -300,14 +310,14 @@ def compute_friendly_egocentric_features(env: Any, entity: Any) -> np.ndarray:
         Array of shape (2,) with normalized spatial relationships
     """
     # Egocentric (2 features)
-    # Calculate map diagonal for normalization (max possible distance)
-    map_width, map_height = env.config.map_size
-    map_diagonal = np.sqrt(map_width * map_width + map_height * map_height)
+    # Calculate map diagonal for normalization (max possible distance in km)
+    map_width_km, map_height_km = env.config.map_size_km
+    map_diagonal_km = np.sqrt(map_width_km * map_width_km + map_height_km * map_height_km)
     
-    island_range = distance_to_island(env, entity.position)
-    island_range_norm = island_range / map_diagonal
+    island_range = distance_to_island(env, entity.pos)  # in km
+    island_range_norm = island_range / map_diagonal_km
     
-    island_bearing = bearing_to_island(env, entity.position)
+    island_bearing = bearing_to_island(env, entity.pos)  # in degrees [0, 360)
     island_bearing_norm = island_bearing / 360.0
     
     return np.array([island_range_norm, island_bearing_norm], dtype=np.float32)
@@ -329,13 +339,20 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
         Array of shape (4,) with normalized status indicators
     """
     health_ok = 1.0 if entity.is_alive else 0.0
-    radar_on = 1.0 if entity.radar_enabled else 0.0
-    max_grid = calculate_max_grid_positions(env.config)
-    radar_focus_grid = np.zeros(3)
+    radar_on = 1.0 if hasattr(entity, 'radar_enabled') and entity.radar_enabled else 0.0
+    
+    # Radar focus position as grid index (1 feature) - matches action space representation
     if entity.has_radar_focus_position:
-        radar_focus_grid = entity.radar_focus_position
-
-    radar_focus_grid_norm = float(radar_focus_grid) / float(max_grid) if max_grid > 0 else 0.0
+        # Convert radar focus position to grid index
+        radar_focus_pos = entity.radar_focus_position
+        radar_focus_grid_idx = position_to_grid(radar_focus_pos.x, radar_focus_pos.y, env.config)
+        
+        # Normalize by max grid positions
+        max_grid = calculate_max_grid_positions(env.config)
+        radar_focus_grid_norm = float(radar_focus_grid_idx) / float(max_grid) if max_grid > 0 else 0.0
+    else:
+        # No radar focus set - use 0 as default
+        radar_focus_grid_norm = 0.0
     
     fuel_norm = entity.relative_fuel_left
     
@@ -357,14 +374,14 @@ def compute_friendly_weapon_features(entity: Any, env: Any) -> np.ndarray:
         Array of shape (3,) with weapon capability and ammo status
     """
 
-    # Check if entity can engage air targets (using target_domains property)
-    has_air_weapons = 1.0 if EntityDomain.AIR in entity.target_domains else 0.0
+    # Check if entity can engage air targets (bitwise check on target_domains)
+    has_air_weapons = 1.0 if (entity.target_domains & EntityDomain.AIR.value) != 0 else 0.0
     
-    # Check if entity can engage surface targets (using target_domains property)
-    has_surface_weapons = 1.0 if EntityDomain.SURFACE in entity.target_domains else 0.0
+    # Check if entity can engage surface targets (bitwise check on target_domains)
+    has_surface_weapons = 1.0 if (entity.target_domains & EntityDomain.SURFACE.value) != 0 else 0.0
     
     total_ammo = float(entity.ammo) if entity.ammo is not None else 0.0
-    ammo_norm = np.clip(total_ammo / env.max_ammo, 0.0, 1.0)
+    ammo_norm = total_ammo / env.max_ammo
     
     return np.array([has_air_weapons, has_surface_weapons, ammo_norm], dtype=np.float32)
 
@@ -397,15 +414,16 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         shots_fired_this_commit = entity.num_shots_fired
     
     if target_group is not None:
-        # Calculate range to target group
+        # Calculate range to target group (positions in meters)
         dx = target_group.pos.x - entity.pos.x
         dy = target_group.pos.y - entity.pos.y
-        target_range = np.sqrt(dx * dx + dy * dy)
+        target_range_m = np.sqrt(dx * dx + dy * dy)
+        target_range_km = target_range_m / 1000.0  # Convert to km
         
-        # Normalize by map diagonal
-        map_width, map_height = env.config.map_size
-        map_diagonal = np.sqrt(map_width * map_width + map_height * map_height)
-        target_range_norm = target_range / map_diagonal if map_diagonal > 0 else 0.0
+        # Normalize by map diagonal (both in km)
+        map_width_km, map_height_km = env.config.map_size_km
+        map_diagonal_km = np.sqrt(map_width_km * map_width_km + map_height_km * map_height_km)
+        target_range_norm = target_range_km / map_diagonal_km if map_diagonal_km > 0 else 0.0
         
         # Calculate bearing to target group
         bearing_rad = np.arctan2(dy, dx)
@@ -427,8 +445,13 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         target_domain_land = 0.0
     
     # Time on target information
-    time_until_shoot = entity.get_estimated_time_until_shoot(target_group)
-    time_until_shoot_norm = np.clip(time_until_shoot / 60.0, 0.0, 1.0)  # Normalize to 1 minute max
+    # get_estimated_time_until_shoot() returns -1.0 when entity can't shoot (not ready/no target)
+    # We map this to 0.0 (not ready) and clamp positive values to [0, 60] seconds
+    time_until_shoot = entity.get_estimated_time_until_shoot()
+    if time_until_shoot < 0:
+        time_until_shoot_norm = 0.0  # Not ready to shoot
+    else:
+        time_until_shoot_norm = min(time_until_shoot / 60.0, 1.0)  # Normalize to max 60 seconds
 
     # Weapons usage mode (one-hot encoding: tight/selective/free)
     weapons_mode = entity.weapons_usage_mode
@@ -495,12 +518,9 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         pos_y_norm = float(grid_pos // grid_size) / max(1, grid_size - 1)
         
         # Speed (2 features)
-        speed_x_norm = np.clip(target_group.vel.x / env.max_velocity, -1.0, 1.0)
-        speed_y_norm = np.clip(target_group.vel.y / env.max_velocity, -1.0, 1.0)
-        
-        # Convert from [-1, 1] to [0, 1] for consistency
-        speed_x_norm = (speed_x_norm + 1.0) / 2.0
-        speed_y_norm = (speed_y_norm + 1.0) / 2.0
+        # Normalize by max_velocity, convert from [-1, 1] to [0, 1]
+        speed_x_norm = (target_group.vel.x / env.max_velocity + 1.0) / 2.0
+        speed_y_norm = (target_group.vel.y / env.max_velocity + 1.0) / 2.0
         
         # Domain (3 features)
         # One-hot encoding from TargetGroup.domain (EntityDomain enum)
@@ -511,15 +531,15 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         # Count (1 feature)
         # Number of known alive units from TargetGroup.num_known_alive_units
         num_units = float(target_group.num_known_alive_units)
-        num_units_norm = np.clip(num_units / 10.0, env.max_entities, 1.0)  # Normalize to max 10 units @Sanjna: 10 is a little low. Typically we should see max 16 (4 squadrons of 4)
+        num_units_norm = num_units / env.max_entities
         
         # Egocentric (2 features)
-        # Distance and bearing to center island objective
-        map_width, map_height = env.config.map_size
-        map_diagonal = np.sqrt(map_width * map_width + map_height * map_height)
+        # Distance and bearing to center island objective (both in km)
+        map_width_km, map_height_km = env.config.map_size_km
+        map_diagonal_km = np.sqrt(map_width_km * map_width_km + map_height_km * map_height_km)
         
-        enemy_island_range = distance_to_island(env, target_group.pos)
-        enemy_island_range_norm = enemy_island_range / map_diagonal
+        enemy_island_range = distance_to_island(env, target_group.pos)  # in km
+        enemy_island_range_norm = enemy_island_range / map_diagonal_km
         
         enemy_island_bearing = bearing_to_island(env, target_group.pos)
         enemy_island_bearing_norm = enemy_island_bearing / 360.0
@@ -559,13 +579,14 @@ def position_to_grid(x: float, y: float, config: Any) -> int:
         Grid index corresponding to the position
     """
     # Convert world coordinates to grid coordinates
-    grid_size = int((config.map_size[0] / 1000) / config.grid_resolution_km)
+    # map_size_km is in km, so grid_size = 25,000 km / 50 km = 500
+    grid_size = int(config.map_size_km[0] / config.grid_resolution_km)
     
-    # Adjust for map center offset
-    adjusted_x = x + (config.map_size[0] // 2)
-    adjusted_y = y + (config.map_size[1] // 2)
+    # Adjust for map center offset (positions are in meters, so convert map_size_km to meters)
+    adjusted_x = x + (config.map_size_km[0] * 1000 // 2)
+    adjusted_y = y + (config.map_size_km[1] * 1000 // 2)
     
-    # Convert to grid indices
+    # Convert to grid indices (grid_resolution_km * 1000 = grid cell size in meters)
     grid_x = int(adjusted_x / (config.grid_resolution_km * 1000))
     grid_y = int(adjusted_y / (config.grid_resolution_km * 1000))
     
@@ -581,16 +602,19 @@ def distance_to_island(env: Any, position: Any) -> float:
     
     Args:
         env: Environment instance (to get island position)
-        position: Entity position object with x, y coordinates
+        position: Entity position object with x, y coordinates (in meters)
         
     Returns:
-        Distance in meters to island center
+        Distance in kilometers to island center
     """
-    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
-    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
+    # Positions are in meters, convert to km
+    island_center_x_km = env.flags[CENTER_ISLAND_FLAG_ID].pos.x / 1000.0
+    island_center_y_km = env.flags[CENTER_ISLAND_FLAG_ID].pos.y / 1000.0
+    pos_x_km = position.x / 1000.0
+    pos_y_km = position.y / 1000.0
     
-    dx = position.x - island_center_x
-    dy = position.y - island_center_y
+    dx = pos_x_km - island_center_x_km
+    dy = pos_y_km - island_center_y_km
     return np.sqrt(dx * dx + dy * dy)
 
 
@@ -599,13 +623,14 @@ def bearing_to_island(env: Any, position: Any) -> float:
     
     Args:
         env: Environment instance (to get island position)
-        position: Entity position object with x, y coordinates
+        position: Entity position object with x, y coordinates (in meters)
         
     Returns:
         Bearing in degrees [0, 360)
     """
-    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
-    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
+    # Positions are in meters, but bearing calculation doesn't depend on units
+    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].pos.x
+    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].pos.y
     
     dx = island_center_x - position.x
     dy = island_center_y - position.y
@@ -618,7 +643,3 @@ def bearing_to_island(env: Any, position: Any) -> float:
         bearing_deg += 360.0
         
     return bearing_deg
-
-
-
-    

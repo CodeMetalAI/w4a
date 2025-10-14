@@ -9,6 +9,7 @@ import pytest
 import numpy as np
 from w4a import Config
 from w4a.envs.trident_multiagent_env import TridentIslandMultiAgentEnv
+from w4a.envs.constants import CENTER_ISLAND_FLAG_ID
 from w4a.agents import CompetitionAgent, SimpleAgent
 from SimulationInterface import Faction
 
@@ -227,12 +228,12 @@ class TestSimulationIsActuallyRunning:
         
         observations, infos = env.reset()
         
-        # Current observation implementation returns zeros (placeholder)
-        # This test will need to be updated when observations are implemented
-        assert observations["legacy"].shape == (12,), "Observation should be 12 features"
-        assert observations["dynasty"].shape == (12,), "Observation should be 12 features"
+        # 10 global + (max_entities * 36) + (max_target_groups * 12)
+        expected_size = 10 + (config.max_entities * 36) + (config.max_target_groups * 12)
         
-        # For now, verify that observations are at least well-formed
+        assert observations["legacy"].shape == (expected_size,), f"Observation should be {expected_size} features"
+        assert observations["dynasty"].shape == (expected_size,), f"Observation should be {expected_size} features"
+        
         assert observations["legacy"].dtype == np.float32
         assert observations["dynasty"].dtype == np.float32
         assert np.all(np.isfinite(observations["legacy"])), "Observations should be finite"
@@ -369,7 +370,14 @@ class TestCaptureProgress:
     """Verify capture progress is tracked per faction"""
     
     def test_capture_progress_is_per_faction(self):
-        """Verify capture progress is tracked independently per faction"""
+        """Verify capture progress is tracked independently per faction from simulation
+        
+        NOTE: This test currently verifies the infrastructure (reading from simulation, 
+        per-faction tracking) but does not test actual capture mechanics because:
+        - Package entities (settlers) don't automatically pathfind to flags  
+        - CaptureFlag command appears to only work when entity is already at flag
+        - Need separate test for full end-to-end capture with proper unit positioning
+        """
         config = Config()
         env = TridentIslandMultiAgentEnv(config=config)
         
@@ -383,27 +391,216 @@ class TestCaptureProgress:
         assert infos["legacy"]["mission"]["my_capture_progress"] == 0.0
         assert infos["dynasty"]["mission"]["my_capture_progress"] == 0.0
         
-        # Manually set legacy capture progress
-        env.capture_progress_by_faction[Faction.LEGACY] = 5.0
-        env.capture_progress_by_faction[Faction.DYNASTY] = 2.0
+        # Verify capture progress values are accessible and properly separated by faction
+        flag = env.flags[CENTER_ISLAND_FLAG_ID]
         
-        # Step to update info
-        # Note: update_capture_progress() will advance progress by time_delta (10 seconds) if settlers present
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        # Test 1: Verify we can read flag state from simulation
+        assert hasattr(flag, 'capture_progress'), "Flag should have capture_progress property"
+        assert hasattr(flag, 'capturing_faction'), "Flag should have capturing_faction property"
+        assert hasattr(flag, 'can_be_captured'), "Flag should have can_be_captured property"
+        assert hasattr(flag, 'is_being_captured'), "Flag should have is_being_captured property"
+        
+        # Test 2: Initial state is sensible
+        assert flag.can_be_captured == True, "Neutral flag should be capturable"
+        assert flag.is_captured == False, "Flag should not be captured initially"
+        assert flag.capture_progress >= 0.0 and flag.capture_progress <= 1.0, "Progress should be 0..1"
+        
+        # Test 3: Verify per-faction tracking exists in environment
+        assert hasattr(env, 'capture_progress_by_faction'), "Environment should track capture progress per faction"
+        assert Faction.LEGACY in env.capture_progress_by_faction, "Should track Legacy faction"
+        assert Faction.DYNASTY in env.capture_progress_by_faction, "Should track Dynasty faction"
+        
+        # Test 4: Run simulation and verify symmetry is maintained
+        for step in range(10):
+            actions = {
+                "legacy": agent_legacy.select_action(observations["legacy"]),
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            # Verify symmetry: my progress for one faction = enemy progress for the other
+            assert infos["legacy"]["mission"]["my_capture_progress"] == \
+                   infos["dynasty"]["mission"]["enemy_capture_progress"], \
+                   "Legacy's my_capture_progress should equal Dynasty's enemy_capture_progress"
+            
+            assert infos["dynasty"]["mission"]["my_capture_progress"] == \
+                   infos["legacy"]["mission"]["enemy_capture_progress"], \
+                   "Dynasty's my_capture_progress should equal Legacy's enemy_capture_progress"
+            
+            # Only one faction can be capturing at a time (exclusive)
+            legacy_progress = infos["legacy"]["mission"]["my_capture_progress"]
+            dynasty_progress = infos["dynasty"]["mission"]["my_capture_progress"]
+            assert (legacy_progress == 0.0 or dynasty_progress == 0.0), \
+                   f"Only one faction should be capturing at a time (Legacy={legacy_progress}, Dynasty={dynasty_progress})"
+            
+            # Progress values should be non-negative and finite
+            assert legacy_progress >= 0.0 and np.isfinite(legacy_progress)
+            assert dynasty_progress >= 0.0 and np.isfinite(dynasty_progress)
+            
+            if terminations["legacy"] or truncations["legacy"]:
+                break
+        
+        print(f"\n[CAPTURE PROGRESS INFRASTRUCTURE TEST] Passed - per-faction tracking works correctly")
+        env.close()
+    
+    # TODO: This test is failing. The settler is  not moving towards the flag after issuing the capture command.
+    def test_capture_mechanics_end_to_end(self):
+        """Test that capture action actually causes a unit to capture the flag
+        
+        This test verifies the full capture flow:
+        1. Find a settler unit that can capture
+        2. Issue a capture action
+        3. Verify the settler moves toward or reaches the flag
+        4. Verify capture progress accumulates when at the flag
+        
+        CURRENTLY FAILING: Settler does not move toward flag after capture command.
+        """
+        import math
+        from w4a.envs.actions import is_valid_action
+        
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Find a settler unit for Legacy
+        settler_id = None
+        settler_entity = None
+        print(f"\n[CAPTURE MECHANICS TEST] Searching for settler in {len(agent_legacy._sim_agent.controllable_entities)} Legacy entities")
+        for entity_id, entity in agent_legacy._sim_agent.controllable_entities.items():
+            if entity.is_alive and entity.can_capture:
+                settler_id = entity_id
+                settler_entity = entity
+                entity_type = type(entity).__name__
+                sim_identifier = getattr(entity, 'identifier', getattr(entity, 'Identifier', 'N/A'))
+                print(f"  Found settler: RL_ID={settler_id}, type={entity_type}, identifier={sim_identifier}")
+                break
+        
+        assert settler_id is not None, "Legacy faction should have at least one settler unit"
+        assert settler_entity is not None
+        
+        # Get flag
+        flag = env.flags[CENTER_ISLAND_FLAG_ID]
+        
+        # Calculate initial distance
+        dx = settler_entity.pos.x - flag.pos.x
+        dy = settler_entity.pos.y - flag.pos.y
+        initial_distance_km = math.sqrt(dx*dx + dy*dy) / 1000.0
+        
+        print(f"[INITIAL STATE]")
+        print(f"  Settler pos: ({settler_entity.pos.x:.1f}, {settler_entity.pos.y:.1f}, {settler_entity.pos.z:.1f})")
+        print(f"  Flag pos: ({flag.pos.x:.1f}, {flag.pos.y:.1f}, {flag.pos.z:.1f})")
+        print(f"  Distance: {initial_distance_km:.1f} km")
+        print(f"  Flag state: can_be_captured={flag.can_be_captured}, is_captured={flag.is_captured}")
+        
+        # Create capture action
+        capture_action = {
+            "action_type": 5,  # Capture
+            "entity_id": settler_id,
+            "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
+            "move_axis_angle": 0, "target_group_id": 0, "weapon_selection": 0,
+            "weapon_usage": 0, "weapon_engagement": 0, "stealth_enabled": 0,
+            "sensing_position_grid": 0, "refuel_target_id": 0
         }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
         
-        # Verify each faction sees their own progress (advanced by 10 seconds)
-        # Legacy: 5.0 + 10.0 = 15.0, Dynasty: 2.0 + 10.0 = 12.0
-        assert infos["legacy"]["mission"]["my_capture_progress"] == 15.0
-        assert infos["legacy"]["mission"]["enemy_capture_progress"] == 12.0
+        # Verify action is valid
+        is_valid = is_valid_action(
+            capture_action, 
+            agent_legacy._sim_agent.controllable_entities,
+            agent_legacy._sim_agent.target_groups,
+            env.flags,
+            env.config
+        )
+        print(f"  Capture action is_valid={is_valid}")
+        assert is_valid, "Capture action should be valid"
         
-        assert infos["dynasty"]["mission"]["my_capture_progress"] == 12.0
-        assert infos["dynasty"]["mission"]["enemy_capture_progress"] == 15.0
+        # Step simulation and track settler movement and capture progress
+        distances = [initial_distance_km]
+        capture_states = []
+        
+        print(f"\n[SIMULATION STEPS]")
+        for step in range(200):
+            actions = {
+                "legacy": capture_action,
+                "dynasty": agent_dynasty.select_action(observations["dynasty"])
+            }
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            # Track distance
+            dx = settler_entity.pos.x - flag.pos.x
+            dy = settler_entity.pos.y - flag.pos.y
+            current_distance_km = math.sqrt(dx*dx + dy*dy) / 1000.0
+            distances.append(current_distance_km)
+            
+            # Track capture state
+            capture_states.append({
+                'step': step,
+                'distance_km': current_distance_km,
+                'is_being_captured': flag.is_being_captured,
+                'capturing_faction': flag.capturing_faction,
+                'legacy_progress': infos["legacy"]["mission"]["my_capture_progress"],
+                'dynasty_progress': infos["dynasty"]["mission"]["my_capture_progress"]
+            })
+            
+            # Print periodic updates
+            if step % 40 == 0 or step < 3:
+                print(f"  Step {step:3d}: distance={current_distance_km:6.1f}km, "
+                      f"is_being_captured={flag.is_being_captured}, "
+                      f"legacy={infos['legacy']['mission']['my_capture_progress']:.2f}s")
+            
+            # Check if capture started
+            if flag.is_being_captured or infos["legacy"]["mission"]["my_capture_progress"] > 0:
+                print(f"\n[SUCCESS] Capture started at step {step}!")
+                print(f"  Distance: {current_distance_km:.1f} km")
+                print(f"  Flag is_being_captured={flag.is_being_captured}")
+                print(f"  Capture progress={flag.capture_progress:.4f}")
+                print(f"  Legacy progress={infos['legacy']['mission']['my_capture_progress']:.2f}s")
+                # Test passes if capture actually starts
+                env.close()
+                return
+            
+            if terminations["legacy"] or truncations["legacy"]:
+                print(f"\n[TERMINATION] Episode ended at step {step}")
+                break
+        
+        # Analyze movement
+        final_distance_km = distances[-1]
+        distance_change = initial_distance_km - final_distance_km
+        max_distance = max(distances)
+        min_distance = min(distances)
+        
+        print(f"\n[ANALYSIS]")
+        print(f"  Initial distance: {initial_distance_km:.1f} km")
+        print(f"  Final distance: {final_distance_km:.1f} km")
+        print(f"  Distance change: {distance_change:.1f} km ({'closer' if distance_change > 0 else 'farther' if distance_change < 0 else 'no movement'})")
+        print(f"  Min distance reached: {min_distance:.1f} km")
+        print(f"  Max distance reached: {max_distance:.1f} km")
+        print(f"  Flag was ever being_captured: {any(s['is_being_captured'] for s in capture_states)}")
+        print(f"  Max capture progress: {max(s['capture_progress'] for s in capture_states):.4f}")
         
         env.close()
+        
+        # Fail with detailed info
+        pytest.fail(
+            f"Settler did not reach flag or start capturing after 200 steps.\n"
+            f"  Settler type: {type(settler_entity).__name__}\n"
+            f"  Initial distance: {initial_distance_km:.1f} km\n"
+            f"  Final distance: {final_distance_km:.1f} km\n"
+            f"  Distance change: {distance_change:.1f} km\n"
+            f"  Settler appears to be: {'stationary' if abs(distance_change) < 0.1 else 'moving but not toward flag'}\n"
+            f"  Action was valid: {is_valid}\n"
+            f"  Flag is_being_captured: {flag.is_being_captured}\n"
+            f"\n"
+            f"POSSIBLE ISSUES:\n"
+            f"  1. CaptureFlag command may not include pathfinding/movement\n"
+            f"  2. Package entities may be stationary (air-dropped supplies)\n"
+            f"  3. May need to move settler to flag first, then issue capture\n"
+            f"  4. Capture command may require unit to already be at flag location\n"
+        )
     
     def test_capture_possible_is_per_faction(self):
         """Verify capture_possible is tracked independently per faction"""
