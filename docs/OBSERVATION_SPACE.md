@@ -4,35 +4,54 @@
 
 Each agent receives observations from their own perspective, filtered by fog-of-war. Agents only observe:
 - Their own controllable entities
-- Enemy units they have detected (via radar, visual contact, etc.), represented as "target groups". These target groups belong to the faction that detected the group.
+- Enemy units they have detected (via radar, visual contact, etc.), represented as "target groups"
 - Shared objective flags
 
 ## Observation Format
 
 Observations are returned as **normalized numpy arrays** with values in [0, 1].
 
-**Current Status**: The observation system returns a flat vector of **12 global features**. The infrastructure for per-entity and per-target-group features is implemented but not yet active (returns zeros as placeholder).
+**Total Size**: 11 global features + (max_entities × 36) + (max_target_groups × 12)
 
-## Current Features (v0.2)
+The observation space consists of three components:
+1. **Global features** (11): Mission state, time, objectives, casualties, flag status
+2. **Friendly entity features** (max_entities × 36): Per-entity capabilities, kinematics, status, engagement
+3. **Enemy target group features** (max_target_groups × 12): Per-group position, velocity, domain, count
+
+## Structure
 
 ```python
-obs = np.array([
-    time_remaining_norm,           # [0]  Mission time remaining (1.0 = full time, 0.0 = time up)
-    my_casualties_norm,            # [1]  Your casualties / max_entities
-    enemy_casualties_norm,         # [2]  Enemy casualties / max_entities
-    kill_ratio_norm,               # [3]  Your kill ratio normalized by threshold
-    awacs_alive_flag,              # [4]  1.0 if AWACS alive, 0.0 otherwise
-    capture_progress_norm,         # [5]  Your capture progress / required_seconds
-    enemy_capture_progress_norm,   # [6]  Enemy capture progress / required_seconds
-    island_contested_flag,         # [7]  1.0 if objective contested, 0.0 otherwise
-    capture_possible_flag,         # [8]  1.0 if you can still capture, 0.0 otherwise
-    enemy_capture_possible_flag,   # [9]  1.0 if enemy can still capture, 0.0 otherwise
-    island_center_x_norm,          # [10] Center island X coordinate normalized
-    island_center_y_norm,          # [11] Center island Y coordinate normalized
+observation = np.concatenate([
+    global_features,      # Shape: (11,)
+    friendly_features,    # Shape: (max_entities * 36,)
+    enemy_features        # Shape: (max_target_groups * 12,)
 ])
 ```
 
-**Note**: Currently returns zeros as a placeholder while the observation encoding pipeline is being finalized.
+### ID-Indexed Layout
+Entity and target group features use **stable ID indexing**:
+- Entity features at index `i * 36` correspond to entity ID `i`
+- Target group features correspond to target group ID `j`
+- Unassigned/invisible IDs have zero-filled rows
+- This keeps observation indices aligned with action space IDs across timesteps
+
+## Global Features (11 total)
+
+```python
+global_features = [
+    time_remaining_norm,           # [0]  Mission time remaining (1.0 = full, 0.0 = expired)
+    my_casualties_norm,            # [1]  Your casualties / max_entities
+    enemy_casualties_norm,         # [2]  Enemy casualties / max_entities
+    kill_ratio_norm,               # [3]  Your kill ratio / threshold
+    capture_progress_norm,         # [4]  Your capture progress / required_seconds
+    capture_possible_flag,         # [5]  1.0 if you can capture, 0.0 otherwise
+    enemy_capture_progress_norm,   # [6]  Enemy capture progress / required_seconds
+    flag_faction,                  # [7]  0.0=neutral, 0.33=Legacy, 0.66=Dynasty
+    enemy_capture_possible_flag,   # [8]  1.0 if enemy can capture, 0.0 otherwise
+    island_center_x_norm,          # [9]  Center island X coordinate [0,1]
+    island_center_y_norm,          # [10] Center island Y coordinate [0,1]
+]
+```
 
 ## Feature Descriptions
 
@@ -60,52 +79,60 @@ Note: Detailed enemy casualties available in `info['mission']['enemy_casualties'
 ### kill_ratio_norm
 Your kill ratio (enemy kills / your casualties) normalized by the win threshold
 - `0.0`: Poor kill ratio
-- `1.0`: At or above win threshold (typically 2.0x)
+- `1.0`: At or above win threshold (default: 1.2×)
 - Formula: `(enemy_casualties / my_casualties) / kill_ratio_threshold`
 
 Note: Raw kill ratio available in `info['mission']['kill_ratio']`
 
-### awacs_alive_flag
-Whether your AWACS (airborne early warning) aircraft is alive
-- `1.0`: AWACS operational (enhanced sensor coverage)
-- `0.0`: AWACS destroyed (reduced sensor coverage)
+### flag_faction
+Which faction currently controls the center island flag
+- `0.0`: Neutral (no faction control)
+- `0.33`: Legacy faction controls flag
+- `0.66`: Dynasty faction controls flag
+
+**Capture Mechanics:**
+- **During active capture**: Flag remains neutral (`0.0`) while `is_being_captured = True`
+- **After capture completes**: Flag switches to capturing faction (`0.33` or `0.66`), `is_captured = True`
 
 ### capture_progress_norm
 Your progress toward capturing the objective (normalized 0-1)
-- `0.0`: No progress
-- `1.0`: Objective captured (win condition met)
+- `0.0`: No progress or capture complete
+- `0.0 < x < 1.0`: Actively capturing (settler on flag)
+- `1.0`: At threshold, capture about to complete
 - Formula: `my_capture_progress / capture_required_seconds`
 
-Note: Detailed capture progress available in `info['mission']['my_capture_progress']`
+**Capture Lifecycle:**
+1. **Pre-capture**: `capture_progress_norm = 0.0`, flag neutral
+2. **During capture**: `capture_progress_norm` increments (0.0 → 1.0), `is_being_captured = True`, flag stays neutral
+3. **After capture**: `capture_progress_norm = 0.0`, `is_captured = True`, flag_faction changes to your faction
+
+Note: Detailed capture progress (in seconds) available in `info['mission']['my_capture_progress']`
 
 ### enemy_capture_progress_norm
 Enemy's progress toward capturing the objective (normalized 0-1)
-- `0.0`: Enemy has no progress
-- `1.0`: Enemy has captured (loss condition met)
+- `0.0`: Enemy has no progress or capture complete
+- `0.0 < x < 1.0`: Enemy actively capturing
+- `1.0`: Enemy at threshold, capture about to complete
 - Formula: `enemy_capture_progress / capture_required_seconds`
 
 Note: Detailed enemy capture progress available in `info['mission']['enemy_capture_progress']`
 
-### island_contested_flag
-Whether both sides have units present at the capture objective
-- `1.0`: Contested (both sides have capture-capable units present)
-- `0.0`: Not contested (only one side present, or no one present)
-
-Note: Also available in `info['mission']['island_contested']`
 
 ### capture_possible_flag
 Whether you still have units capable of capturing
 - `1.0`: You have capture-capable units alive
 - `0.0`: No capture-capable units (cannot win via capture)
 
-Note: Also available in `info['mission']['my_capture_possible']`
+**Note**: If the flag is currently being captured by either side, this will be `0.0` (can't capture while someone else is capturing)
+
+Available in `info['mission']['my_capture_possible']`
 
 ### enemy_capture_possible_flag
 Whether the enemy still has units capable of capturing
 - `1.0`: Enemy has capture-capable units alive
 - `0.0`: Enemy has no capture-capable units (cannot win via capture)
 
-Note: Also available in `info['mission']['enemy_capture_possible']`
+Available in `info['mission']['enemy_capture_possible']`
 
 ### island_center_x_norm
 X coordinate of the center island (capture objective) normalized to [0, 1]
@@ -154,11 +181,10 @@ info = {
         'my_casualties': 8,                    # Your losses
         'enemy_casualties': 12,                # Enemy losses
         'kill_ratio': 1.5,                     # Your kill ratio
-        'my_capture_progress': 0.4,            # Your capture progress (0-1)
+        'my_capture_progress': 0.4,            # Your capture progress (seconds)
         'my_capture_possible': True,           # Can you still capture?
-        'enemy_capture_progress': 0.1,         # Enemy capture progress
-        'enemy_capture_possible': True,        # Can enemy still capture?
-        'island_contested': False              # Is objective contested?
+        'enemy_capture_progress': 0.1,         # Enemy capture progress (seconds)
+        'enemy_capture_possible': True         # Can enemy still capture?
     }
 }
 ```
@@ -232,45 +258,83 @@ class MyAgent(CompetitionAgent):
         return obs
 ```
 
+## Friendly Entity Features (36 per entity)
+
+Each friendly entity (units you control) has 36 features organized as:
+
+### Identity & Intent (7 features)
+- `can_engage`: Can fire weapons (0.0 or 1.0)
+- `can_sense`: Has radar/sensors (0.0 or 1.0)
+- `can_refuel`: Can refuel others (0.0 or 1.0)
+- `can_capture`: Can capture objectives (0.0 or 1.0)
+- `domain_air`, `domain_sea`, `domain_ground`: One-hot domain encoding
+
+### Kinematics (7 features)
+- `grid_x`, `grid_y`: Normalized grid position [0,1]
+- `heading_sin`, `heading_cos`: Heading direction encoding
+- `speed_norm`: Speed normalized by max speed
+- `altitude_norm`: Altitude normalized (air units only)
+- `manoeuver`: Current maneuver type (patrol, engage, RTB, etc.)
+
+### Egocentric (2 features)
+- `distance_to_island_norm`: Distance to objective [0,1]
+- `bearing_to_island_norm`: Bearing to objective [0,1]
+
+### Status (6 features)
+- `health_norm`: Health/hit points [0,1]
+- `fuel_norm`: Fuel level [0,1]
+- `radar_enabled`: Radar on/off (0.0 or 1.0)
+- `radar_focus_x`, `radar_focus_y`: Radar focus position [0,1]
+- `selected_flag`: Currently selected entity (0.0 or 1.0)
+
+### Weapons (4 features)
+- `has_air_weapons`: Can engage air targets (0.0 or 1.0)
+- `has_surface_weapons`: Can engage surface targets (0.0 or 1.0)
+- `air_ammo_norm`: Air weapon ammo [0,1]
+- `surface_ammo_norm`: Surface weapon ammo [0,1]
+
+### Engagement (10 features)
+- `is_engaging`: Currently engaging target (0.0 or 1.0)
+- `target_id_norm`: Current target ID normalized
+- `target_grid_x`, `target_grid_y`: Target position [0,1]
+- `target_distance_norm`: Distance to target [0,1]
+- `target_bearing_norm`: Bearing to target [0,1]
+- `target_domain_air`, `target_domain_sea`, `target_domain_ground`: Target domain
+- `can_engage_target`: Weapon range check (0.0 or 1.0)
+
+**Total**: 36 features per entity
+
+## Enemy Target Group Features (12 per target group)
+
+Each detected enemy target group has 12 features:
+
+### Detection & Identity (4 features)
+- `is_detected`: Target visible to sensors (0.0 or 1.0)
+- `domain_air`, `domain_sea`, `domain_ground`: One-hot domain encoding
+
+### Position & Velocity (6 features)
+- `grid_x`, `grid_y`: Normalized grid position [0,1]
+- `velocity_x`, `velocity_y`: Velocity components [0,1]
+- `speed_norm`: Speed magnitude [0,1]
+- `heading_norm`: Heading direction [0,1]
+
+### Count & Egocentric (2 features)
+- `entity_count_norm`: Number of units in group [0,1]
+- `distance_to_island_norm`: Distance to objective [0,1]
+
+**Total**: 12 features per target group
+
 ## Gymnasium Space Definition
 
 ```python
 spaces.Box(
     low=0.0,
     high=1.0,
-    shape=(12,),  # Current: 12 global features
+    shape=(11 + max_entities*36 + max_target_groups*12,),
     dtype=np.float32
 )
 ```
 
-## Future Enhancements
-
-The observation system has infrastructure prepared for expanded features:
-
-### Planned Entity-Level Features (per friendly unit)
-- **Identity & Intent** (7 features): can_engage, can_sense, can_refuel, can_capture, domain one-hot
-- **Kinematics** (5 features): grid position, heading (sin/cos), speed
-- **Egocentric** (2 features): distance/bearing to island
-- **Status** (4 features): health, radar state, radar focus, fuel
-- **Weapons** (4 features): air/surface weapon capability, ammo counts
-- **Engagement** (6 features): engagement status, target info, target domain
-
-Total: 28 features per entity (ID-indexed array)
-
-### Planned Enemy Target Group Features
-- **Detection** (1 feature): is_detected flag
-- **Position** (2 features): normalized grid coordinates  
-- **Domain** (3 features): air/surface/land one-hot
-- **Count** (1 feature): number of units in group
-- **Egocentric** (2 features): distance/bearing to island
-- **Uncertainty** (1 feature): is_ghost (detection quality)
-
-Total: 10 features per target group (ID-indexed array)
-
-### ID-Indexed Design
-Entity and target group features will use **stable ID indexing**:
-- Row `i` corresponds to entity ID `i` (zero rows for unassigned IDs)
-- Row `j` corresponds to target group ID `j` (zero rows for undetected groups)
-
-This ensures observation indices remain aligned with action space IDs across timesteps.
+Example with default config (max_entities=100, max_target_groups=50):
+- Shape: `(3711,)` = 11 + (100×36) + (50×12)
 

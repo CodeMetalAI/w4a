@@ -75,16 +75,18 @@ action = {
 ```
 
 ### 2: Engage
-Command an entity to engage enemy target group with weapons.
+Command an entity to engage a detected enemy target group with weapons.
 
 **Parameters used**:
 - `entity_id`: Which entity fires
-- `target_group_id`: Which detected target group to engage
-- `weapon_selection`: Combination of weapons to use
+- `target_group_id`: Which detected target group to engage (from visible_targets mask)
+- `weapon_selection`: Combination of weapons to use (platform-specific)
 - `weapon_usage`: 0=1 shot per unit, 1=1 shot per adversary, 2=2 shots per adversary
 - `weapon_engagement`: 0=defensive, 1=cautious, 2=assertive, 3=offensive
 
-**Valid for**: Entities with weapons that can reach the target
+**Valid for**: Entities with weapons that can reach the target (check entity_target_matrix)
+
+**Note**: Target groups represent detected enemy units visible to your sensors. You can only engage targets you've detected.
 
 **Example**:
 ```python
@@ -150,21 +152,30 @@ Initiate refueling between tanker and receiver aircraft.
 
 ## Action Masking
 
-The environment provides action masks in the `info` dict to indicate valid actions:
+The environment provides action masks in the `info` dict to indicate valid actions. These masks are useful for ensuring agents only select valid actions based on current game state.
 
 ```python
 obs, reward, terminated, truncated, info = env.step(action)
 
 info['valid_masks'] = {
-    'action_types': {0, 1, 2, 5, 6},           # Valid action types
-    'controllable_entities': {0, 3, 5, 7},     # Valid entity IDs
-    'visible_targets': {1, 4},                 # Valid target group IDs
-    'entity_target_matrix': {                  # Which entities can engage which targets
+    'action_types': {0, 1, 2, 5, 6},           # Valid action types this step
+    'controllable_entities': {0, 3, 5, 7},     # Valid entity IDs (alive entities)
+    'visible_targets': {1, 4},                 # Valid target group IDs (detected enemies)
+    'entity_target_matrix': {                  # Entity-target engagement matrix
         0: {1, 4},    # Entity 0 can engage targets 1 and 4
         3: {4},       # Entity 3 can only engage target 4
     }
 }
 ```
+
+### Mask Usage
+
+- **action_types**: Only action types in this set are valid this step
+- **controllable_entities**: Only these entity IDs are alive and controllable
+- **visible_targets**: Only these target group IDs are detected by your sensors
+- **entity_target_matrix**: Maps which entities can engage which targets (weapon range check)
+
+Invalid actions (not matching masks) will be rejected and treated as no-ops.
 
 ## Gymnasium Space Definition
 
