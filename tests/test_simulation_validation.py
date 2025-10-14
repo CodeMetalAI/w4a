@@ -401,6 +401,7 @@ class TestCaptureProgress:
         assert pioneer_id is not None, "Should have a settler unit"
         
         # Send capture action once
+
         capture_action = {
             "action_type": 5, "entity_id": pioneer_id,
             "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
@@ -462,6 +463,7 @@ class TestCaptureProgress:
                 print(f"  Legacy capture progress: {legacy_progress:.1f}s")
                 print(f"  Dynasty capture progress: {dynasty_progress:.1f}s")
             
+                print(f" Check that pioneer is still alive: {pioneer_entity.is_alive}")
             if terminations["legacy"] or terminations["dynasty"]:
                 # VERIFY: Termination cause
                 assert infos["legacy"]["termination_cause"] == "legacy_win", \
