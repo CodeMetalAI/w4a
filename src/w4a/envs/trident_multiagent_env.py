@@ -185,6 +185,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         # Action tracking for debugging and analysis
         self.last_action_by_entity = {}  # Intent: what agent tried to do
         self.last_action_applied_by_entity = {}  # Reality: what actually happened
+
+    def set_agent_classes(self, legacy_agent_class, dynasty_agent_class):
+        self.legacy_agent_class = legacy_agent_class
+        self.dynasty_agent_class = dynasty_agent_class
     
     def set_agents(self, legacy_agent, dynasty_agent):
         """
@@ -240,6 +244,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Returns:
             Tuple of (observations, infos) where each is a dict keyed by agent name
         """
+
+        if hasattr(self, "legacy_agent_class") and hasattr(self, "dynasty_agent_class"):
+            self.set_agents(self.legacy_agent_class(), self.dynasty_agent_class())
+
         # Validate agents are set
         if self.agent_legacy is None or self.agent_dynasty is None:
             raise RuntimeError("Agents must be set via set_agents() before reset()")
