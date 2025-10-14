@@ -77,10 +77,10 @@
                     "RadarData": [
                         {
                             "RadarFOV": 6.2831854820251465,
-                            "TransmitterPower": 20000.0,
+                            "TransmitterPower": 14000.0,
                             "TransmitterGain": 28.5,
                             "ReceiverGain": 35.0,
-                            "SignalWavelength": 0.699999988079071,
+                            "SignalWavelength": 1.0,
                             "MinimumSignalPower": 9.9999998245167e-15,
                             "TransmitterLosses": 2.0,
                             "ReceiverLosses": 3.0,
@@ -170,10 +170,10 @@
                     "RadarData": [
                         {
                             "RadarFOV": 6.2831854820251465,
-                            "TransmitterPower": 20000.0,
+                            "TransmitterPower": 14000.0,
                             "TransmitterGain": 28.5,
                             "ReceiverGain": 35.0,
-                            "SignalWavelength": 0.699999988079071,
+                            "SignalWavelength": 1.0,
                             "MinimumSignalPower": 9.9999998245167e-15,
                             "TransmitterLosses": 2.0,
                             "ReceiverLosses": 3.0,
