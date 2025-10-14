@@ -470,7 +470,7 @@ class TestSensingAction:
         sensing_entity_id = None
         sensing_entity = None
         for eid, entity in agent_legacy._sim_agent.controllable_entities.items():
-            if hasattr(entity, 'can_sense') and entity.can_sense:
+            if entity.has_radar:
                 sensing_entity_id = eid
                 sensing_entity = entity
                 break
