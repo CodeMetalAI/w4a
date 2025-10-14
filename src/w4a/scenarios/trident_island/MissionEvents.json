@@ -24,7 +24,7 @@
         "Location": {
             "X": 500000.0,
             "Y": -0.01216796413064003,
-            "Z": 0.0
+            "Z": 575.0
         },
         "FrameIndex": 0
     },
@@ -46,7 +46,7 @@
         "Location": {
             "X": -500000.0,
             "Y": 0.01216796413064003,
-            "Z": 0.0
+            "Z": 2387.0
         },
         "FrameIndex": 0
     },
@@ -68,7 +68,7 @@
         "Location": {
             "X": 0.0,
             "Y": 0.0,
-            "Z": 0.0
+            "Z": 1305.4000244140625
         },
         "FrameIndex": 0
     },
@@ -259,7 +259,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -352,7 +352,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -489,7 +489,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -582,7 +582,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -757,7 +757,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -850,7 +850,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -914,7 +914,12 @@
                         "Specific": 0,
                         "Extra": 0
                     },
-                    "SpawnComponents": [],
+                    "SpawnComponents": [
+                        {
+                            "EventName": "SimSpawnCaptureFlagComponent",
+                            "ComponentId": 0
+                        }
+                    ],
                     "Pos": {
                         "X": 0.0,
                         "Y": 0.0,
@@ -982,7 +987,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
@@ -1075,7 +1080,7 @@
                                             "TransmitterPower": 1000.0,
                                             "TransmitterGain": 30.0,
                                             "ReceiverGain": 35.0,
-                                            "SignalWavelength": 0.029999999329447746,
+                                            "SignalWavelength": 1.0,
                                             "MinimumSignalPower": 1.599999971922672e-13,
                                             "TransmitterLosses": 2.0,
                                             "ReceiverLosses": 3.0,
