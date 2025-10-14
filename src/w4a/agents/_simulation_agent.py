@@ -35,10 +35,12 @@ class _SimulationAgentImpl(SimAgent):
         self.controllable_entities = {}  # Dict[entity_id -> controllable entity]
         self._entity_id_by_ptr = {}
         self._next_entity_id = 0
+        self._free_entity_ids = []  # Stack of recycled entity IDs
         
         self.target_groups = {}  # Dict[group_id -> target_group]
         self._target_group_id_by_ptr = {}
         self._next_target_group_id = 0
+        self._free_target_group_ids = []
         
         self.flags = {}  # Flags this agent can see
 
@@ -69,7 +71,8 @@ class _SimulationAgentImpl(SimAgent):
         }
 
         self.entity_despawned_handlers = {
-            TargetGroup: self._on_target_group_despawned, # Nothing else despawns at this moment
+            ControllableEntity: self._on_controllable_entity_despawned,
+            TargetGroup: self._on_target_group_despawned,
         }
 
         self.component_spawned_handlers = {
@@ -156,10 +159,17 @@ class _SimulationAgentImpl(SimAgent):
                 cls = cls.__base__
 
     def _on_entity_despawned(self, event):
-        handler = self.entity_despawned_handlers.get(type(event.entity))
+        """Handle entity despawn by traversing class hierarchy to find handler."""
+        cls = type(event.entity)
 
-        if handler:
-            handler(event)
+        while cls != None:
+            handler = self.entity_despawned_handlers.get(cls)
+
+            if handler:
+                handler(event)
+                return
+            else:
+                cls = cls.__base__
 
     def _on_component_spawned(self, event):
         handler = self.component_spawned_handlers.get(type(event.component))
@@ -178,6 +188,7 @@ class _SimulationAgentImpl(SimAgent):
         Track enemy target groups detected by this faction.
         
         Assigns stable target group IDs that persist across the episode.
+        Uses ID recycling to prevent running out of valid IDs in long episodes.
         """
 
         group = event.entity
@@ -186,24 +197,44 @@ class _SimulationAgentImpl(SimAgent):
         assert group.faction == self.faction, f"Agent {self.faction.name} got a target group spawn of faction {group.faction}"
 
         if ptr not in self._target_group_id_by_ptr:
-            group_id = self._next_target_group_id
-            self._next_target_group_id += 1
+            # Reuse a freed ID if available, otherwise allocate new one
+            if self._free_target_group_ids:
+                group_id = self._free_target_group_ids.pop()
+            else:
+                group_id = self._next_target_group_id
+                self._next_target_group_id += 1
+            
             self._target_group_id_by_ptr[ptr] = group_id
             self.target_groups[group_id] = group
 
     def _on_target_group_despawned(self, event):
+        """
+        Handle target group despawn and recycle its ID.
+        
+        Returns the ID to the free list so it can be reused for future target groups.
+        This prevents ID exhaustion in long episodes with many detection events.
+        """
         group = event.entity
         ptr = id(group)
 
         assert group.faction == self.faction, f"Agent {self.faction.name} got a target group despawn of faction {group.faction}"
 
         if ptr in self._target_group_id_by_ptr:
-            group_id = self._target_group_id_by_ptr[ptr] # TODO: We should recycle this number
-
-            del self._target_group_id_by_ptr[ptr]  # Is this ok to do? 
-            del self.target_groups[group_id]  # Is this ok to do? 
+            group_id = self._target_group_id_by_ptr[ptr]
+            
+            # Recycle the ID for future use
+            self._free_target_group_ids.append(group_id)
+            
+            del self._target_group_id_by_ptr[ptr]
+            del self.target_groups[group_id] 
 
     def _on_controllable_entity_spawned(self, event):
+        """
+        Track controllable entities for this faction.
+        
+        Assigns stable entity IDs that persist across the episode.
+        Uses ID recycling to prevent running out of valid IDs in long episodes.
+        """
         entity = event.entity
 
         assert entity.faction == self.faction, f"Agent {self.faction.name} got an entity spawn of faction {entity.faction} {entity.identifier}"
@@ -212,14 +243,44 @@ class _SimulationAgentImpl(SimAgent):
         if not entity.Controllable: # @Sanjna: I think this is always true in the current setup.
             return
         
-        # Assign stable ID
+        # Assign stable ID (reuse freed ID if available)
         ptr = id(entity)
         if ptr not in self._entity_id_by_ptr:
-            entity_id = self._next_entity_id
-            self._next_entity_id += 1
+            # Reuse a freed ID if available, otherwise allocate new one
+            if self._free_entity_ids:
+                entity_id = self._free_entity_ids.pop()
+            else:
+                entity_id = self._next_entity_id
+                self._next_entity_id += 1
+            
             self._entity_id_by_ptr[ptr] = entity_id
             self.controllable_entities[entity_id] = entity
 
+    def _on_controllable_entity_despawned(self, event):
+        """
+        Handle controllable entity despawn and recycle its ID.
+        
+        Returns the ID to the free list so it can be reused for future entities.
+        This prevents ID exhaustion in long episodes with many spawns/deaths.
+        """
+        entity = event.entity
+        ptr = id(entity)
+        
+        if ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[ptr]
+            
+            # Recycle the ID for future use
+            self._free_entity_ids.append(entity_id)
+            
+            # Clean up tracking
+            del self._entity_id_by_ptr[ptr]
+            del self.controllable_entities[entity_id]
+            
+            # Clean up from active operations if entity was performing any
+            self.active_capturing_entities.pop(entity_id, None)
+            self.active_refuel_receivers.pop(entity_id, None)
+            self.active_refuel_providers.pop(entity_id, None)
+    
     def _on_adversary_contact(self, event):
         pass    # Nothing to do here, since we moved the logic to the targetgroup spawned (easier to manage)
     
