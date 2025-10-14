@@ -336,9 +336,9 @@ def test_pettingzoo_parallel_api_official():
     env = TridentIslandMultiAgentEnv(config=config)
     
     # Set up agents (use SimpleAgent for realistic test)
-    agent_legacy = SimpleAgent(Faction.LEGACY, config)
-    agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-    env.set_agents(agent_legacy, agent_dynasty)
+    agent_legacy_class = lambda: SimpleAgent(Faction.LEGACY, config)
+    agent_dynasty_class = lambda: SimpleAgent(Faction.DYNASTY, config)
+    env.set_agent_classes(agent_legacy_class, agent_dynasty_class)
     
     # Run official PettingZoo API test
     parallel_api_test(env, num_cycles=10)
