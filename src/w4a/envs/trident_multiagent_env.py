@@ -580,6 +580,11 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 'providers': list(self._get_refuel_providers_set(agent))
             },
             
+            # Active operations (RL ID -> entity pointer)
+            'capturing_entities': self._get_capturing_entities_dict(agent),
+            'refuel_receivers': self._get_active_refuel_receivers_dict(agent),
+            'refuel_providers': self._get_active_refuel_providers_dict(agent),
+            
             # Action tracking for debugging (filtered to this agent's actions)
             'last_action_intent_by_entity': {
                 k: v for k, v in self.last_action_by_entity.items() 
@@ -666,6 +671,24 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             if entity.is_alive and entity.can_refuel_others:
                 providers.add(entity_id)
         return providers
+    
+    def _get_capturing_entities_dict(self, agent) -> dict:
+        """Get dict of RL ID -> entity pointer for entities currently capturing flags."""
+        # Filter out dead entities
+        return {rl_id: entity for rl_id, entity in agent._sim_agent.active_capturing_entities.items() 
+                if entity.is_alive}
+    
+    def _get_active_refuel_receivers_dict(self, agent) -> dict:
+        """Get dict of RL ID -> entity pointer for entities currently receiving fuel."""
+        # Filter out dead entities
+        return {rl_id: entity for rl_id, entity in agent._sim_agent.active_refuel_receivers.items() 
+                if entity.is_alive}
+    
+    def _get_active_refuel_providers_dict(self, agent) -> dict:
+        """Get dict of RL ID -> entity pointer for entities currently providing fuel."""
+        # Filter out dead entities
+        return {rl_id: entity for rl_id, entity in agent._sim_agent.active_refuel_providers.items() 
+                if entity.is_alive}
     
     def _get_casualties_count_for_faction(self, faction: Faction) -> int:
         """Get casualty count for a specific faction (cached in mission_metrics)."""

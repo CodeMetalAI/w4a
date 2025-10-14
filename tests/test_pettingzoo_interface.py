@@ -29,6 +29,10 @@ class MockCompetitionAgent:
         self._sim_agent.controllable_entities = {}
         self._sim_agent.target_groups = {}
         self._sim_agent.flags = {}
+        # Active operation tracking (new fields)
+        self._sim_agent.active_capturing_entities = {}
+        self._sim_agent.active_refuel_receivers = {}
+        self._sim_agent.active_refuel_providers = {}
     
     def _set_env(self, env):
         """Link agent to environment."""
@@ -257,6 +261,9 @@ def test_info_dict_structure():
     assert 'valid_masks' in info
     assert 'controllable_entities' in info
     assert 'refuel' in info
+    assert 'capturing_entities' in info
+    assert 'refuel_receivers' in info
+    assert 'refuel_providers' in info
     assert 'last_action_intent_by_entity' in info
     assert 'last_action_applied_by_entity' in info
     assert 'mission' in info
@@ -272,6 +279,11 @@ def test_info_dict_structure():
     refuel = info['refuel']
     assert 'receivers' in refuel
     assert 'providers' in refuel
+    
+    # Check active operations structure (new fields)
+    assert isinstance(info['capturing_entities'], dict)
+    assert isinstance(info['refuel_receivers'], dict)
+    assert isinstance(info['refuel_providers'], dict)
     
     # Check mission info structure
     mission = info['mission']
