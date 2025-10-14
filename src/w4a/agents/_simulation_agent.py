@@ -7,8 +7,9 @@ processing, entity tracking, and force laydown.
 
 from SimulationInterface import Agent as SimAgent
 from SimulationInterface import (
-    Faction, EntitySpawned, EntityDespawned, AdversaryContact, Victory, ControllableEntity, 
-    TargetGroup, Flag, CAPManouver, NonCombatManouverQueue
+    Faction, EntitySpawned, EntityDespawned, AdversaryContact, Victory, ComponentSpawned, ControllableEntity, 
+    TargetGroup, Flag, CAPManouver, NonCombatManouverQueue,
+    CaptureFlagComponent, EntitySpawnComponent, RefuelComponent, RefuelingComponent
 )
 
 
@@ -40,11 +41,17 @@ class _SimulationAgentImpl(SimAgent):
         self._next_target_group_id = 0
         
         self.flags = {}  # Flags this agent can see
+
+        self.entity_spawn_entities = set()              # All units capable of spawning new entities (carriers)
+        self.refueling_entities = set()                 # All units capable of refueling others
+        self.refuelable_entities = set()                # All units capable of refueling
+        self.capture_entities = set()                   # All units capable of capturing a flag
         
         # Event handlers
         self.simulation_event_handlers = {
             EntitySpawned: self._on_entity_spawned,
             EntityDespawned: self._on_entity_despawned,
+            ComponentSpawned: self._on_component_spawned,
             AdversaryContact: self._on_adversary_contact,
             Victory: self._on_victory,
         }
@@ -57,6 +64,13 @@ class _SimulationAgentImpl(SimAgent):
 
         self.entity_despawned_handlers = {
             TargetGroup: self._on_target_group_despawned, # Nothing else despawns at this moment
+        }
+
+        self.component_spawned_handlers = {
+            CaptureFlagComponent: self._on_capture_flag_component_spawned,
+            EntitySpawnComponent: self._on_entity_spawn_component_spawned,
+            RefuelComponent: self._on_refuel_component_spawned,
+            RefuelingComponent: self._on_refueling_component_spawned,
         }
     
     def start_force_laydown(self, force_laydown):
@@ -141,7 +155,11 @@ class _SimulationAgentImpl(SimAgent):
         if handler:
             handler(event)
 
-        entity = event.entity
+    def _on_component_spawned(self, event):
+        handler = self.component_spawned_handlers.get(type(event.component))
+
+        if handler:
+            handler(event)
         
     def _on_flag_spawned(self, event):
         flag = event.entity
@@ -203,3 +221,14 @@ class _SimulationAgentImpl(SimAgent):
         """Handle victory events."""
         pass
 
+    def _on_capture_flag_component_spawned(self, event):
+        self.capture_entities.add(event.component.entity)
+
+    def _on_entity_spawn_component_spawned(self, event):
+        self.entity_spawn_entities.add(event.component.entity)
+
+    def _on_refuel_component_spawned(self, event):
+        self.refuelable_entities.add(event.component.entity)
+
+    def _on_refueling_component_spawned(self, event):
+        self.refueling_entities.add(event.component.entity)
