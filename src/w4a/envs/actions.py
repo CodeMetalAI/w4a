@@ -27,7 +27,7 @@ from .utils import calculate_max_grid_positions, grid_to_position, position_in_b
 from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
-    RefuelComponent,
+    RefuelComponent, CaptureFlagComponent,
     Vector3, Formation, ControllableEntity, EntityDomain, Faction,
 )
 
@@ -248,11 +248,12 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     return event
 
 def execute_capture_action(entity_id: int, action: Dict, entities: Dict, flags: Dict):
-    # """Execute land action - land at nearest friendly airbase"""
+    # """Execute land action - land at center island flag"""
     entity = entities[entity_id]
     flag = flags[FACTION_FLAG_IDS[Faction.NEUTRAL]]
 
     event = CaptureFlag()
+    event.component = entity.find_component_by_class(CaptureFlagComponent)
     event.entity = entity
     event.flag = flag
 
