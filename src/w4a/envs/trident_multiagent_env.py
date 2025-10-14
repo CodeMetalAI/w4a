@@ -77,7 +77,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
-        self.max_ammo = 50.0  # TODO: Erwin, is this correct? @Sanjna: yes that's fine.
+        self.max_ammo = 50.0
+        self.max_velocity = 1029.0  # 3x 343 m/s
 
         # Set up paths
         self.scenario_path = Path(__file__).parent.parent / "scenarios"
@@ -179,7 +180,6 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             Faction.LEGACY: None,  # Step number when capture completed (None = not completed)
             Faction.DYNASTY: None
         }
-        self.island_contested = False
         
         # Action tracking for debugging and analysis
         self.last_action_by_entity = {}  # Intent: what agent tried to do
@@ -459,42 +459,27 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Evaluate current mission outcome.
         
         This method checks multiple win/loss conditions for both factions:
-        1. Capture win: Holding the objective for required time (per-faction)
+        1. Capture win: Completing the objective capture (only one faction can win this way)
         2. Kill ratio win: Achieving favorable kill:death ratio
         3. Kill ratio loss: Suffering unfavorable kill:death ratio
         
         Returns:
             "legacy_win", "dynasty_win", "draw", or "ongoing"
         """
-        # Capture win condition (per-faction, agent-agnostic)
-        legacy_capture_progress = self.capture_progress_by_faction[Faction.LEGACY]
-        dynasty_capture_progress = self.capture_progress_by_faction[Faction.DYNASTY]
-        legacy_can_capture = self.capture_possible_by_faction[Faction.LEGACY]
-        dynasty_can_capture = self.capture_possible_by_faction[Faction.DYNASTY]
+        # Capture win condition - check if flag has been captured
+        # Only one faction can capture at a time, so no ties possible via capture
+        flag = self.flags[CENTER_ISLAND_FLAG_ID]
         
-        # Check if factions have completed capture
-        legacy_captured = legacy_capture_progress >= self.config.capture_required_seconds and legacy_can_capture
-        dynasty_captured = dynasty_capture_progress >= self.config.capture_required_seconds and dynasty_can_capture
-        
-        # Determine winner based on who completed FIRST (tracked by step number)
-        if legacy_captured and dynasty_captured:
-            # Both completed - check who finished first
-            legacy_step = self.capture_completed_at_step[Faction.LEGACY]
-            dynasty_step = self.capture_completed_at_step[Faction.DYNASTY]
+        if flag.is_captured:
+            # Flag has been captured - determine which faction captured it
+            legacy_capture_progress = self.capture_progress_by_faction[Faction.LEGACY]
+            dynasty_capture_progress = self.capture_progress_by_faction[Faction.DYNASTY]
             
-            if legacy_step is not None and dynasty_step is not None:
-                if legacy_step < dynasty_step:
-                    return "legacy_win"  # Legacy completed first
-                elif dynasty_step < legacy_step:
-                    return "dynasty_win"  # Dynasty completed first
-                else:
-                    return "draw"  # Completed at exact same step (rare)
-            # Fallback if completion steps not tracked properly
-            return "draw"
-        elif legacy_captured:
-            return "legacy_win"
-        elif dynasty_captured:
-            return "dynasty_win"
+            # The faction with progress at required threshold is the capturer
+            if legacy_capture_progress >= self.config.capture_required_seconds:
+                return "legacy_win"
+            elif dynasty_capture_progress >= self.config.capture_required_seconds:
+                return "dynasty_win"
         
         # Get cached kill ratios (computed in mission_metrics.update_kill_ratios)
         legacy_kill_ratio = self.kill_ratio_by_faction[Faction.LEGACY]
@@ -510,6 +495,9 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         # Check loss conditions (inverse kill ratio + no capture possible)
         inverse_threshold = 1.0 / max(1e-6, threshold)
+        legacy_can_capture = self.capture_possible_by_faction[Faction.LEGACY]
+        dynasty_can_capture = self.capture_possible_by_faction[Faction.DYNASTY]
+        
         if legacy_kill_ratio <= inverse_threshold and not legacy_can_capture:
             return "dynasty_win"
         if dynasty_kill_ratio <= inverse_threshold and not dynasty_can_capture:
@@ -599,7 +587,6 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 'my_capture_possible': bool(self.capture_possible_by_faction[agent.faction]),
                 'enemy_capture_progress': float(self._get_enemy_capture_progress(agent.faction)),
                 'enemy_capture_possible': bool(self._get_enemy_capture_possible(agent.faction)),
-                'island_contested': bool(self.island_contested)
             }
         }
     

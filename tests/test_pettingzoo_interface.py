@@ -282,7 +282,6 @@ def test_info_dict_structure():
     assert 'my_capture_possible' in mission
     assert 'enemy_capture_progress' in mission
     assert 'enemy_capture_possible' in mission
-    assert 'island_contested' in mission
     
     # Note: termination_cause is added during reset/step, not in _build_info_for_agent
 

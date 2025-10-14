@@ -469,16 +469,14 @@ def validate_capture_action(action: Dict, entities: Dict, flags: Dict) -> bool:
     flag_id = FACTION_FLAG_IDS[Faction.NEUTRAL]
     flag = flags[flag_id]
     
-    # Check entity is aircraft
-    if entity.domain != EntityDomain.AIR:
-        return False
-
-    # Check if flag is neutral
-    if flag.faction != Faction.NEUTRAL:
-        return False
-    
     # Check entity can capture
     if not entity.can_capture:
+        return False
+
+    if flag.is_captured:
+        return False
+    
+    if not flag.can_be_captured:
         return False
     
     return True

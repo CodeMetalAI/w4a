@@ -9,16 +9,7 @@ The observation system encodes three main categories:
 - Friendly features: our units' capabilities, positions, and status
 - Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-Current Implementation Status:
-- build_observation_space(): ACTIVE - Returns Box space with 12 global features
-- compute_observation(): PLACEHOLDER - Returns zeros, awaiting full implementation
-- _compute_global_features(): IMPLEMENTED - 12 global mission state features
-- _compute_friendly_features(): IMPLEMENTED - 28 features per friendly entity (ready to use)
-- _compute_enemy_features(): IMPLEMENTED - 10 features per enemy target group (ready to use)
-
-The infrastructure for entity-level and target group features is complete but not yet
-integrated into compute_observation(). When ready, simply call the helper functions
-and concatenate their outputs.
+Total observation size: 10 + (max_entities * 32) + (max_target_groups * 12)
 """
 
 from typing import Any
@@ -29,28 +20,33 @@ from gymnasium import spaces
 from w4a.envs.constants import CENTER_ISLAND_FLAG_ID
 from w4a.envs.utils import calculate_max_grid_positions
 
-from SimulationInterface import Faction, EntityDomain
+from SimulationInterface import Faction, EntityDomain, ControllableEntityManouver
 
 def build_observation_space(config) -> spaces.Box:
     """Build the complete observation space for the environment.
 
     Creates a normalized Box space containing all observation features.
-    Currently includes 12 global features with placeholders for entity features.
+    
+    Observation structure:
+    - Global features: 10 (mission state, objectives, time)
+    - Friendly entity features: max_entities * 32 (capabilities, status, engagement)
+    - Enemy target group features: max_target_groups * 12 (position, velocity, domain)
+    
+    NOTE (ID-indexed layout):
+    - Entities: shape (config.max_entities, 32), row i corresponds to entity_id i
+    - Target groups: shape (config.max_target_groups, 12), row j corresponds to target_group_id j
+    - Zero rows for IDs that are not assigned/visible
+    - This keeps observation indices aligned with action/mask IDs across steps
     
     Returns:
         Box space with normalized values in [0, 1]
     """
-    # Current: 12 global features
-    # NOTE (ID-indexed layout):
-    # When adding per-entity or per-target-group features, index rows by stable IDs
-    # assigned in the environment, not by iteration order. That is:
-    # - Entities: shape (config.max_entities, features_per_entity), row i corresponds
-    #             to entity_id i. Zero rows for IDs that are not assigned.
-    # - Target groups: shape (config.max_target_groups, features_per_group), row j
-    #                  corresponds to target_group_id j. Zero rows when not visible.
-    # This keeps observation indices aligned with action/mask IDs across steps.
+    global_features = 10
+    friendly_features = config.max_entities * 32
+    enemy_features = config.max_target_groups * 12
     
-    total_features = 12  # globals only for now
+    total_features = global_features + friendly_features + enemy_features
+    
     low = np.zeros((total_features,), dtype=np.float32)
     high = np.ones((total_features,), dtype=np.float32)
     return spaces.Box(low=low, high=high, dtype=np.float32)
@@ -60,8 +56,10 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
     """
     Compute observation for a specific agent.
     
-    Extracts and normalizes features from the agent's perspective, including
-    only entities and target groups visible to that agent.
+    Extracts and normalizes features from the agent's perspective, including:
+    - Global mission state (shared by both agents)
+    - Friendly entity features (our controllable units)
+    - Enemy features (detected target groups)
     
     Args:
         env: Environment instance (for global info like time, flags)
@@ -69,16 +67,25 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
         
     Returns:
         Normalized observation vector with values in [0, 1]
+        Shape: (10 + max_entities*32 + max_target_groups*12,)
     """
-    # TODO: Implement full observation encoding using agent's visible state
-    # Available from agent:
-    # - agent._sim_agent.controllable_entities: Dict[entity_id -> entity] for this agent
-    # - agent._sim_agent.target_groups: Dict[group_id -> target_group] detected by this agent
-    # - agent._sim_agent.flags: Flags visible to this agent
+    # Compute global features (mission state, objectives, time)
+    global_features = _compute_global_features(env, agent)
     
-    # For now, return zeros (minimal implementation for test)
-    obs_space = env.observation_spaces[agent.faction.name.lower()]
-    return np.zeros(obs_space.shape, dtype=np.float32)
+    # Compute friendly entity features (our units)
+    friendly_features = _compute_friendly_features(env, agent)
+    
+    # Compute enemy features (detected target groups)
+    enemy_features = _compute_enemy_features(env, agent)
+    
+    # Concatenate all features into single observation vector
+    observation = np.concatenate([
+        global_features,
+        friendly_features,
+        enemy_features
+    ], dtype=np.float32)
+    
+    return observation
 
 
 def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
@@ -87,15 +94,13 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     Extracts high-level mission status from the agent's perspective
     All features are normalized to [0,1] for consistent learning.
     
-    Features (12 total):
+    Features (10 total):
     - time_remaining_norm: Mission time remaining [0,1]
     - my_casualties_norm: Our casualties normalized by max entities
     - enemy_casualties_norm: Enemy casualties normalized by max entities
     - kill_ratio_norm: Our kill ratio (enemy kills / our casualties) normalized by threshold
-    - awacs_alive_flag: AWACS availability [0,1]
     - capture_progress_norm: Our objective capture progress [0,1]
     - enemy_capture_progress_norm: Enemy objective capture progress [0,1]
-    - island_contested_flag: Area contestation status [0,1]
     - capture_possible_flag: Our capture capability status [0,1]
     - enemy_capture_possible_flag: Enemy capture capability status [0,1]
     - island_center_x_norm: Center island X coordinate normalized
@@ -106,7 +111,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         agent: CompetitionAgent instance (to get faction-specific capture info)
     
     Returns:
-        Array of shape (12,) with normalized values in [0,1]
+        Array of shape (10,) with normalized values in [0,1]
     """
 
     
@@ -130,9 +135,6 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     threshold = env.config.kill_ratio_threshold
     kill_ratio_norm = np.clip(kill_ratio / threshold, 0.0, 1.0)
 
-    # AWACS alive flag
-    awacs_alive_flag = 1.0 if _awacs_alive(env) else 0.0
-
     # Capture progress normalized by required capture time (agent-specific)
     required_capture_time = env.config.capture_required_seconds
     my_capture_progress = float(env.capture_progress_by_faction[my_faction])
@@ -145,8 +147,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         capture_progress_norm = float(np.clip(my_capture_progress / required_capture_time, 0.0, 1.0))
         enemy_capture_progress_norm = float(np.clip(enemy_capture_progress / required_capture_time, 0.0, 1.0))
 
-    # Island contested and capture possible flags
-    island_contested_flag = 1.0 if env.island_contested else 0.0
+    # Capture possible flags
     capture_possible_flag = 1.0 if env.capture_possible_by_faction[my_faction] else 0.0
     enemy_capture_possible_flag = 1.0 if env.capture_possible_by_faction[enemy_faction] else 0.0
     
@@ -166,10 +167,8 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         my_casualties_norm,
         enemy_casualties_norm,
         kill_ratio_norm,
-        awacs_alive_flag,
         capture_progress_norm,
         enemy_capture_progress_norm,
-        island_contested_flag,
         capture_possible_flag,
         enemy_capture_possible_flag,
         island_center_x_norm,
@@ -177,43 +176,33 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     ], dtype=np.float32)
 
 
-def _get_friendly_entities(env: Any) -> list:
-    """Get list of friendly entities (helper for placeholder code).
-    
-    Returns:
-        List of entities belonging to our faction
-    """
-    # TODO: This can be queried from the agent the entities see
-    # TODO: Think about the env operating for two agents simulating
-    return [entity for entity in env.entities.values() if entity.faction.value == env.config.our_faction]
-
-
-def _compute_friendly_features(env: Any) -> np.ndarray:
+def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
     """Compute friendly entity features for observation encoding.
     
     Extracts detailed information about our units including capabilities,
     status, and tactical situation. Features are organized by category
     for each entity up to the maximum entity limit.
     
-    Feature categories per entity (28 features total):
-    - Identity & Intent: can_engage, can_sense, can_refuel, can_capture, domain (air/surface/land)
-    - Kinematics: position, heading, speed
-    - Egocentric: distance/bearing to island
-    - Status: health, radar state, fuel
-    - Weapons: weapon types, ammo counts  
-    - Engagement: current engagement state, target info
+    Feature categories per entity (32 features total):
+    - Identity & Intent: can_engage, can_sense, can_refuel, can_capture, domain (air/surface/land) - 7 features
+    - Kinematics: position, heading, speed - 5 features
+    - Egocentric: distance/bearing to island - 2 features
+    - Status: health, radar state, fuel - 4 features
+    - Weapons: weapon types, ammo counts - 3 features
+    - Engagement: current engagement state, target info, weapons mode - 11 features
+    
+    Args:
+        env: Environment instance
+        agent: CompetitionAgent instance (to get controllable entities)
     
     Returns:
-        Array of shape (max_entities * 28,) with zero padding for unused slots
+        Array of shape (max_entities * 32,) with zero padding for unused slots
     """
-    # TODO: Implement this as an ID-indexed array sized to max_entities
     # Build an ID-indexed array: row i corresponds to entity_id i. Zero rows for unused IDs.
-    friendly_entity_features = np.zeros((int(env.config.max_entities), 28), dtype=np.float32)
+    friendly_entity_features = np.zeros((int(env.config.max_entities), 32), dtype=np.float32)
 
-    for entity_id, entity in env.entities.items():
-        # Include only friendly faction entities
-        if entity.faction.value != env.config.our_faction:
-            continue
+    # Iterate through agent's controllable entities
+    for entity_id, entity in agent._sim_agent.controllable_entities.items():
 
         # Compute each feature category
         identity_features = compute_friendly_identity_features(entity)
@@ -237,7 +226,7 @@ def _compute_friendly_features(env: Any) -> np.ndarray:
         if 0 <= entity_id < int(env.config.max_entities):
             friendly_entity_features[entity_id] = features
 
-    # Convert (max_entities, 28) -> (max_entities * 28,)
+    # Convert (max_entities, 32) -> (max_entities * 32,)
     return friendly_entity_features.flatten()
 
 
@@ -292,10 +281,10 @@ def compute_friendly_kinematic_features(env: Any, entity: Any) -> np.ndarray:
     heading_sin = (np.sin(entity.heading) + 1.0) / 2.0  # [-1,1] -> [0,1]
     heading_cos = (np.cos(entity.heading) + 1.0) / 2.0  # [-1,1] -> [0,1]
     
-    # Speed normalized by max speed
-    speed_norm = entity.speed / entity.max_speed if entity.max_speed > 0 else 0.0
+    # Velocity normalized by max vel
+    velocity_norm = entity.vel / entity.max_speed if env.max_velocity > 0 else 0.0
     
-    return np.array([grid_x_norm, grid_y_norm, heading_sin, heading_cos, speed_norm], dtype=np.float32)
+    return np.array([grid_x_norm, grid_y_norm, heading_sin, heading_cos, velocity_norm], dtype=np.float32)
     
 
 
@@ -315,10 +304,10 @@ def compute_friendly_egocentric_features(env: Any, entity: Any) -> np.ndarray:
     map_width, map_height = env.config.map_size
     map_diagonal = np.sqrt(map_width * map_width + map_height * map_height)
     
-    island_range = distance_to_island(entity.position)
+    island_range = distance_to_island(env, entity.position)
     island_range_norm = island_range / map_diagonal
     
-    island_bearing = bearing_to_island(entity.position)
+    island_bearing = bearing_to_island(env, entity.position)
     island_bearing_norm = island_bearing / 360.0
     
     return np.array([island_range_norm, island_bearing_norm], dtype=np.float32)
@@ -342,11 +331,9 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
     health_ok = 1.0 if entity.is_alive else 0.0
     radar_on = 1.0 if entity.radar_enabled else 0.0
     max_grid = calculate_max_grid_positions(env.config)
-
+    radar_focus_grid = np.zeros(3)
     if entity.has_radar_focus_position:
         radar_focus_grid = entity.radar_focus_position
-    else:
-        radar_focus_grid = Vector(0, 0, 0) # @Sanjna: Not sure what we should do here
 
     radar_focus_grid_norm = float(radar_focus_grid) / float(max_grid) if max_grid > 0 else 0.0
     
@@ -360,7 +347,7 @@ def compute_friendly_weapon_features(entity: Any, env: Any) -> np.ndarray:
     
     Encodes the entity's weapon capabilities and ammunition status.
     
-    Features: has_air_weapons, has_surface_weapons, air_ammo_norm, surface_ammo_norm (4 features)
+    Features: has_air_weapons, has_surface_weapons, ammo_norm (3 features)
     
     Args:
         entity: Entity to compute features for
@@ -387,21 +374,27 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
     
     Encodes the entity's current combat engagement state and target information.
     
-    Features: currently_engaging, target_range_norm, target_bearing_norm,
-             target_domain_air, target_domain_surface, target_domain_land (6 features)
+    Features: currently_engaging, shots_fired_this_commit, target_range_norm, target_bearing_norm,
+             target_domain_air, target_domain_surface, target_domain_land, time_until_shoot_norm,
+             weapons_tight, weapons_selective, weapons_free (11 features)
     
     Args:
         env: Environment instance (for map size to normalize range)
         entity: Entity to compute features for
     
     Returns:
-        Array of shape (6,) with engagement status and target information
+        Array of shape (11,) with engagement status and target information
     """
     # Check if entity is currently engaging by examining current_manouver
     engaging = entity.current_manouver == ControllableEntityManouver.COMBAT
 
     target_group = entity.current_target_group if engaging else None
     currently_engaging = 1.0 if target_group is not None else 0.0
+    
+    # Shots fired this engagement/commit (only valid during an engagement)
+    shots_fired_this_commit = 0
+    if engaging:
+        shots_fired_this_commit = entity.num_shots_fired
     
     if target_group is not None:
         # Calculate range to target group
@@ -437,27 +430,24 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
     time_until_shoot = entity.get_estimated_time_until_shoot(target_group)
     time_until_shoot_norm = np.clip(time_until_shoot / 60.0, 0.0, 1.0)  # Normalize to 1 minute max
 
-    # Relative velocity toward/away from target
-    # @Sanjna: I added it in 0f4aee4ffc9cd56ef2f6342fd1e10cb94d9d8941
-    closure_rate = calculate_closure_rate(entity.vel, target_group.vel) if target_group else 0.0
-
     # Weapons usage mode (one-hot encoding: tight/selective/free)
     weapons_mode = entity.weapons_usage_mode
-    weapons_tight = 1.0 if weapons_mode == 0 else 0.0
-    weapons_selective = 1.0 if weapons_mode == 1 else 0.0  
-    weapons_free = 1.0 if weapons_mode == 2 else 0.0
-    
-    # Shots fired this engagement/commit
-    shots_fired_this_commit = entity.num_shots_fired    # @Sanjna: This number is only valid during an engagement.
-    shots_fired_norm = np.clip(shots_fired_this_commit / 10.0, 0.0, 1.0)  # Normalize to max 10 shots
-    
+    weapons_tight = 1.0 if weapons_mode == 0 else 0.0 # tight
+    weapons_selective = 1.0 if weapons_mode == 1 else 0.0  # selective
+    weapons_free = 1.0 if weapons_mode == 2 else 0.0 # free
+
     return np.array([
         currently_engaging,
+        shots_fired_this_commit,
         target_range_norm,
         target_bearing_norm,
         target_domain_air,
         target_domain_surface,
-        target_domain_land
+        target_domain_land,
+        time_until_shoot_norm,
+        weapons_tight,
+        weapons_selective,
+        weapons_free,
     ], dtype=np.float32)
 
 
@@ -468,9 +458,10 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
     tiers are handled automatically by the simulation - if a target group is
     in agent.target_groups, it has been detected.
     
-    Features per enemy target group (10 features total):
+    Features per enemy target group (12 features total):
     - Detection: is_detected (1.0 if in target_groups)
     - Position: pos_x_norm, pos_y_norm (grid coordinates from target_group.pos)
+    - Velocity: vel_x_norm, vel_y_norm (velocity components normalized by typical max speed)
     - Domain: domain_air, domain_surface, domain_land (one-hot from target_group.domain)
     - Count: num_units_norm (from target_group.num_known_alive_units)
     - Egocentric: island_range_norm, island_bearing_norm (distance/bearing to objective)
@@ -481,9 +472,9 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         agent: CompetitionAgent instance (to get detected target groups)
     
     Returns:
-        Array of shape (max_target_groups * 10,) with zero padding for undetected groups
+        Array of shape (max_target_groups * 12,) with zero padding for undetected groups
     """
-    num_features = 10
+    num_features = 12
     enemy_group_features = np.zeros((env.config.max_target_groups, num_features), dtype=np.float32)
     
     # Populate rows by stable target_group_id; array size stays fixed
@@ -503,6 +494,14 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         pos_x_norm = float(grid_pos % grid_size) / max(1, grid_size - 1)
         pos_y_norm = float(grid_pos // grid_size) / max(1, grid_size - 1)
         
+        # Speed (2 features)
+        speed_x_norm = np.clip(target_group.vel.x / env.max_velocity, -1.0, 1.0)
+        speed_y_norm = np.clip(target_group.vel.y / env.max_velocity, -1.0, 1.0)
+        
+        # Convert from [-1, 1] to [0, 1] for consistency
+        speed_x_norm = (speed_x_norm + 1.0) / 2.0
+        speed_y_norm = (speed_y_norm + 1.0) / 2.0
+        
         # Domain (3 features)
         # One-hot encoding from TargetGroup.domain (EntityDomain enum)
         domain_air = 1.0 if target_group.domain == EntityDomain.AIR else 0.0
@@ -512,18 +511,17 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         # Count (1 feature)
         # Number of known alive units from TargetGroup.num_known_alive_units
         num_units = float(target_group.num_known_alive_units)
-        num_units_norm = np.clip(num_units / 10.0, 0.0, 1.0)  # Normalize to max 10 units @Sanjna: 10 is a little low. Typically we should see max 16 (4 squadrons of 4)
+        num_units_norm = np.clip(num_units / 10.0, env.max_entities, 1.0)  # Normalize to max 10 units @Sanjna: 10 is a little low. Typically we should see max 16 (4 squadrons of 4)
         
         # Egocentric (2 features)
         # Distance and bearing to center island objective
-        # TODO: Get actual island position from env.flags[CENTER_ISLAND_FLAG_ID] instead of (0, 0)
         map_width, map_height = env.config.map_size
         map_diagonal = np.sqrt(map_width * map_width + map_height * map_height)
         
-        enemy_island_range = distance_to_island(target_group.pos)
+        enemy_island_range = distance_to_island(env, target_group.pos)
         enemy_island_range_norm = enemy_island_range / map_diagonal
         
-        enemy_island_bearing = bearing_to_island(target_group.pos)
+        enemy_island_bearing = bearing_to_island(env, target_group.pos)
         enemy_island_bearing_norm = enemy_island_bearing / 360.0
         
         # Uncertainty (1 feature)
@@ -533,17 +531,18 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         features = np.array([
             is_detected,                                          # Detection (1)
             pos_x_norm, pos_y_norm,                              # Position (2)
+            speed_x_norm, speed_y_norm,                              # Velocity (2)
             domain_air, domain_surface, domain_land,             # Domain (3)
             num_units_norm,                                      # Count (1)
             enemy_island_range_norm, enemy_island_bearing_norm,  # Egocentric (2)
             is_ghost                                             # Uncertainty (1)
-        ], dtype=np.float32)  # Total: 10 features
+        ], dtype=np.float32)  # Total: 12 features
         
         # Assign into the stable ID-indexed row; keep array size fixed
         if 0 <= group_id < int(env.config.max_target_groups):
             enemy_group_features[group_id] = features
     
-    return enemy_group_features.flatten()  # Shape: (max_target_groups * 10,)
+    return enemy_group_features.flatten()  # Shape: (max_target_groups * 12,)
 
 
 def position_to_grid(x: float, y: float, config: Any) -> int:
@@ -567,7 +566,6 @@ def position_to_grid(x: float, y: float, config: Any) -> int:
     adjusted_y = y + (config.map_size[1] // 2)
     
     # Convert to grid indices
-    # TODO: 1000s? Is this correct?
     grid_x = int(adjusted_x / (config.grid_resolution_km * 1000))
     grid_y = int(adjusted_y / (config.grid_resolution_km * 1000))
     
@@ -578,36 +576,36 @@ def position_to_grid(x: float, y: float, config: Any) -> int:
     return grid_y * grid_size + grid_x
 
 
-def distance_to_island(position: Any) -> float:
+def distance_to_island(env: Any, position: Any) -> float:
     """Calculate distance from entity position to the mission objective.
     
     Args:
+        env: Environment instance (to get island position)
         position: Entity position object with x, y coordinates
         
     Returns:
         Distance in meters to island center
     """
-    # TODO: Get actual island center coordinates from scenario
-    island_center_x = 0.0  # Assuming island at map center for now
-    island_center_y = 0.0
+    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
+    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
     
     dx = position.x - island_center_x
     dy = position.y - island_center_y
     return np.sqrt(dx * dx + dy * dy)
 
 
-def bearing_to_island(position: Any) -> float:
+def bearing_to_island(env: Any, position: Any) -> float:
     """Calculate bearing from entity position to the mission objective.
     
     Args:
+        env: Environment instance (to get island position)
         position: Entity position object with x, y coordinates
         
     Returns:
         Bearing in degrees [0, 360)
     """
-    # TODO: Get actual island center coordinates from scenario
-    island_center_x = 0.0  # Assuming island at map center for now
-    island_center_y = 0.0
+    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].position.x
+    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].position.y
     
     dx = island_center_x - position.x
     dy = island_center_y - position.y
@@ -622,23 +620,5 @@ def bearing_to_island(position: Any) -> float:
     return bearing_deg
 
 
-def _awacs_alive(env: Any) -> bool:
-    """Check if friendly AWACS or equivalent radar platform is operational.
-
-    Scans for any friendly, alive entity with AWACS identification.
-    
-    Returns:
-        True if at least one AWACS platform is alive and operational
-        
-    TODO: Determine correct way to identify AWACS entities.
-    """
-    # TODO: Is this correct?
-    our_faction = env.config.our_faction
-    for entity in env.entities.values():
-        if (entity.is_alive and 
-                entity.Entity.Identity == "AWACS" and 
-                entity.faction.value == our_faction):
-            return True
-    return False
 
     
