@@ -41,7 +41,7 @@
         "RadarData": [
             {
                 "RadarFOV": 6.2831854820251465,
-                "TransmitterPower": 100000.0,
+                "TransmitterPower": 5200.0,
                 "TransmitterGain": 43.0,
                 "ReceiverGain": 35.0,
                 "SignalWavelength": 0.10000000149011612,
