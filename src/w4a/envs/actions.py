@@ -181,7 +181,6 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     # RL agent selects which compatible weapons to use
     selected_weapons = select_weapons_from_available(available_weapons, weapon_selection)
     
-    # TODO: Check if selected weapons have ammo available    
     commit = PlayerEventCommit()
     commit.entity = entity
     commit.target_group = target_group

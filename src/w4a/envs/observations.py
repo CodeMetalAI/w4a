@@ -256,7 +256,8 @@ def compute_friendly_identity_features(entity: Any) -> np.ndarray:
         Array of shape (7,) with binary capability flags and domain one-hot encoding
     """
 
-    can_engage = 1.0 if hasattr(entity, 'can_engage') and entity.can_engage else 0.0 # TODO: Revisit this?
+    # can_engage = 1.0 if hasattr(entity, 'can_engage') and entity.can_engage else 0.0 # TODO: Revisit this?
+    can_engage = 1.0 if entity.has_radar else 0.0
     can_sense = 1.0 if entity.has_radar else 0.0 
     can_refuel = 1.0 if entity.can_refuel else 0.0
     can_capture = 1.0 if entity.can_capture else 0.0
