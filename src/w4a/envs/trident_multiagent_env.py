@@ -354,12 +354,14 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         )
         
         # Combine player events and tick simulation
-        sim_data = SimulationData()
-        sim_data.player_events = player_events_legacy + player_events_dynasty
+        self.sim_data.player_events = player_events_legacy + player_events_dynasty
         
         simulation_utils.tick_simulation(self)
         
-        # Get observations for both agents
+        # Update mission metrics (before observations use them)
+        mission_metrics.update_all_mission_metrics(self)
+        
+        # Get observations for both agents)
         observations = {
             "legacy": self.agent_legacy.get_observation(),
             "dynasty": self.agent_dynasty.get_observation()
@@ -368,9 +370,6 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         # Calculate rewards for both agents (independent but zero-sum)
         reward_legacy = self._calculate_reward_for_agent(self.agent_legacy)
         reward_dynasty = self._calculate_reward_for_agent(self.agent_dynasty)
-        
-        # Update mission metrics
-        mission_metrics.update_all_mission_metrics(self)
         
         # Check termination (same for both agents)
         terminated = self._check_termination()
@@ -473,15 +472,12 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         if flag.is_captured:
             # Flag has been captured - determine which faction captured it
-            legacy_capture_progress = self.capture_progress_by_faction[Faction.LEGACY]
-            dynasty_capture_progress = self.capture_progress_by_faction[Faction.DYNASTY]
-            
-            # The faction with progress at required threshold is the capturer
-            if legacy_capture_progress >= self.config.capture_required_seconds:
+            flag_faction = flag.faction
+            if flag_faction == Faction.LEGACY:
                 return "legacy_win"
-            elif dynasty_capture_progress >= self.config.capture_required_seconds:
+            elif flag_faction == Faction.DYNASTY:
                 return "dynasty_win"
-        
+            
         # Get cached kill ratios (computed in mission_metrics.update_kill_ratios)
         legacy_kill_ratio = self.kill_ratio_by_faction[Faction.LEGACY]
         dynasty_kill_ratio = self.kill_ratio_by_faction[Faction.DYNASTY]

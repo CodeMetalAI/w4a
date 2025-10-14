@@ -64,13 +64,14 @@ def update_capture_progress(env: Any) -> None:
     required_time = env.config.capture_required_seconds
     
     # Get current capture state from flag
+    # flag.capture_progress is normalized 0..1 (0 = not started, 1 = complete)
     current_progress_normalized = flag.capture_progress  # 0..1
-    current_progress_seconds = current_progress_normalized * required_time
+    current_progress_seconds = current_progress_normalized * required_time  # Convert to seconds
     
     # Only the faction currently capturing the flag has progress
     # All other factions have 0 progress
     capturing_faction = flag.capturing_faction
-    
+
     for faction in [Faction.LEGACY, Faction.DYNASTY]:
         old_progress = env.capture_progress_by_faction[faction]
         
@@ -88,8 +89,6 @@ def update_capture_progress(env: Any) -> None:
             # First time crossing threshold - record the step
             if env.capture_completed_at_step[faction] is None:
                 env.capture_completed_at_step[faction] = env.current_step
-
-
 
 def update_capture_possible(env: Any) -> None:
     """Check if capture is currently possible for each faction.
@@ -135,7 +134,7 @@ def update_kill_ratios(env: Any) -> None:
     # Count casualties per faction directly from per-faction sets (no filtering!)
     legacy_casualties = len(env.dead_entities_by_faction.get(Faction.LEGACY, set()))
     dynasty_casualties = len(env.dead_entities_by_faction.get(Faction.DYNASTY, set()))
-    
+
     # Kills are the enemy's casualties
     legacy_kills = dynasty_casualties  # Legacy killed Dynasty units
     dynasty_kills = legacy_casualties  # Dynasty killed Legacy units

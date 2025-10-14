@@ -9,7 +9,7 @@ The observation system encodes three main categories:
 - Friendly features: our units' capabilities, positions, and status
 - Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-Total observation size: 10 + (max_entities * 36) + (max_target_groups * 12)
+Total observation size: 11 + (max_entities * 36) + (max_target_groups * 12)
 """
 
 from typing import Any
@@ -28,7 +28,7 @@ def build_observation_space(config) -> spaces.Box:
     Creates a normalized Box space containing all observation features.
     
     Observation structure:
-    - Global features: 10 (mission state, objectives, time)
+    - Global features: 11 (mission state, objectives, time, flag faction)
     - Friendly entity features: max_entities * 36 (capabilities, kinematics, status, engagement)
     - Enemy target group features: max_target_groups * 12 (position, velocity, domain)
     
@@ -41,7 +41,7 @@ def build_observation_space(config) -> spaces.Box:
     Returns:
         Box space with normalized values in [0, 1]
     """
-    global_features = 10
+    global_features = 11
     friendly_features = config.max_entities * 36
     enemy_features = config.max_target_groups * 12
     
@@ -67,7 +67,7 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
         
     Returns:
         Normalized observation vector with values in [0, 1]
-        Shape: (10 + max_entities*36 + max_target_groups*12,)
+        Shape: (11 + max_entities*36 + max_target_groups*12,)
     """
 
     # Compute global features (mission state, objectives, time)
@@ -95,7 +95,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     Extracts high-level mission status from the agent's perspective
     All features are normalized to [0,1] for consistent learning.
     
-    Features (10 total):
+    Features (11 total):
     - time_remaining_norm: Mission time remaining [0,1]
     - my_casualties_norm: Our casualties normalized by max entities
     - enemy_casualties_norm: Enemy casualties normalized by max entities
@@ -103,6 +103,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     - capture_progress_norm: Our objective capture progress [0,1]
     - enemy_capture_progress_norm: Enemy objective capture progress [0,1]
     - capture_possible_flag: Our capture capability status [0,1]
+    - flag_faction_norm: Center flag faction (0.0=neutral, 0.33=legacy, 0.66=dynasty)
     - enemy_capture_possible_flag: Enemy capture capability status [0,1]
     - island_center_x_norm: Center island X coordinate normalized
     - island_center_y_norm: Center island Y coordinate normalized
@@ -112,7 +113,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         agent: CompetitionAgent instance (to get faction-specific capture info)
     
     Returns:
-        Array of shape (10,) with normalized values in [0,1]
+        Array of shape (11,) with normalized values in [0,1]
     """
 
     
@@ -152,9 +153,21 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     capture_possible_flag = 1.0 if env.capture_possible_by_faction[my_faction] else 0.0
     enemy_capture_possible_flag = 1.0 if env.capture_possible_by_faction[enemy_faction] else 0.0
     
+    # Flag faction (neutral=0.0, legacy=0.33, dynasty=0.66, captured by me=1.0)
+    # Encoded as: neutral -> 0.0, legacy -> 0.33, dynasty -> 0.66
+    flag = env.flags[CENTER_ISLAND_FLAG_ID]
+    flag_current_faction = flag.faction
+    
+    if flag_current_faction == Faction.NEUTRAL:
+        flag_faction_norm = 0.0
+    elif flag_current_faction == Faction.LEGACY:
+        flag_faction_norm = 0.33
+    elif flag_current_faction == Faction.DYNASTY:
+        flag_faction_norm = 0.66
+
     # Center island coordinates (from neutral flag)
-    island_center_x = env.flags[CENTER_ISLAND_FLAG_ID].pos.x
-    island_center_y = env.flags[CENTER_ISLAND_FLAG_ID].pos.y
+    island_center_x = flag.pos.x
+    island_center_y = flag.pos.y
 
     
     # Normalize to [0, 1] based on map bounds
@@ -171,6 +184,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         capture_progress_norm,
         enemy_capture_progress_norm,
         capture_possible_flag,
+        flag_faction_norm,
         enemy_capture_possible_flag,
         island_center_x_norm,
         island_center_y_norm,

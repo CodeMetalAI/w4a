@@ -228,8 +228,8 @@ class TestSimulationIsActuallyRunning:
         
         observations, infos = env.reset()
         
-        # 10 global + (max_entities * 36) + (max_target_groups * 12)
-        expected_size = 10 + (config.max_entities * 36) + (config.max_target_groups * 12)
+        # 11 global + (max_entities * 36) + (max_target_groups * 12)
+        expected_size = 11 + (config.max_entities * 36) + (config.max_target_groups * 12)
         
         assert observations["legacy"].shape == (expected_size,), f"Observation should be {expected_size} features"
         assert observations["dynasty"].shape == (expected_size,), f"Observation should be {expected_size} features"
@@ -389,6 +389,19 @@ class TestCaptureProgress:
         assert Faction.LEGACY in env.capture_progress_by_faction
         assert Faction.DYNASTY in env.capture_progress_by_faction
         
+        # VERIFY: Initial observation space - flag is neutral, not captured
+        # Observation space indices:
+        # [0] time_remaining, [1] my_casualties, [2] enemy_casualties, [3] kill_ratio,
+        # [4] capture_progress, [5] enemy_capture_progress, [6] capture_possible_flag,
+        # [7] flag_faction, [8] enemy_capture_possible_flag, [9] island_center_x, [10] island_center_y
+        obs_legacy = observations["legacy"]
+        initial_capture_progress = obs_legacy[4]
+        initial_capture_possible = obs_legacy[6]
+        initial_flag_faction = obs_legacy[7]
+        
+        assert initial_capture_progress == 0.0, f"Initial capture progress should be 0.0, got {initial_capture_progress}"
+        assert initial_flag_faction == 0.0, f"Flag should be neutral (0.0) initially, got {initial_flag_faction}"
+        
         # Find settler
         pioneer_id = None
         pioneer_entity = None
@@ -421,6 +434,8 @@ class TestCaptureProgress:
         flag_pos = flag.pos
         max_steps = 480  # 80 minutes game time
         
+        capture_started = False  # Track when we start seeing non-zero capture progress
+        
         for step in range(max_steps):
             if step == 0:
                 legacy_action = capture_action
@@ -432,6 +447,40 @@ class TestCaptureProgress:
             
             legacy_progress = infos["legacy"]["mission"]["my_capture_progress"]
             dynasty_progress = infos["dynasty"]["mission"]["my_capture_progress"]
+            
+            # VERIFY: Observation space during capture
+            obs_legacy = observations["legacy"]
+            obs_capture_progress = obs_legacy[4]
+            obs_capture_possible = obs_legacy[6]
+            obs_flag_faction = obs_legacy[7]
+            
+            # Once we start capturing, verify observation space is updating
+            if flag.is_being_captured:
+                # Only verify during active capture (before completion)
+                if not capture_started:
+                    capture_started = True
+                
+                required_capture_time = config.capture_required_seconds
+                flag_capturing_faction = flag.capturing_faction
+                
+                # Only assert if capturing_faction is Legacy
+                if flag_capturing_faction == Faction.LEGACY:
+                    expected_progress_norm = min(legacy_progress / required_capture_time, 1.0)
+                    
+                    # ASSERT: Observation space reflects active capture progress
+                    assert obs_capture_progress > 0, \
+                        f"Step {step}: Flag is being captured by Legacy but obs shows 0, expected {expected_progress_norm:.4f}"
+                    assert abs(obs_capture_progress - expected_progress_norm) < 0.01, \
+                        f"Step {step}: Obs capture_progress {obs_capture_progress:.4f} doesn't match expected {expected_progress_norm:.4f}"
+                    
+                    # Flag should still be neutral while capturing
+                    assert obs_flag_faction == 0.0, \
+                        f"Step {step}: Flag should be neutral (0.0) while being captured, got {obs_flag_faction:.4f}"
+                
+                # ASSERT: Capture possible should be false while flag is being captured
+                # (can't capture what's already being captured)
+                assert obs_capture_possible == 0.0, \
+                    f"Step {step}: Can't capture while already being captured, got {obs_capture_possible}"
             
             if terminations["legacy"] or terminations["dynasty"]:
                 # VERIFY: Termination cause
@@ -449,7 +498,23 @@ class TestCaptureProgress:
                 assert rewards["legacy"] > 0, f"Legacy should get positive reward on win, got {rewards['legacy']}"
                 assert rewards["dynasty"] < 0, f"Dynasty should get negative reward on loss, got {rewards['dynasty']}"
                 
-
+                # VERIFY: Observation space reflects completed capture
+                obs_legacy_final = observations["legacy"]
+                final_capture_progress = obs_legacy_final[4]
+                final_capture_possible = obs_legacy_final[6]
+                final_flag_faction = obs_legacy_final[7]
+                
+                # ASSERT: Once capture is complete, capture_progress resets to 0
+                assert final_capture_progress == 0.0, \
+                    f"Capture complete, progress should be 0.0, got {final_capture_progress}"
+                
+                # ASSERT: Flag faction should now be Legacy (0.33)
+                assert final_flag_faction == 0.33, \
+                    f"Flag should be owned by Legacy (0.33), got {final_flag_faction}"
+                
+                # ASSERT: We actually saw capture progress during the test
+                assert capture_started, "Should have seen non-zero capture progress during test"
+                
                 env.close()
                 return
             
