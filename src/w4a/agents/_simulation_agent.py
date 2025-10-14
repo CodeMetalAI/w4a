@@ -7,8 +7,9 @@ processing, entity tracking, and force laydown.
 
 from SimulationInterface import Agent as SimAgent
 from SimulationInterface import (
-    Faction, EntitySpawned, EntityDespawned, AdversaryContact, Victory, ControllableEntity, 
-    TargetGroup, Flag, CAPManouver, NonCombatManouverQueue
+    Faction, EntitySpawned, EntityDespawned, AdversaryContact, Victory, ComponentSpawned, ControllableEntity, 
+    TargetGroup, Flag, CAPManouver, NonCombatManouverQueue,
+    CaptureFlagComponent, EntitySpawnComponent, RefuelComponent, RefuelingComponent
 )
 
 
@@ -40,11 +41,23 @@ class _SimulationAgentImpl(SimAgent):
         self._next_target_group_id = 0
         
         self.flags = {}  # Flags this agent can see
+
+        self.entity_spawn_entities = set()              # All units capable of spawning new entities (carriers)
+        self.refueling_entities = set()                 # All units capable of refueling others
+        self.refuelable_entities = set()                # All units capable of refueling
+        self.capture_entities = set()                   # All units capable of capturing a flag
+        
+        # Active operation tracking (entities currently performing operations)
+        # Store by RL ID for fast lookup without recomputing ptr->id mapping
+        self.active_capturing_entities = {}             # Dict[rl_id -> entity] currently capturing flags
+        self.active_refuel_receivers = {}               # Dict[rl_id -> entity] currently receiving fuel
+        self.active_refuel_providers = {}               # Dict[rl_id -> entity] currently providing fuel
         
         # Event handlers
         self.simulation_event_handlers = {
             EntitySpawned: self._on_entity_spawned,
             EntityDespawned: self._on_entity_despawned,
+            ComponentSpawned: self._on_component_spawned,
             AdversaryContact: self._on_adversary_contact,
             Victory: self._on_victory,
         }
@@ -57,6 +70,13 @@ class _SimulationAgentImpl(SimAgent):
 
         self.entity_despawned_handlers = {
             TargetGroup: self._on_target_group_despawned, # Nothing else despawns at this moment
+        }
+
+        self.component_spawned_handlers = {
+            CaptureFlagComponent: self._on_capture_flag_component_spawned,
+            EntitySpawnComponent: self._on_entity_spawn_component_spawned,
+            RefuelComponent: self._on_refuel_component_spawned,
+            RefuelingComponent: self._on_refueling_component_spawned,
         }
     
     def start_force_laydown(self, force_laydown):
@@ -141,7 +161,11 @@ class _SimulationAgentImpl(SimAgent):
         if handler:
             handler(event)
 
-        entity = event.entity
+    def _on_component_spawned(self, event):
+        handler = self.component_spawned_handlers.get(type(event.component))
+
+        if handler:
+            handler(event)
         
     def _on_flag_spawned(self, event):
         flag = event.entity
@@ -203,3 +227,85 @@ class _SimulationAgentImpl(SimAgent):
         """Handle victory events."""
         pass
 
+    def _on_capture_flag_component_spawned(self, event):
+        self.capture_entities.add(event.component.entity)
+
+    def _on_entity_spawn_component_spawned(self, event):
+        self.entity_spawn_entities.add(event.component.entity)
+
+    def _on_refuel_component_spawned(self, event):
+        self.refuelable_entities.add(event.component.entity)
+
+    def _on_refueling_component_spawned(self, event):
+        self.refueling_entities.add(event.component.entity)
+    
+    # === Event Hooks (can be called by external systems) ===
+    
+    def on_refuel_started(self, receiver_entity, provider_entity):
+        """Hook: Called when refueling operation starts."""
+        receiver_ptr = id(receiver_entity)
+        provider_ptr = id(provider_entity)
+        
+        # Look up RL IDs (similar to _on_controllable_entity_spawned pattern)
+        if receiver_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[receiver_ptr]
+            self.active_refuel_receivers[entity_id] = receiver_entity
+        
+        if provider_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[provider_ptr]
+            self.active_refuel_providers[entity_id] = provider_entity
+    
+    def on_refuel_completed(self, receiver_entity, provider_entity):
+        """Hook: Called when refueling operation completes."""
+        receiver_ptr = id(receiver_entity)
+        provider_ptr = id(provider_entity)
+        
+        # Look up RL IDs
+        if receiver_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[receiver_ptr]
+            self.active_refuel_receivers.pop(entity_id, None)
+        
+        if provider_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[provider_ptr]
+            self.active_refuel_providers.pop(entity_id, None)
+    
+    def on_refuel_interrupted(self, receiver_entity, provider_entity):
+        """Hook: Called when refueling operation is interrupted."""
+        receiver_ptr = id(receiver_entity)
+        provider_ptr = id(provider_entity)
+        
+        # Look up RL IDs
+        if receiver_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[receiver_ptr]
+            self.active_refuel_receivers.pop(entity_id, None)
+        
+        if provider_ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[provider_ptr]
+            self.active_refuel_providers.pop(entity_id, None)
+    
+    def on_capture_started(self, entity, flag):
+        """Hook: Called when entity starts capturing a flag."""
+        ptr = id(entity)
+        
+        # Look up RL ID
+        if ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[ptr]
+            self.active_capturing_entities[entity_id] = entity
+    
+    def on_capture_completed(self, entity, flag):
+        """Hook: Called when capture completes."""
+        ptr = id(entity)
+        
+        # Look up RL ID
+        if ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[ptr]
+            self.active_capturing_entities.pop(entity_id, None)
+    
+    def on_capture_interrupted(self, entity, flag, reason=None):
+        """Hook: Called when capture is interrupted."""
+        ptr = id(entity)
+        
+        # Look up RL ID
+        if ptr in self._entity_id_by_ptr:
+            entity_id = self._entity_id_by_ptr[ptr]
+            self.active_capturing_entities.pop(entity_id, None)

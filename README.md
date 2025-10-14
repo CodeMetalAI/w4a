@@ -135,7 +135,7 @@ pytest tests/test_basic_multiagent.py -v -s
 
 ## Learn More
 
-For game-specific information and gameplay details, visit [war.game](https://war.game).
+For competition details, visit [war.game](https://war.game).
 
 ## Support
 

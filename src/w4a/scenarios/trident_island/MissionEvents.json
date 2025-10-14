@@ -91,7 +91,7 @@
         "Kill": [
             {
                 "EntityIdentifier": "PIONEER",
-                "Priority": 0.0
+                "Priority": 1.0
             }
         ],
         "Capture": [
@@ -123,7 +123,7 @@
         "Kill": [
             {
                 "EntityIdentifier": "BAMBOO",
-                "Priority": 0.0
+                "Priority": 1.0
             }
         ],
         "Capture": [
