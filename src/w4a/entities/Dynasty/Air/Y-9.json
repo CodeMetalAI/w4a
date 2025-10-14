@@ -278,7 +278,12 @@
                     "Specific": 0,
                     "Extra": 0
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnCaptureFlagComponent",
+                        "ComponentId": 0
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
