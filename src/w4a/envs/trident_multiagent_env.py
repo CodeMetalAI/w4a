@@ -361,6 +361,16 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             self.config
         )
         
+        # Collect event-driven player events from SimpleAgent
+        # SimpleAgent accumulates events in self.player_events during simulation event processing
+        if hasattr(self.agent_legacy, 'player_events'):
+            player_events_legacy += self.agent_legacy.player_events
+            self.agent_legacy.player_events = []  # Clear for next step
+        
+        if hasattr(self.agent_dynasty, 'player_events'):
+            player_events_dynasty += self.agent_dynasty.player_events
+            self.agent_dynasty.player_events = []  # Clear for next step
+        
         # Combine player events and tick simulation
         self.sim_data.player_events = player_events_legacy + player_events_dynasty
         
