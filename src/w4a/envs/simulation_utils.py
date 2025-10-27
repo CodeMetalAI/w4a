@@ -228,6 +228,9 @@ def process_simulation_events(env, events):
         env: The environment instance 
         events: List of simulation events to process
     """
+    # Store all events for debugging
+    env.simulation_events = events
+    
     for event in events:
         handler = env.simulation_event_handlers.get(type(event))
         if handler:

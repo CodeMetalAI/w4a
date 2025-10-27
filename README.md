@@ -41,26 +41,29 @@ from SimulationInterface import Faction
 config = Config()
 env = TridentIslandMultiAgentEnv(config=config)
 
-# Create agents
-agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-env.set_agents(agent_legacy, agent_dynasty)
+# Register agent classes
+env.set_agent_classes(
+    lambda: CompetitionAgent(Faction.LEGACY, config),
+    lambda: SimpleAgent(Faction.DYNASTY, config)
+)
 
 # Run episode
 observations, infos = env.reset()
 
 for step in range(1000):
     actions = {
-        "legacy": agent_legacy.select_action(observations["legacy"]),
-        "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        "legacy": env.agent_legacy.select_action(observations["legacy"]),
+        "dynasty": env.agent_dynasty.select_action(observations["dynasty"])
     }
-    
+
     observations, rewards, terminations, truncations, infos = env.step(actions)
     
     if terminations["legacy"] or truncations["legacy"]:
+        print(f"Episode ended at step {step}: {infos['legacy']['termination_cause']}")
         observations, infos = env.reset()
 
 env.close()
+print("Test completed!")
 ```
 
 ## What's Included
