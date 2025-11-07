@@ -132,7 +132,7 @@ class CompetitionAgent:
     
     def get_all_entities(self) -> List:
         """
-        Get all entities including recently dead ones (appears in observations with health_ok=0.0).
+        Get all entities.
         
         Returns:
             List of all ControllableEntity objects (alive and dead)
