@@ -120,15 +120,24 @@ class CompetitionAgent:
         # Default: return random action from action space
         return self.action_space.sample()
     
-    def get_entities(self) -> List:
+    def get_alive_entities(self) -> List:
         """
-        Get list of entities controlled by this agent.
+        Get alive entities you can command.
         
         Returns:
-            List of ControllableEntity objects that are alive.
+            List of ControllableEntity objects where is_alive=True
         """
         return [entity for entity in self._sim_agent.controllable_entities.values() 
                 if entity.is_alive]
+    
+    def get_all_entities(self) -> List:
+        """
+        Get all entities including recently dead ones (appears in observations with health_ok=0.0).
+        
+        Returns:
+            List of all ControllableEntity objects (alive and dead)
+        """
+        return list(self._sim_agent.controllable_entities.values())
     
     def get_target_groups(self) -> List:
         """

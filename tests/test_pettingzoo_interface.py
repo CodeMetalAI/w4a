@@ -64,7 +64,11 @@ class MockCompetitionAgent:
             'refuel_target_id': 0,
         }
     
-    def get_entities(self):
+    def get_alive_entities(self):
+        """Return empty alive entity list."""
+        return []
+    
+    def get_all_entities(self):
         """Return empty entity list."""
         return []
     

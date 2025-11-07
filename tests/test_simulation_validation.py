@@ -43,11 +43,11 @@ class TestSimulationIsActuallyRunning:
             assert entity_id >= 0, f"Entity ID {entity_id} should be non-negative"
         
         # Agents should be able to get their entities
-        legacy_entity_list = agent_legacy.get_entities()
-        dynasty_entity_list = agent_dynasty.get_entities()
+        legacy_entity_list = agent_legacy.get_alive_entities()
+        dynasty_entity_list = agent_dynasty.get_alive_entities()
         
-        assert len(legacy_entity_list) > 0, "Legacy agent should have entities"
-        assert len(dynasty_entity_list) > 0, "Dynasty agent should have entities"
+        assert len(legacy_entity_list) > 0, "Legacy agent should have alive entities"
+        assert len(dynasty_entity_list) > 0, "Dynasty agent should have alive entities"
         
         # Entities should have actual simulation objects
         for entity in legacy_entity_list:

@@ -50,7 +50,7 @@ class MyAgent(CompetitionAgent):
         reward = 0.0
         
         # Force preservation
-        my_entities = self.get_entities()
+        my_entities = self.get_alive_entities()
         reward += 0.1 * len(my_entities)
         
         # Attrition (access from env.dead_entities_by_faction)
@@ -92,7 +92,7 @@ class MyAgent(CompetitionAgent):
             reward -= 1.0
         
         # Bonus for protecting capture-capable units
-        capturers = [e for e in self.get_entities() if e.can_capture]
+        capturers = [e for e in self.get_alive_entities() if e.can_capture]
         reward += 0.5 * len(capturers)
         
         return reward

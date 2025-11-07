@@ -563,7 +563,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             
             # Entity counts
             'total_entities': total_entities,
-            'my_entities_count': len(agent.get_entities()),  # Alive and controllable
+            'my_entities_count': len(agent.get_alive_entities()),  # Alive and controllable
             'detected_targets_count': len(detected),
             'last_events_count': len(self.simulation_events),
             

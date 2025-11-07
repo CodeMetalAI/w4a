@@ -196,14 +196,17 @@ For custom observations, you can query detailed state from your agent:
 ```python
 class MyAgent(CompetitionAgent):
     def get_observation(self):
-        # Get your entities
-        my_entities = self.get_entities()
+        # Get all entities
+        all_entities = self.get_all_entities()
+        
+        # Or get only alive entities (for action selection)
+        alive_entities = self.get_alive_entities()
         
         # Get detected enemies
         enemy_groups = self.get_target_groups()
         
         # Access per-entity information
-        for entity in my_entities:
+        for entity in all_entities:
             pos = entity.pos                    # Position (x, y, z)
             vel = entity.vel                    # Velocity
             fuel = entity.fuel                  # Fuel level
@@ -220,7 +223,7 @@ class MyAgent(CompetitionAgent):
             # ... more attributes
         
         # Build custom observation
-        return self._encode_custom_observation(my_entities, enemy_groups)
+        return self._encode_custom_observation(all_entities, enemy_groups)
 ```
 
 
@@ -246,12 +249,13 @@ You can override `get_observation()` to customize:
 class MyAgent(CompetitionAgent):
     def get_observation(self):
         """Custom observation encoding."""
-        my_entities = self.get_entities()
+        # Use get_alive_entities() for actionable force count
+        alive_entities = self.get_alive_entities()
         enemy_groups = self.get_target_groups()
         
         # Example: Simple feature vector
         obs = np.zeros(10)
-        obs[0] = len(my_entities) / 50  # Normalized entity count
+        obs[0] = len(alive_entities) / 50  # Normalized alive entity count
         obs[1] = len(enemy_groups) / 20  # Normalized target count
         # ... your custom features
         
