@@ -151,6 +151,74 @@ class CompetitionAgent:
         """
         return list(self._sim_agent.target_groups.values())
     
+    
+    def get_entity_by_id(self, entity_id: int):
+        """
+        Get entity by its ID.
+        
+        Args:
+            entity_id: Entity ID int
+            
+        Returns:
+            ControllableEntity if found, None otherwise
+        """
+        return self._sim_agent.controllable_entities.get(entity_id)
+    
+    def get_target_group_by_id(self, group_id: int):
+        """
+        Get target group by its ID.
+
+        Args:
+            group_id: Target group ID int
+            
+        Returns:
+            TargetGroup if found, None otherwise
+        """
+        return self._sim_agent.target_groups.get(group_id)
+        
+    def get_capture_capable_entities(self) -> List:
+        """
+        Get alive entities capable of capturing flags.
+        
+        Returns:
+            List of entities with can_capture=True
+        """
+        return [e for e in self.get_alive_entities() if e.can_capture]
+    
+    def get_refuelable_entities(self) -> List:
+        """
+        Get alive entities capable of receiving fuel.
+        
+        Returns:
+            List of entities with can_refuel=True
+        """
+        return [e for e in self.get_alive_entities() if e.can_refuel]
+    
+    def is_entity_capturing(self, entity_id: int) -> bool:
+        """
+        Check if entity is currently capturing a flag.
+        
+        Args:
+            entity_id: Entity ID from observation or action space
+            
+        Returns:
+            True if entity is actively capturing, False otherwise
+        """
+        return entity_id in self._sim_agent.active_capturing_entities
+    
+    def is_entity_refueling(self, entity_id: int) -> bool:
+        """
+        Check if entity is involved in refueling (giving or receiving).
+        
+        Args:
+            entity_id: Entity ID from observation or action space
+            
+        Returns:
+            True if entity is refueling or being refueled, False otherwise
+        """
+        return (entity_id in self._sim_agent.active_refuel_receivers or 
+                entity_id in self._sim_agent.active_refuel_providers)
+    
     def calculate_reward(self, env) -> float:
         """
         Calculate per-step reward for this agent.
