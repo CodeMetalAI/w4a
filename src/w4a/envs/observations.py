@@ -353,7 +353,7 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
         Array of shape (4,) with normalized status indicators
     """
     health_ok = 1.0 if entity.is_alive else 0.0
-    radar_on = 1.0 if hasattr(entity, 'radar_enabled') and entity.radar_enabled else 0.0
+    radar_on = 1.0 if hasattr(entity, 'radars_enabled') and entity.radars_enabled else 0.0
     
     # Radar focus position as grid index (1 feature) - matches action space representation
     if entity.has_radar_focus_position:

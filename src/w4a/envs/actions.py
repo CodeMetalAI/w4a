@@ -242,7 +242,7 @@ def execute_stealth_action(entity_id: int, action: Dict, entities: Dict, config:
     
     event = SetRadarEnabled()
     event.entity = entity
-    event.enabled = stealth_enabled
+    event.enabled = not bool(stealth_enabled)
     
     return event
 
