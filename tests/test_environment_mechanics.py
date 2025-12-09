@@ -305,10 +305,13 @@ class TestTerminationConditions:
         obs_my_casualties = observations["legacy"][1]
         obs_enemy_casualties = observations["legacy"][2]
         obs_kill_ratio = observations["legacy"][3]
+
+        def almost_equal(a, b, abs_tol=1e-9):
+            return abs(a - b) <= abs_tol
         
         expected_enemy_norm = 3.0 / max(config.max_entities, 1)
         assert obs_my_casualties == 0.0, f"My casualties should be 0, got {obs_my_casualties}"
-        assert obs_enemy_casualties == expected_enemy_norm, \
+        assert almost_equal(obs_enemy_casualties, expected_enemy_norm), \
             f"Enemy casualties obs {obs_enemy_casualties:.4f} doesn't match expected {expected_enemy_norm:.4f}"
         assert obs_kill_ratio > 0, \
             f"Kill ratio obs {obs_kill_ratio} should be > 0 when we have kills"

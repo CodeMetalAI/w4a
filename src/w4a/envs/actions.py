@@ -28,7 +28,7 @@ from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
     RefuelComponent, CaptureFlagComponent,
-    Vector3, Formation, ControllableEntity, EntityDomain, Faction,
+    Vector3, Formation, ControllableEntity, PlatformDomain, ProjectileDomain, Faction,
 )
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dict, config: Config) -> List:
@@ -351,7 +351,7 @@ def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
         return False  
 
     # Check entity is capable of movement (air units for CAP)
-    if entity.domain != EntityDomain.AIR:  # Only air units can do CAP
+    if entity.platform_domain != PlatformDomain.AIR:  # Only air units can do CAP
         return False
     
     return True
@@ -498,7 +498,7 @@ def validate_rtb_action(action: Dict, entities: Dict, flags: Dict) -> bool:
     flag_id = FACTION_FLAG_IDS[entity.faction]
     flag = flags[flag_id]
     # Check entity is aircraft
-    if entity.domain != EntityDomain.AIR:
+    if entity.platform_domain != PlatformDomain.AIR:
         return False
 
     # Check if flag faction is the same as the aircraft

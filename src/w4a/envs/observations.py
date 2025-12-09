@@ -20,7 +20,7 @@ from gymnasium import spaces
 from w4a.envs.constants import CENTER_ISLAND_FLAG_ID
 from w4a.envs.utils import calculate_max_grid_positions
 
-from SimulationInterface import Faction, EntityDomain, ControllableEntityManouver
+from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver
 
 def build_observation_space(config) -> spaces.Box:
     """Build the complete observation space for the environment.
@@ -262,9 +262,9 @@ def compute_friendly_identity_features(entity: Any) -> np.ndarray:
     can_capture = 1.0 if entity.can_capture else 0.0
     
     # Domain one-hot encoding
-    domain_air = 1.0 if entity.domain == EntityDomain.AIR else 0.0
-    domain_surface = 1.0 if entity.domain == EntityDomain.SURFACE else 0.0
-    domain_land = 1.0 if entity.domain == EntityDomain.LAND else 0.0
+    domain_air = 1.0 if entity.platform_domain == PlatformDomain.AIR else 0.0
+    domain_surface = 1.0 if entity.platform_domain == PlatformDomain.SURFACE else 0.0
+    domain_land = 1.0 if entity.platform_domain == PlatformDomain.LAND else 0.0
     
     return np.array([can_engage, can_sense, can_refuel, can_capture, 
                      domain_air, domain_surface, domain_land], dtype=np.float32)
@@ -388,11 +388,11 @@ def compute_friendly_weapon_features(entity: Any, env: Any) -> np.ndarray:
         Array of shape (3,) with weapon capability and ammo status
     """
 
-    # Check if entity can engage air targets (bitwise check on target_domains)
-    has_air_weapons = 1.0 if (entity.target_domains & EntityDomain.AIR.value) != 0 else 0.0
+    # Check if entity can engage air targets (bitwise check on target_platform_domains)
+    has_air_weapons = 1.0 if (entity.target_platform_domains & PlatformDomain.AIR.value) != 0 else 0.0
     
-    # Check if entity can engage surface targets (bitwise check on target_domains)
-    has_surface_weapons = 1.0 if (entity.target_domains & EntityDomain.SURFACE.value) != 0 else 0.0
+    # Check if entity can engage surface targets (bitwise check on target_platform_domains)
+    has_surface_weapons = 1.0 if (entity.target_platform_domains & PlatformDomain.SURFACE.value) != 0 else 0.0
     
     total_ammo = float(entity.ammo) if entity.ammo is not None else 0.0
     ammo_norm = total_ammo / env.max_ammo
@@ -447,9 +447,9 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         target_bearing_norm = bearing_deg / 360.0
         
         # Target domain (one-hot encoding)
-        target_domain_air = 1.0 if target_group.domain == EntityDomain.AIR else 0.0
-        target_domain_surface = 1.0 if target_group.domain == EntityDomain.SURFACE else 0.0
-        target_domain_land = 1.0 if target_group.domain == EntityDomain.LAND else 0.0
+        target_domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
+        target_domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
+        target_domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
     else:
         # Not engaging - all features are 0
         target_range_norm = 0.0
@@ -499,7 +499,7 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
     - Detection: is_detected (1.0 if in target_groups)
     - Position: pos_x_norm, pos_y_norm (grid coordinates from target_group.pos)
     - Velocity: vel_x_norm, vel_y_norm (velocity components normalized by typical max speed)
-    - Domain: domain_air, domain_surface, domain_land (one-hot from target_group.domain)
+    - Platform domain: domain_air, domain_surface, domain_land (one-hot from target_group.platform_domain)
     - Count: num_units_norm (from target_group.num_known_alive_units)
     - Egocentric: island_range_norm, island_bearing_norm (distance/bearing to objective)
     - Uncertainty: is_ghost (detection quality from target_group.is_ghost)
@@ -537,10 +537,11 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         speed_y_norm = (target_group.vel.y / env.max_velocity + 1.0) / 2.0
         
         # Domain (3 features)
-        # One-hot encoding from TargetGroup.domain (EntityDomain enum)
-        domain_air = 1.0 if target_group.domain == EntityDomain.AIR else 0.0
-        domain_surface = 1.0 if target_group.domain == EntityDomain.SURFACE else 0.0
-        domain_land = 1.0 if target_group.domain == EntityDomain.LAND else 0.0
+        # One-hot encoding from TargetGroup.platform_domain (PlatformDomain enum)
+        domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
+        domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
+        domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
+        domain_projectile = 0 # Todo
         
         # Count (1 feature)
         # Number of known alive units from TargetGroup.num_known_alive_units

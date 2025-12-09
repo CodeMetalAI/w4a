@@ -25,9 +25,9 @@ from .constants import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
 
 import SimulationInterface
 from SimulationInterface import (
-    Simulation, SimulationConfig, SimulationData, Faction, Flag,
+    Simulation, SimulationConfig, SimulationData, Faction, Flag, Satellite,
     EntitySpawned, Victory, AdversaryContact, TargetGroup,
-    Entity, ControllableEntity, Unit, EntityDomain,
+    Entity, ControllableEntity, Unit, PlatformDomain, ProjectileDomain,
     EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
 
@@ -136,6 +136,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         # Flags (shared resource, both agents can see)
         self.flags = {}
+        self.satellites = []
         
         # Set up environment event handlers
         # EntitySpawned: for shared resources like flags
@@ -266,8 +267,9 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         # Reset agents list (both active)
         self.agents = self.possible_agents[:]
         
-        # Reset flags
+        # Reset flags and satellites
         self.flags.clear()
+        self.satellites.clear()
         
         # Reset mission metrics
         mission_metrics.reset_mission_metrics(self)
@@ -625,7 +627,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             if not self._is_controllable_entity_for_agent(entity, agent):
                 continue
             
-            if entity.domain == EntityDomain.AIR:
+            if entity.platform_domain == PlatformDomain.AIR:
                 valid_actions.update({1, 6})  # move, rtb
             if self._entity_can_engage_for_agent(entity, agent):
                 valid_actions.add(2)  # engage
@@ -743,9 +745,11 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         """
         entity = event.entity
         
-        # Track flags as shared resource
+        # Track flags and satellites as shared resource
         if isinstance(entity, Flag):
             self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
+        elif isinstance(entity, Satellite):
+            self.satellites.append(entity)
         
 
     def _on_adversary_contact(self, event):
@@ -805,7 +809,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             True if entity has weapons and valid targets exist
         """
         # Check if entity has weapons
-        has_weapons = entity.target_domains != 0
+        has_weapons = entity.target_platform_domains != 0 #Todo: target_projectile_domains
         if not has_weapons:
             return False
         
