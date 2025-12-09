@@ -49,6 +49,8 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dic
     action_type = action["action_type"]
     entity_id = action["entity_id"]
 
+    #assert is_valid_action(action, entities, target_groups, flags, config)
+
     if not is_valid_action(action, entities, target_groups, flags, config):
         return []
 
@@ -94,14 +96,15 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, flags: Di
     Returns:
         True if action is valid and can be executed, False otherwise
     """
-    if not validate_entity(action, entities, config):
-        return False
-    
-    action_type = action["action_type"]
 
+    action_type = action["action_type"]
     if action_type == 0:  # No-op
         return True
-    elif action_type == 1:  # Move
+
+    if not validate_entity(action, entities, config):
+        return False
+
+    if action_type == 1:  # Move
         return validate_move_action(action, entities, config)
     elif action_type == 2:  # Engage
         return validate_engage_action(action, entities, target_groups)
@@ -304,23 +307,23 @@ def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
         True if entity is valid and controllable
     """
     entity_id = action["entity_id"]
+
     
     # Check entity exists
     if entity_id not in entities:
         return False
     
     entity = entities[entity_id]
-        
+ 
     # Check entity is alive
     if not entity.is_alive:
         return False
-        
+ 
     # Check entity belongs to our faction
     if entity.faction.value != config.our_faction:
         return False
         
     return True
-
 
 def validate_move_action(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate move action parameters and entity capabilities.

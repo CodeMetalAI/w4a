@@ -503,14 +503,17 @@ class TestCaptureProgress:
                 final_capture_progress = obs_legacy_final[4]
                 final_capture_possible = obs_legacy_final[6]
                 final_flag_faction = obs_legacy_final[7]
+
+                def almost_equal(a, b, abs_tol=1e-6):
+                    return abs(a - b) <= abs_tol
                 
                 # ASSERT: Once capture is complete, capture_progress resets to 0
                 assert final_capture_progress == 0.0, \
                     f"Capture complete, progress should be 0.0, got {final_capture_progress}"
                 
                 # ASSERT: Flag faction should now be Legacy (0.33)
-                assert final_flag_faction == 0.33, \
-                    f"Flag should be owned by Legacy (0.33), got {final_flag_faction}"
+                assert almost_equal(final_flag_faction, 0.33), \
+                    f"Flag should be owned by Legacy (0.33), got {final_flag_faction}. Diff = {abs(final_flag_faction - 0.33)}"
                 
                 # ASSERT: We actually saw capture progress during the test
                 assert capture_started, "Should have seen non-zero capture progress during test"

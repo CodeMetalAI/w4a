@@ -20,7 +20,7 @@ from gymnasium import spaces
 from w4a.envs.constants import CENTER_ISLAND_FLAG_ID
 from w4a.envs.utils import calculate_max_grid_positions
 
-from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver
+from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver, UnitTargetGroup
 
 def build_observation_space(config) -> spaces.Box:
     """Build the complete observation space for the environment.
@@ -447,9 +447,16 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         target_bearing_norm = bearing_deg / 360.0
         
         # Target domain (one-hot encoding)
-        target_domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
-        target_domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
-        target_domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
+        if isinstance(target_group, UnitTargetGroup):
+            target_domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
+            target_domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
+            target_domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
+            target_domain_projectile = 0
+        else:
+            target_domain_air = 0
+            target_domain_surface = 0
+            target_domain_land = 0
+            target_domain_projectile = 1.0 # Todo: we should validate which projectile domain it is.
     else:
         # Not engaging - all features are 0
         target_range_norm = 0.0
@@ -457,6 +464,7 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         target_domain_air = 0.0
         target_domain_surface = 0.0
         target_domain_land = 0.0
+        target_domain_projectile = 0.0
     
     # Time on target information
     # get_estimated_time_until_shoot() returns -1.0 when entity can't shoot (not ready/no target)
@@ -538,10 +546,17 @@ def _compute_enemy_features(env: Any, agent: Any) -> np.ndarray:
         
         # Domain (3 features)
         # One-hot encoding from TargetGroup.platform_domain (PlatformDomain enum)
-        domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
-        domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
-        domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
-        domain_projectile = 0 # Todo
+
+        if isinstance(target_group, UnitTargetGroup):
+            domain_air = 1.0 if target_group.platform_domain == PlatformDomain.AIR else 0.0
+            domain_surface = 1.0 if target_group.platform_domain == PlatformDomain.SURFACE else 0.0
+            domain_land = 1.0 if target_group.platform_domain == PlatformDomain.LAND else 0.0
+            domain_projectile = 0
+        else:
+            domain_air = 0
+            domain_surface = 0
+            domain_land = 0
+            domain_projectile = 1.0 # Todo: we should validate which projectile domain it is.
         
         # Count (1 feature)
         # Number of known alive units from TargetGroup.num_known_alive_units

@@ -10,7 +10,7 @@ import numpy as np
 from w4a import Config
 from w4a.envs.trident_multiagent_env import TridentIslandMultiAgentEnv
 from w4a.agents import CompetitionAgent, SimpleAgent
-from SimulationInterface import Faction
+from SimulationInterface import Faction, PlatformDomain
 
 
 class TestActionVisibilityAtReset:
@@ -215,8 +215,12 @@ class TestEngageAction:
         for eid, targets in matrix.items():
             if len(targets) > 0:
                 entity_id = eid
-                target_id = list(targets)[0]
-                break
+
+                entity = agent_legacy._sim_agent.controllable_entities[entity_id]
+
+                if entity.platform_domain == PlatformDomain.AIR:
+                    target_id = list(targets)[0]
+                    break
         
         assert entity_id is not None, f"Should have engageable targets"
         
@@ -290,6 +294,7 @@ class TestEngageAction:
     def test_engage_action_legacy_dies_to_dynasty(self):
         """Test Dynasty killing Legacy entity: friendly casualties tracked"""
         config = Config()
+        config.our_faction = Faction.DYNASTY.value
         env = TridentIslandMultiAgentEnv(config=config)
         
         # Legacy is passive
@@ -306,25 +311,31 @@ class TestEngageAction:
         env.set_agents(agent_legacy, agent_dynasty)
         
         observations, infos = env.reset()
+
+
         
-        # Step to get targets
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
-        }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
-        
+        # # Step to get targets
+        # actions = {
+        #     "legacy": agent_legacy.select_action(observations["legacy"]),
+        #     "dynasty": agent_dynasty.select_action(observations["dynasty"])
+        # }
+        # observations, rewards, terminations, truncations, infos = env.step(actions)
+
         # Dynasty finds Legacy target
         matrix = infos["dynasty"]["valid_masks"]["entity_target_matrix"]
         entity_id, target_id = None, None
         for eid, targets in matrix.items():
             if len(targets) > 0:
                 entity_id = eid
-                target_id = list(targets)[0]
-                break
+
+                entity = agent_dynasty._sim_agent.controllable_entities[entity_id]
+
+                if entity.platform_domain == PlatformDomain.AIR:
+                    target_id = list(targets)[0]
+                    break
         
         assert entity_id is not None, "Dynasty should have engageable targets"
-        
+
         engage_action = {
             "action_type": 2, "entity_id": entity_id, "target_group_id": target_id,
             "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
