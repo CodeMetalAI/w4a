@@ -48,7 +48,17 @@
                     "Specific": 0,
                     "Extra": 2
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -73,30 +83,7 @@
                     "MaxSpeed": 536.0,
                     "RadarCrossSection": 0.004999999888241291,
                     "RadarCrossSectionWithRadar": 5.0,
-                    "FuelCapacity": 9000.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.4434609413146973,
-                            "TransmitterPower": 2000.0,
-                            "TransmitterGain": 35.43000030517578,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 4.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 9000.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -111,15 +98,18 @@
                                     "Specific": 3,
                                     "Extra": 0
                                 },
-                                "Range": 925000.0,
-                                "Damage": 100.0,
-                                "Speed": 295.0,
-                                "AutonomousDistance": 800000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 1
+                                "Specifications": {
+                                    "Range": 925000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 295.0,
+                                    "AutonomousDistance": 800000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 1,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         },
@@ -134,22 +124,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 180000.0,
-                                "Damage": 100.0,
-                                "Speed": 1372.0,
-                                "AutonomousDistance": 90000.0,
-                                "BlastRadius": 15.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 2452.5,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 2
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 900,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 536.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
@@ -192,7 +193,17 @@
                     "Specific": 0,
                     "Extra": 2
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -217,30 +228,7 @@
                     "MaxSpeed": 536.0,
                     "RadarCrossSection": 0.004999999888241291,
                     "RadarCrossSectionWithRadar": 5.0,
-                    "FuelCapacity": 9000.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.4434609413146973,
-                            "TransmitterPower": 2000.0,
-                            "TransmitterGain": 35.43000030517578,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 4.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 9000.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -255,15 +243,18 @@
                                     "Specific": 3,
                                     "Extra": 0
                                 },
-                                "Range": 925000.0,
-                                "Damage": 100.0,
-                                "Speed": 295.0,
-                                "AutonomousDistance": 800000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 1
+                                "Specifications": {
+                                    "Range": 925000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 295.0,
+                                    "AutonomousDistance": 800000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 1,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         },
@@ -278,22 +269,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 180000.0,
-                                "Damage": 100.0,
-                                "Speed": 1372.0,
-                                "AutonomousDistance": 90000.0,
-                                "BlastRadius": 15.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 2452.5,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 2
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 900,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 536.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
@@ -336,7 +338,17 @@
                     "Specific": 0,
                     "Extra": 2
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -361,30 +373,7 @@
                     "MaxSpeed": 536.0,
                     "RadarCrossSection": 0.004999999888241291,
                     "RadarCrossSectionWithRadar": 5.0,
-                    "FuelCapacity": 9000.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.4434609413146973,
-                            "TransmitterPower": 2000.0,
-                            "TransmitterGain": 35.43000030517578,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 4.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 9000.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -399,15 +388,18 @@
                                     "Specific": 3,
                                     "Extra": 0
                                 },
-                                "Range": 925000.0,
-                                "Damage": 100.0,
-                                "Speed": 295.0,
-                                "AutonomousDistance": 800000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 1
+                                "Specifications": {
+                                    "Range": 925000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 295.0,
+                                    "AutonomousDistance": 800000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 1,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         },
@@ -422,22 +414,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 180000.0,
-                                "Damage": 100.0,
-                                "Speed": 1372.0,
-                                "AutonomousDistance": 90000.0,
-                                "BlastRadius": 15.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 2452.5,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 2
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 900,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 536.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
@@ -480,7 +483,17 @@
                     "Specific": 0,
                     "Extra": 2
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -505,30 +518,7 @@
                     "MaxSpeed": 536.0,
                     "RadarCrossSection": 0.004999999888241291,
                     "RadarCrossSectionWithRadar": 5.0,
-                    "FuelCapacity": 9000.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.4434609413146973,
-                            "TransmitterPower": 2000.0,
-                            "TransmitterGain": 35.43000030517578,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 4.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 9000.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -543,15 +533,18 @@
                                     "Specific": 3,
                                     "Extra": 0
                                 },
-                                "Range": 925000.0,
-                                "Damage": 100.0,
-                                "Speed": 295.0,
-                                "AutonomousDistance": 800000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 1
+                                "Specifications": {
+                                    "Range": 925000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 295.0,
+                                    "AutonomousDistance": 800000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 1,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         },
@@ -566,22 +559,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 180000.0,
-                                "Damage": 100.0,
-                                "Speed": 1372.0,
-                                "AutonomousDistance": 90000.0,
-                                "BlastRadius": 15.0,
-                                "Accuracy": 0.8999999761581421,
-                                "MaxAcceleration": 2452.5,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 2
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 2
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 900,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 536.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
