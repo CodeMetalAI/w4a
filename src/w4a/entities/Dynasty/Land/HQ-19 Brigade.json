@@ -1,0 +1,626 @@
+{
+    "EventName": "SimSpawnPackage",
+    "EntityId": 0,
+    "Faction": 1,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 45,
+        "Category": 28,
+        "SubCategory": 11,
+        "Specific": 0,
+        "Extra": 0
+    },
+    "SpawnComponents": [],
+    "Pos": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Rot": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+    },
+    "Controllable": true,
+    "FormationOffset": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "DefaultRadarsEnabled": 1,
+    "DefaultJammersEnabled": 0,
+    "SpawnEntities": [
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "Type409_Radar",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 3,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {}
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 100,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 10.0,
+                    "Y": 2.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 12.0,
+                    "Y": -2.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 14.0,
+                    "Y": 2.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 16.0,
+                    "Y": -2.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 18.0,
+                    "Y": 1.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-19_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 11,
+                    "Specific": 4,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 20.0,
+                    "Y": -1.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-19.HQ-19": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 43,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 200000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 3000.0,
+                                    "AutonomousDistance": 50000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9900000095367432,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.10000000149011612,
+                                    "TargetPlatformDomains": 16,
+                                    "TargetProjectileDomains": 1792
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 990,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        }
+    ]
+}
