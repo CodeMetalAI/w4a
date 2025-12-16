@@ -9,7 +9,7 @@ The observation system encodes three main categories:
 - Friendly features: our units' capabilities, positions, and status
 - Enemy features: detected enemy units and threat assessments based on sensing tiers
 
-Total observation size: 11 + (max_entities * 36) + (max_target_groups * 12)
+Total observation size: 11 + (max_entities * 41) + (max_target_groups * 12)
 """
 
 from typing import Any
@@ -20,7 +20,7 @@ from gymnasium import spaces
 from w4a.envs.constants import CENTER_ISLAND_FLAG_ID
 from w4a.envs.utils import calculate_max_grid_positions
 
-from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver, UnitTargetGroup
+from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver, UnitTargetGroup, Role
 
 def build_observation_space(config) -> spaces.Box:
     """Build the complete observation space for the environment.
@@ -29,11 +29,11 @@ def build_observation_space(config) -> spaces.Box:
     
     Observation structure:
     - Global features: 11 (mission state, objectives, time, flag faction)
-    - Friendly entity features: max_entities * 36 (capabilities, kinematics, status, engagement)
+    - Friendly entity features: max_entities * 41 (capabilities, kinematics, status, engagement, unit stats)
     - Enemy target group features: max_target_groups * 12 (position, velocity, domain)
     
     NOTE (ID-indexed layout):
-    - Entities: shape (config.max_entities, 36), row i corresponds to entity_id i
+    - Entities: shape (config.max_entities, 41), row i corresponds to entity_id i
     - Target groups: shape (config.max_target_groups, 12), row j corresponds to target_group_id j
     - Zero rows for IDs that are not assigned/visible
     - This keeps observation indices aligned with action/mask IDs across steps
@@ -42,7 +42,7 @@ def build_observation_space(config) -> spaces.Box:
         Box space with normalized values in [0, 1]
     """
     global_features = 11
-    friendly_features = config.max_entities * 36
+    friendly_features = config.max_entities * 41
     enemy_features = config.max_target_groups * 12
     
     total_features = global_features + friendly_features + enemy_features
@@ -67,7 +67,7 @@ def compute_observation(env: Any, agent: Any) -> np.ndarray:
         
     Returns:
         Normalized observation vector with values in [0, 1]
-        Shape: (11 + max_entities*36 + max_target_groups*12,)
+        Shape: (11 + max_entities*41 + max_target_groups*12,)
     """
 
     # Compute global features (mission state, objectives, time)
@@ -198,23 +198,24 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
     status, and tactical situation. Features are organized by category
     for each entity up to the maximum entity limit.
     
-    Feature categories per entity (36 features total):
+    Feature categories per entity (41 features total):
     - Identity & Intent: can_engage, can_sense, can_refuel, can_capture, domain (air/surface/land) - 7 features
     - Kinematics: position (2), velocity (3), rotation quaternion (4) - 9 features
     - Egocentric: distance/bearing to island - 2 features
     - Status: health, radar state, fuel - 4 features
     - Weapons: weapon types, ammo counts - 3 features
     - Engagement: current engagement state, target info, weapons mode - 11 features
+    - Unit Stats: role (3), meta_value (1), stats_value (1) - 5 features
     
     Args:
         env: Environment instance
         agent: CompetitionAgent instance (to get controllable entities)
     
     Returns:
-        Array of shape (max_entities * 36,) with zero padding for unused slots
+        Array of shape (max_entities * 41,) with zero padding for unused slots
     """
     # Build an ID-indexed array: row i corresponds to entity_id i. Zero rows for unused IDs.
-    friendly_entity_features = np.zeros((int(env.config.max_entities), 36), dtype=np.float32)
+    friendly_entity_features = np.zeros((int(env.config.max_entities), 41), dtype=np.float32)
 
     # Iterate through agent's controllable entities
     for entity_id, entity in agent._sim_agent.controllable_entities.items():
@@ -226,6 +227,7 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
         status_features = compute_friendly_status_features(entity, env)
         weapon_features = compute_friendly_weapon_features(entity, env)
         engagement_features = compute_friendly_engagement_features(env, entity)
+        unit_stats_features = compute_friendly_unit_stats_features(entity)
 
         # Concatenate all features for this entity
         features = np.concatenate([
@@ -234,14 +236,15 @@ def _compute_friendly_features(env: Any, agent: Any) -> np.ndarray:
             egocentric_features,
             status_features,
             weapon_features,
-            engagement_features
+            engagement_features,
+            unit_stats_features
         ])
 
         # Assign into the stable ID-indexed row
         if 0 <= entity_id < int(env.config.max_entities):
             friendly_entity_features[entity_id] = features
 
-    # Convert (max_entities, 36) -> (max_entities * 36,)
+    # Convert (max_entities, 41) -> (max_entities * 41,)
     return friendly_entity_features.flatten()
 
 
@@ -493,6 +496,50 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
         weapons_tight,
         weapons_selective,
         weapons_free,
+    ], dtype=np.float32)
+
+
+def compute_friendly_unit_stats_features(entity: Any) -> np.ndarray:
+    """Compute unit statistics features for a friendly entity.
+    
+    Encodes the entity's tactical role and statistical values from simulation.
+    
+    Features: role_attack, role_defense, role_support, meta_value_norm, stats_value (5 features)
+    
+    Args:
+        entity: Entity to compute features for
+    
+    Returns:
+        Array of shape (5,) with role one-hot encoding and stat values
+    """
+
+    if hasattr(entity, 'get_stats'):
+        stats = entity.get_stats(False)
+        
+    # Role one-hot encoding (3 features)
+    role = stats.role
+    role_attack = 1.0 if role == Role.ATTACK else 0.0
+    role_defense = 1.0 if role == Role.DEFENSE else 0.0
+    role_support = 1.0 if role == Role.SUPPORT else 0.0
+        
+    # Meta value normalized (1 feature)
+    # TODO: Determine proper max value for meta_value normalization
+    meta_value_max = 15000.0
+    meta_value_norm = float(stats.meta_value) / meta_value_max
+    meta_value_norm = min(meta_value_norm, 1.0)  # Clamp to [0, 1]
+        
+    # Stats value (1 feature)
+    # TODO: Determine proper normalization for stats.values once semantics are defined.
+    # Assuming already in [0, 1] range for now.
+    stats_value = float(stats.values)
+    stats_value = max(0.0, min(stats_value, 1.0))  # Clamp to [0, 1]
+    
+    return np.array([
+        role_attack,
+        role_defense,
+        role_support,
+        meta_value_norm,
+        stats_value,
     ], dtype=np.float32)
 
 
