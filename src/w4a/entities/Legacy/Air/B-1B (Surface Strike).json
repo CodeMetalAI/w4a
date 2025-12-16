@@ -48,7 +48,17 @@
                     "Specific": 1,
                     "Extra": 1
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -73,30 +83,7 @@
                     "MaxSpeed": 420.0,
                     "RadarCrossSection": 25.0,
                     "RadarCrossSectionWithRadar": 25.0,
-                    "FuelCapacity": 120300.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 5000.0,
-                            "TransmitterGain": 37.5,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 3.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 120300.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -111,22 +98,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 600000.0,
-                                "Damage": 100.0,
-                                "Speed": 275.0,
-                                "AutonomousDistance": 500000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8799999952316284,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 4
+                                "Specifications": {
+                                    "Range": 600000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 275.0,
+                                    "AutonomousDistance": 500000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8799999952316284,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 4,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 24
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 650,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 420.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
@@ -169,7 +167,17 @@
                     "Specific": 1,
                     "Extra": 1
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -194,30 +202,7 @@
                     "MaxSpeed": 420.0,
                     "RadarCrossSection": 25.0,
                     "RadarCrossSectionWithRadar": 25.0,
-                    "FuelCapacity": 120300.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 5000.0,
-                            "TransmitterGain": 37.5,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 3.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 120300.0
                 },
                 "Loadout": {
                     "Weapons": {
@@ -232,22 +217,33 @@
                                     "Specific": 0,
                                     "Extra": 0
                                 },
-                                "Range": 600000.0,
-                                "Damage": 100.0,
-                                "Speed": 275.0,
-                                "AutonomousDistance": 500000.0,
-                                "BlastRadius": 80.0,
-                                "Accuracy": 0.8799999952316284,
-                                "MaxAcceleration": 392.3999938964844,
-                                "RadarCrossSection": 0.05000000074505806,
-                                "TargetDomains": 4
+                                "Specifications": {
+                                    "Range": 600000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 275.0,
+                                    "AutonomousDistance": 500000.0,
+                                    "BlastRadius": 80.0,
+                                    "Accuracy": 0.8799999952316284,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 4,
+                                    "TargetProjectileDomains": 0
+                                }
                             },
                             "Ammo": 24
                         }
                     }
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 650,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 420.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },

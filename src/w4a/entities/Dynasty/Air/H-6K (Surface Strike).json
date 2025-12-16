@@ -48,7 +48,17 @@
                     "Specific": 5,
                     "Extra": 1
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -73,36 +83,21 @@
                     "MaxSpeed": 420.0,
                     "RadarCrossSection": 25.0,
                     "RadarCrossSectionWithRadar": 25.0,
-                    "FuelCapacity": 120300.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 5000.0,
-                            "TransmitterGain": 37.5,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 3.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 120300.0
                 },
                 "Loadout": {
                     "Weapons": {}
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 650,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 420.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },
@@ -145,7 +140,17 @@
                     "Specific": 5,
                     "Extra": 1
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "Specifications": {
+                            "Strength": 10000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.094395160675049
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -170,36 +175,21 @@
                     "MaxSpeed": 420.0,
                     "RadarCrossSection": 25.0,
                     "RadarCrossSectionWithRadar": 25.0,
-                    "FuelCapacity": 120300.0,
-                    "RadarData": [
-                        {
-                            "RadarFOV": 2.094395160675049,
-                            "TransmitterPower": 5000.0,
-                            "TransmitterGain": 37.5,
-                            "ReceiverGain": 35.0,
-                            "SignalWavelength": 1.0,
-                            "MinimumSignalPower": 1.599999971922672e-13,
-                            "TransmitterLosses": 2.0,
-                            "ReceiverLosses": 3.0,
-                            "FilterBandwidth": 1000000.0,
-                            "NoiseFigure": 3.0,
-                            "WorkingTemperature": 300.0,
-                            "Rotates": false,
-                            "RotationPeriod": 0.0,
-                            "PositionAngle": 0.0,
-                            "MemoryTime": 0.05000000074505806,
-                            "RotationRange": 1.0471975803375244,
-                            "FilterMethod": 1,
-                            "FusionMethod": 1
-                        }
-                    ],
-                    "JammerData": []
+                    "FuelCapacity": 120300.0
                 },
                 "Loadout": {
                     "Weapons": {}
                 },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 650,
+                    "Role": 1
+                },
                 "Vel": {
-                    "X": 420.0,
+                    "X": 0.0,
                     "Y": 0.0,
                     "Z": 0.0
                 },

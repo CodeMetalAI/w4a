@@ -9,7 +9,7 @@ from pathlib import Path
 
 import SimulationInterface
 from SimulationInterface import (
-    Simulation, SimulationConfig, SimulationData, ForceLaydown, Faction, EntitySpawnData, FactionConfiguration, EntityList
+    Simulation, SimulationConfig, SimulationData, ForceLaydown, Faction, EntitySpawnData, FactionConfiguration, EntityList, SatelliteSweep
 )
 
 from ..entities import w4a_entities
@@ -164,15 +164,40 @@ def _execute_force_laydown(env, force_laydowns):
     # Finalize force laydown phase. Theoretically, we could give the agents time in between these steps, but let's make it immediate for now.
     env.simulation.finalize_force_laydown(env.sim_data)
 
-
-    env.sim_data = SimulationData()
-
     # Debug: report event summary from finalize
     try:
         events = env.sim_data.simulation_events
         print(f"[LAYDOWN] finalize produced {len(events)} events")
     except Exception:
         pass
+
+    # Satellite sweep
+    if len(env.satellites) != 0:
+        player_events = []
+
+        for satellite in env.satellites:
+            print(f"Sweeping {satellite.faction.name} satellite!!!")
+
+            sweep = SatelliteSweep()
+            sweep.entity = satellite
+            
+            player_events.append(sweep)
+
+        env.sim_data = SimulationData()
+        env.sim_data.player_events = player_events
+
+        env.simulation.pre_simulation_tick(env.sim_data)
+
+        process_simulation_events(env, env.sim_data.simulation_events)
+
+        # Debug: report event summary from satellite sweep
+        try:
+            events = env.sim_data.simulation_events
+            print(f"[LAYDOWN] satellite sweep produced {len(events)} events")
+        except Exception:
+            pass
+
+    env.sim_data = SimulationData()
 
     # Process all events coming out of this
     process_simulation_events(env, env.sim_data.simulation_events)

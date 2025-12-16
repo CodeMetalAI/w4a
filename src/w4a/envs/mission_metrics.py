@@ -11,7 +11,7 @@ termination conditions, and agent observations.
 
 from typing import Dict, List, Set, Any
 
-from SimulationInterface import Entity, EntityDomain, Faction
+from SimulationInterface import Entity, PlatformDomain, ProjectileDomain, Faction
 
 from .utils import *
 from .constants import CENTER_ISLAND_FLAG_ID

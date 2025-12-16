@@ -207,13 +207,13 @@ class MyAgent(CompetitionAgent):
         
         # Access per-entity information
         for entity in all_entities:
-            pos = entity.pos                    # Position (x, y, z)
-            vel = entity.vel                    # Velocity
-            fuel = entity.fuel                  # Fuel level
-            is_alive = entity.is_alive          # Alive status
-            domain = entity.domain              # AIR, SEA, or GROUND
-            faction = entity.faction            # LEGACY or DYNASTY
-            can_capture = entity.can_capture    # Capture capability
+            pos = entity.pos                            # Position (x, y, z)
+            vel = entity.vel                            # Velocity
+            fuel = entity.fuel                          # Fuel level
+            is_alive = entity.is_alive                  # Alive status
+            platform_domain = entity.platform_domain    # AIR, SEA, or GROUND
+            faction = entity.faction                    # LEGACY or DYNASTY
+            can_capture = entity.can_capture            # Capture capability
             # ... many more attributes available
         
         # Access per-target-group information

@@ -1,0 +1,389 @@
+{
+    "EventName": "SimSpawnPackage",
+    "EntityId": 0,
+    "Faction": 0,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 225,
+        "Category": 4,
+        "SubCategory": 1,
+        "Specific": 2,
+        "Extra": 0
+    },
+    "SpawnComponents": [],
+    "Pos": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Rot": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+    },
+    "Controllable": true,
+    "FormationOffset": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "DefaultRadarsEnabled": 1,
+    "DefaultJammersEnabled": 0,
+    "SpawnEntities": [
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 0,
+                "Identifier": "M270-PrSm_Inc2-3",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 225,
+                    "Category": 4,
+                    "SubCategory": 1,
+                    "Specific": 2,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Legacy/Land/PrSM.PrSm": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 9,
+                                    "Country": 225,
+                                    "Category": 1,
+                                    "SubCategory": 39,
+                                    "Specific": 2,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 800000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1200.0,
+                                    "AutonomousDistance": 100000.0,
+                                    "BlastRadius": 50.0,
+                                    "Accuracy": 0.949999988079071,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.30000001192092896,
+                                    "TargetPlatformDomains": 5,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 700,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 0,
+                "Identifier": "M270-PrSm_Inc2-3",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 225,
+                    "Category": 4,
+                    "SubCategory": 1,
+                    "Specific": 2,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 50.0,
+                    "Y": 50.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Legacy/Land/PrSM.PrSm": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 9,
+                                    "Country": 225,
+                                    "Category": 1,
+                                    "SubCategory": 39,
+                                    "Specific": 2,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 800000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1200.0,
+                                    "AutonomousDistance": 100000.0,
+                                    "BlastRadius": 50.0,
+                                    "Accuracy": 0.949999988079071,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.30000001192092896,
+                                    "TargetPlatformDomains": 5,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 700,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 0,
+                "Identifier": "M270-PrSm_Inc2-3",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 225,
+                    "Category": 4,
+                    "SubCategory": 1,
+                    "Specific": 2,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 50.0,
+                    "Y": -50.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Legacy/Land/PrSM.PrSm": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 9,
+                                    "Country": 225,
+                                    "Category": 1,
+                                    "SubCategory": 39,
+                                    "Specific": 2,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 800000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1200.0,
+                                    "AutonomousDistance": 100000.0,
+                                    "BlastRadius": 50.0,
+                                    "Accuracy": 0.949999988079071,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.30000001192092896,
+                                    "TargetPlatformDomains": 5,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 700,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 0,
+                "Identifier": "M270-PrSm_Inc2-3",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 225,
+                    "Category": 4,
+                    "SubCategory": 1,
+                    "Specific": 2,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 100.0,
+                    "Y": 50.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Legacy/Land/PrSM.PrSm": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 9,
+                                    "Country": 225,
+                                    "Category": 1,
+                                    "SubCategory": 39,
+                                    "Specific": 2,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 800000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1200.0,
+                                    "AutonomousDistance": 100000.0,
+                                    "BlastRadius": 50.0,
+                                    "Accuracy": 0.949999988079071,
+                                    "MaxAcceleration": 3849.4443359375,
+                                    "RadarCrossSection": 0.30000001192092896,
+                                    "TargetPlatformDomains": 5,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 2
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 700,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        }
+    ]
+}

@@ -1,0 +1,626 @@
+{
+    "EventName": "SimSpawnPackage",
+    "EntityId": 0,
+    "Faction": 1,
+    "Identifier": "",
+    "DISEntityType": {
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 45,
+        "Category": 28,
+        "SubCategory": 7,
+        "Specific": 0,
+        "Extra": 0
+    },
+    "SpawnComponents": [],
+    "Pos": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "Rot": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
+    },
+    "Controllable": true,
+    "FormationOffset": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+    },
+    "DefaultRadarsEnabled": 1,
+    "DefaultJammersEnabled": 0,
+    "SpawnEntities": [
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HT-233",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 28,
+                    "SubCategory": 7,
+                    "Specific": 3,
+                    "Extra": 1
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {}
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 100,
+                    "Role": 1
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.5,
+                    "Y": 0.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": -0.5,
+                    "Y": 0.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 0.5,
+                    "Y": -0.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": -0.5,
+                    "Y": -0.5,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": 1.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        },
+        {
+            "Event": {
+                "EventName": "SimSpawnGroundUnit",
+                "EntityId": 0,
+                "Faction": 1,
+                "Identifier": "HQ-9B_TEL",
+                "DISEntityType": {
+                    "Kind": 1,
+                    "Domain": 1,
+                    "Country": 45,
+                    "Category": 7,
+                    "SubCategory": 2,
+                    "Specific": 1,
+                    "Extra": 0
+                },
+                "SpawnComponents": [],
+                "Pos": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rot": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0,
+                    "W": 1.0
+                },
+                "Controllable": true,
+                "FormationOffset": {
+                    "X": -1.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "DefaultRadarsEnabled": 1,
+                "DefaultJammersEnabled": 0,
+                "Specifications": {
+                    "CruisingSpeed": 0.0,
+                    "MaxSpeed": 0.0,
+                    "RadarCrossSection": 0.10000000149011612,
+                    "RadarCrossSectionWithRadar": 0.10000000149011612,
+                    "FuelCapacity": 0.0
+                },
+                "Loadout": {
+                    "Weapons": {
+                        "/Game/Simulation/Projectiles/Dynasty/Land/HQ-9B.HQ-9B": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 19,
+                                    "Specific": 4,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 90000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1715.0,
+                                    "AutonomousDistance": 60000.0,
+                                    "BlastRadius": 20.0,
+                                    "Accuracy": 0.9800000190734863,
+                                    "MaxAcceleration": 9623.6103515625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 1833
+                                }
+                            },
+                            "Ammo": 8
+                        }
+                    }
+                },
+                "Stats": {
+                    "Values[0]": 0.20000000298023224,
+                    "Values[1]": 0.20000000298023224,
+                    "Values[2]": 0.20000000298023224,
+                    "Values[3]": 0.20000000298023224,
+                    "MetaValue": 560,
+                    "Role": 2
+                },
+                "Vel": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "GroundUnitSpecifications": {}
+            }
+        }
+    ]
+}

@@ -23,11 +23,13 @@ from . import mission_metrics
 from .utils import get_time_elapsed
 from .constants import FACTION_FLAG_IDS, CENTER_ISLAND_FLAG_ID
 
+from datetime import datetime
+
 import SimulationInterface
 from SimulationInterface import (
-    Simulation, SimulationConfig, SimulationData, Faction, Flag,
+    Simulation, SimulationConfig, SimulationData, Faction, Flag, Satellite,
     EntitySpawned, Victory, AdversaryContact, TargetGroup,
-    Entity, ControllableEntity, Unit, EntityDomain,
+    Entity, ControllableEntity, Unit, PlatformDomain, ProjectileDomain,
     EntitySpawnData, EntityList, ForceLaydown, FactionConfiguration
 )
 
@@ -136,6 +138,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         # Flags (shared resource, both agents can see)
         self.flags = {}
+        self.satellites = []
+        self.winning_faction = None
         
         # Set up environment event handlers
         # EntitySpawned: for shared resources like flags
@@ -266,8 +270,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         # Reset agents list (both active)
         self.agents = self.possible_agents[:]
         
-        # Reset flags
+        # Reset flags and satellites
         self.flags.clear()
+        self.satellites.clear()
+        self.winning_faction = None
         
         # Reset mission metrics
         mission_metrics.reset_mission_metrics(self)
@@ -484,41 +490,15 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         Returns:
             "legacy_win", "dynasty_win", "draw", or "ongoing"
         """
-        # Capture win condition - check if flag has been captured
-        # Only one faction can capture at a time, so no ties possible via capture
-        flag = self.flags[CENTER_ISLAND_FLAG_ID]
-        
-        if flag.is_captured:
-            # Flag has been captured - determine which faction captured it
-            flag_faction = flag.faction
-            if flag_faction == Faction.LEGACY:
-                return "legacy_win"
-            elif flag_faction == Faction.DYNASTY:
-                return "dynasty_win"
-            
-        # Get cached kill ratios (computed in mission_metrics.update_kill_ratios)
-        legacy_kill_ratio = self.kill_ratio_by_faction[Faction.LEGACY]
-        dynasty_kill_ratio = self.kill_ratio_by_faction[Faction.DYNASTY]
-        
-        threshold = self.config.kill_ratio_threshold
-        
-        # Check win conditions (kill ratio threshold met)
-        if legacy_kill_ratio >= threshold:
+       
+        if self.winning_faction == Faction.LEGACY:
             return "legacy_win"
-        if dynasty_kill_ratio >= threshold:
+        elif self.winning_faction == Faction.DYNASTY:
             return "dynasty_win"
-        
-        # Check loss conditions (inverse kill ratio + no capture possible)
-        inverse_threshold = 1.0 / max(1e-6, threshold)
-        legacy_can_capture = self.capture_possible_by_faction[Faction.LEGACY]
-        dynasty_can_capture = self.capture_possible_by_faction[Faction.DYNASTY]
-        
-        if legacy_kill_ratio <= inverse_threshold and not legacy_can_capture:
-            return "dynasty_win"
-        if dynasty_kill_ratio <= inverse_threshold and not dynasty_can_capture:
-            return "legacy_win"
-        
-        return "ongoing"
+        elif self.winning_faction == Faction.NEUTRAL:
+            return "draw"
+        else:        
+            return "ongoing"
     
     def _get_winner(self) -> Optional[str]:
         """
@@ -625,7 +605,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             if not self._is_controllable_entity_for_agent(entity, agent):
                 continue
             
-            if entity.domain == EntityDomain.AIR:
+            if entity.platform_domain == PlatformDomain.AIR:
                 valid_actions.update({1, 6})  # move, rtb
             if self._entity_can_engage_for_agent(entity, agent):
                 valid_actions.add(2)  # engage
@@ -743,9 +723,11 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         """
         entity = event.entity
         
-        # Track flags as shared resource
+        # Track flags and satellites as shared resource
         if isinstance(entity, Flag):
             self.flags[FACTION_FLAG_IDS[entity.faction]] = entity
+        elif isinstance(entity, Satellite):
+            self.satellites.append(entity)
         
 
     def _on_adversary_contact(self, event):
@@ -761,7 +743,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         Routes to both agents and environment for mission completion tracking.
         """
-        pass
+        self.winning_faction = event.victor_faction
+
     def _record_last_intended_action(self, action: Dict, agent_name: str) -> None:
         """Record last action issued (pre-validation) per entity for debugging and analysis.
         
@@ -805,7 +788,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             True if entity has weapons and valid targets exist
         """
         # Check if entity has weapons
-        has_weapons = entity.target_domains != 0
+        has_weapons = entity.target_platform_domains != 0 #Todo: target_projectile_domains
         if not has_weapons:
             return False
         
@@ -854,9 +837,23 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         enemy_faction = Faction.DYNASTY if my_faction == Faction.LEGACY else Faction.LEGACY
         return self.capture_possible_by_faction[enemy_faction]
     
-    def close(self):
+    def close(self, save_replay = False):
         """Clean up environment resources."""
         if self.simulation:
+
+            if save_replay:
+                save_dir = Path("./replays")
+                save_dir.mkdir(exist_ok=True)
+
+                simulation_json = self.simulation.export_json()
+
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_path = save_dir / f"{timestamp}.json"
+
+                with open(output_path, 'w') as f:
+                    f.write(simulation_json)
+
+
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
 
