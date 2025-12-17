@@ -52,10 +52,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "Strength": 510000.0,
+                            "FOV": 6.2831854820251465,
+                            "RotationRange": 0.0
                         }
                     }
                 ],
@@ -140,10 +141,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "Strength": 510000.0,
+                            "FOV": 6.2831854820251465,
+                            "RotationRange": 0.0
                         }
                     }
                 ],

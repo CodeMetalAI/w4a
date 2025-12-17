@@ -38,7 +38,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "Type409_Radar",
+                "Identifier": "Type 610",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -48,7 +48,18 @@
                     "Specific": 3,
                     "Extra": 0
                 },
-                "SpawnComponents": [],
+                "SpawnComponents": [
+                    {
+                        "EventName": "SimSpawnRadarComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "",
+                        "Specifications": {
+                            "Strength": 1900000.0,
+                            "FOV": 6.2831854820251465,
+                            "RotationRange": 0.0
+                        }
+                    }
+                ],
                 "Pos": {
                     "X": 0.0,
                     "Y": 0.0,
@@ -99,7 +110,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -187,7 +198,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -275,7 +286,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -363,7 +374,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -451,7 +462,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -539,7 +550,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "HQ-19_TEL",
+                "Identifier": "HQ-19 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,

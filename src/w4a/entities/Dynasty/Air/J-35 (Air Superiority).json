@@ -38,7 +38,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "J-35_AirSuperiority",
+                "Identifier": "J-35 (AS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -52,10 +52,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -157,7 +158,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "J-35_AirSuperiority",
+                "Identifier": "J-35 (AS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -171,10 +172,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -276,7 +278,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "J-35_AirSuperiority",
+                "Identifier": "J-35 (AS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -290,10 +292,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -395,7 +398,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "J-35_AirSuperiority",
+                "Identifier": "J-35 (AS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -409,10 +412,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],

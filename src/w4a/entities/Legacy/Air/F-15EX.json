@@ -15,7 +15,9 @@
     "SpawnComponents": [
         {
             "EventName": "SimSpawnRefuelComponent",
-            "ComponentId": 0
+            "ComponentId": 0,
+            "DataAssetPath": "/Game/Experiment/Refuel/DA_Refuel_Tanker_Only.DA_Refuel_Tanker_Only",
+            "RefuelCompatibility": 4
         }
     ],
     "Pos": {
@@ -43,7 +45,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "F-15EX_AirSuperiority",
+                "Identifier": "F-15EX",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -57,10 +59,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -214,7 +217,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "F-15EX_AirSuperiority",
+                "Identifier": "F-15EX",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -228,10 +231,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -385,7 +389,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "F-15EX_AirSuperiority",
+                "Identifier": "F-15EX",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -399,10 +403,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -556,7 +561,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "F-15EX_AirSuperiority",
+                "Identifier": "F-15EX",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -570,10 +575,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],

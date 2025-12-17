@@ -38,7 +38,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -126,7 +126,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -151,7 +151,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 1.0,
-                    "Y": 0.20000000298023224,
+                    "Y": 0.19999998807907104,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,
@@ -214,7 +214,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -239,7 +239,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 2.0,
-                    "Y": -0.20000000298023224,
+                    "Y": -0.19999998807907104,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,
@@ -302,7 +302,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -327,7 +327,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 3.0,
-                    "Y": 0.20000000298023224,
+                    "Y": 0.19999998807907104,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,
