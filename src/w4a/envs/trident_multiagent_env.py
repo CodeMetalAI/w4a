@@ -279,17 +279,19 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         mission_metrics.reset_mission_metrics(self)
         
         # Setup simulation with both agents
-        legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
-        dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
-        legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
-        dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
+        #legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
+        #dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
+        #legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
+        #dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
+
+        # @Sanjna: this needs to be configured externally. Could we use the reset options for this?
+        legacy_force_laydown = self.scenario_path / "force_laydown" / "W4A_ForceLaydown_Legacy.json"
+        dynasty_force_laydown = self.scenario_path / "force_laydown" / "W4A_ForceLaydown_Dynasty.json"
         
         simulation_utils.setup_simulation_from_json(
             self,
-            str(legacy_entity_list),
-            str(dynasty_entity_list),
-            str(legacy_spawn_data),
-            str(dynasty_spawn_data),
+            str(legacy_force_laydown),
+            str(dynasty_force_laydown),
             legacy_agent=self.agent_legacy._get_sim_agent(),
             dynasty_agent=self.agent_dynasty._get_sim_agent(),
             seed=seed

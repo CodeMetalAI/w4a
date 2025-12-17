@@ -92,32 +92,7 @@ class _SimulationAgentImpl(SimAgent):
         
         This is the default force laydown implementation.
         """
-        force_laydown = self.force_laydown
-        entities = []
-        
-        # Ground forces
-        for entity in force_laydown.ground_forces_entities:
-            spawn_location = force_laydown.get_random_ground_force_spawn_location()
-            entity.pos = spawn_location.pos
-            entity.rot = spawn_location.rot
-            entities.append(entity)
-        
-        # Sea forces
-        for entity in force_laydown.sea_forces_entities:
-            spawn_location = force_laydown.get_random_sea_force_spawn_location()
-            entity.pos = spawn_location.pos
-            entity.rot = spawn_location.rot
-            entities.append(entity)
-        
-        # Air forces
-        for entity in force_laydown.air_forces_entities:
-            spawn_location = force_laydown.get_random_air_force_spawn_location()
-            entity.pos = spawn_location.pos
-            entity.rot = spawn_location.rot
-            
-            entities.append(entity)
-        
-        return entities
+        return self.force_laydown.entity_data.entities
     
     def pre_simulation_tick(self, simulation_data):
         """Called before each simulation tick."""
