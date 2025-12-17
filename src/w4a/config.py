@@ -10,6 +10,7 @@ from typing import Optional
 
 from .constants import *
 
+from pathlib import Path
 
 @dataclass
 class Config:
@@ -56,6 +57,11 @@ class Config:
     reward_scale: float = 1.0
     normalize_observations: bool = True
     enable_curriculum: bool = False
+
+    scenario_path = Path(__file__).parent / "scenarios"
+
+    legacy_force_laydown_path: str = scenario_path / "force_laydown" / "W4A_ForceLaydown_Legacy.json"
+    dynasty_force_laydown_path: str = scenario_path / "force_laydown" / "W4A_ForceLaydown_Dynasty.json"
     
     @property
     def max_episode_steps(self) -> int:

@@ -84,7 +84,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.max_entities = self.config.max_entities
 
         # Set up paths
-        self.scenario_path = Path(__file__).parent.parent / "scenarios"
+        self.scenario_path = self.config.scenario_path
         
         # Initialize simulation interface
         SimulationInterface.initialize()
@@ -285,8 +285,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         #dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
 
         # @Sanjna: this needs to be configured externally. Could we use the reset options for this?
-        legacy_force_laydown = self.scenario_path / "force_laydown" / "W4A_ForceLaydown_Legacy.json"
-        dynasty_force_laydown = self.scenario_path / "force_laydown" / "W4A_ForceLaydown_Dynasty.json"
+        legacy_force_laydown = self.config.legacy_force_laydown_path
+        dynasty_force_laydown = self.config.dynasty_force_laydown_path
         
         simulation_utils.setup_simulation_from_json(
             self,
