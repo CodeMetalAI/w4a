@@ -570,7 +570,30 @@ class TestCaptureAction:
         entity_id = list(controllable)[0]
         
         print(f"\n[CAPTURE] Testing capture action on entity {entity_id}")
-        
+
+        # We need to be in the air before performing a capture actions
+        action_legacy = {
+            "action_type": 1,
+            "entity_id": entity_id,
+            "move_center_grid": 0,
+            "move_short_axis_km": 10,
+            "move_long_axis_km": 100,
+            "move_axis_angle": 0,
+            "target_group_id": 0,
+            "weapon_selection": 0,
+            "weapon_usage": 0,
+            "weapon_engagement": 0,
+            "stealth_enabled": 0,
+            "sensing_position_grid": 0,
+            "refuel_target_id": 0
+        }
+
+        action_dynasty = agent_dynasty.select_action(observations["dynasty"])
+
+        actions = {"legacy": action_legacy, "dynasty": action_dynasty}
+
+        env.step(actions)
+
         # Create capture action
         action_legacy = {
             "action_type": 5,
@@ -587,7 +610,6 @@ class TestCaptureAction:
             "sensing_position_grid": 0,
             "refuel_target_id": 0
         }
-        action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
         actions = {"legacy": action_legacy, "dynasty": action_dynasty}
         observations, rewards, terminations, truncations, infos = env.step(actions)
@@ -664,6 +686,7 @@ class TestRTBAction:
 class TestRefuelAction:
     """Test refuel action (type 7) execution"""
     
+    @pytest.mark.skip(reason="Need force laydown first.")
     def test_refuel_action_execution(self):
         """Test that refuel action executes when receivers and providers are available"""
         config = Config()

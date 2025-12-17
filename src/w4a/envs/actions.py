@@ -28,7 +28,7 @@ from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
     RefuelComponent, CaptureFlagComponent,
-    Vector3, Formation, ControllableEntity, PlatformDomain, ProjectileDomain, Faction,
+    Vector3, Formation, ControllableEntity, PlatformDomain, ProjectileDomain, Faction, UnitEngagement, UnitWeaponUsage
 )
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dict, config: Config) -> List:
@@ -188,8 +188,8 @@ def execute_engage_action(entity_id: int, action: Dict, entities: Dict, target_g
     commit.entity = entity
     commit.target_group = target_group
     commit.manouver_data.throttle = 1.0  # Always max throttle
-    commit.manouver_data.engagement = weapon_engagement
-    commit.manouver_data.weapon_usage = weapon_usage  # 0=1/unit, 1=1/adversary, 2=2/adversary
+    commit.manouver_data.engagement = UnitEngagement(weapon_engagement)
+    commit.manouver_data.weapon_usage = UnitWeaponUsage(weapon_usage)  # 0=1/unit, 1=1/adversary, 2=2/adversary
     commit.manouver_data.weapons = selected_weapons.keys()
     commit.manouver_data.wez_scale = 1  # Always 1
     
@@ -268,7 +268,7 @@ def execute_rtb_action(entity_id: int, action: Dict, entities: Dict, flags: Dict
 
     event = RTBManouver()
     event.entity = entity
-    event.flag = flag
+    event.base = flag
     
     return event
 

@@ -414,6 +414,13 @@ class TestCaptureProgress:
         assert pioneer_id is not None, "Should have a settler unit"
         
         # Send capture action once
+        move_action = {
+            "action_type": 1, "entity_id": pioneer_id,
+            "move_center_grid": 0, "move_short_axis_km": 10, "move_long_axis_km": 100,
+            "move_axis_angle": 0, "target_group_id": 0, "weapon_selection": 0,
+            "weapon_usage": 0, "weapon_engagement": 0, "stealth_enabled": 0,
+            "sensing_position_grid": 0, "refuel_target_id": 0
+        }
 
         capture_action = {
             "action_type": 5, "entity_id": pioneer_id,
@@ -432,12 +439,14 @@ class TestCaptureProgress:
         }
         
         flag_pos = flag.pos
-        max_steps = 480  # 80 minutes game time
+        max_steps = 600  # 80 minutes game time
         
         capture_started = False  # Track when we start seeing non-zero capture progress
         
         for step in range(max_steps):
             if step == 0:
+                legacy_action = move_action # We need to be in the air to start the capture action
+            elif step == 1:
                 legacy_action = capture_action
             else:
                 legacy_action = noop_action

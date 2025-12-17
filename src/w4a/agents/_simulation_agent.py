@@ -115,10 +115,6 @@ class _SimulationAgentImpl(SimAgent):
             entity.pos = spawn_location.pos
             entity.rot = spawn_location.rot
             
-            # Set up CAP maneuver for air units
-            NonCombatManouverQueue.create(entity.pos, lambda: 
-                CAPManouver.create_from_spline_points(force_laydown.get_random_cap().spline_points))
-            
             entities.append(entity)
         
         return entities

@@ -7,7 +7,7 @@ Matches the original SimpleAgent behavior exactly while extending CompetitionAge
 from .competition_agent import CompetitionAgent
 from SimulationInterface import (
     Faction, PlayerEventCommit, AdversaryContact, EntitySpawned, 
-    ComponentSpawned, ControllableEntity
+    ComponentSpawned, ControllableEntity, UnitEngagement, UnitWeaponUsage
 )
 
 
@@ -104,8 +104,8 @@ class SimpleAgent(CompetitionAgent):
         commit.entity = event.entity
         commit.target_group = event.target_group
         commit.manouver_data.throttle = 1.0
-        commit.manouver_data.engagement = 2
-        commit.manouver_data.weapon_usage = 2
+        commit.manouver_data.engagement = UnitEngagement(2)
+        commit.manouver_data.weapon_usage = UnitWeaponUsage(2)
         commit.manouver_data.weapons = selected_weapons.keys()
         commit.manouver_data.wez_scale = 1
         
