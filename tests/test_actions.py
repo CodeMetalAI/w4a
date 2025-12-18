@@ -160,7 +160,10 @@ class TestMoveAction:
             "weapon_engagement": 0,
             "stealth_enabled": 0,
             "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
@@ -195,7 +198,8 @@ class TestEngageAction:
                        "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                        "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                        "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                       "refuel_target_id": 0}
+                       "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+                       "spawn_component_idx": 0}
         
         agent_dynasty = PassiveDynastyAgent(Faction.DYNASTY, config)
         env.set_agents(agent_legacy, agent_dynasty)
@@ -229,7 +233,8 @@ class TestEngageAction:
             "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
             "move_axis_angle": 0, "weapon_selection": 0, "weapon_usage": 0,
             "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
 
         entity = agent_legacy._sim_agent.controllable_entities[entity_id]
@@ -241,7 +246,8 @@ class TestEngageAction:
                "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-               "refuel_target_id": 0}
+               "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+               "spawn_component_idx": 0}
         
         print(f"\n[ENGAGE TEST] Entity {entity_id} engaging target {target_id}")
         
@@ -303,7 +309,8 @@ class TestEngageAction:
                        "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                        "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                        "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                       "refuel_target_id": 0}
+                       "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+                       "spawn_component_idx": 0}
         
         agent_legacy = PassiveLegacyAgent(Faction.LEGACY, config)
         agent_dynasty = CompetitionAgent(Faction.DYNASTY, config)
@@ -340,14 +347,16 @@ class TestEngageAction:
             "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
             "move_axis_angle": 0, "weapon_selection": 0, "weapon_usage": 0,
             "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         
         noop = {"action_type": 0, "entity_id": 0, "move_center_grid": 0,
                "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-               "refuel_target_id": 0}
+               "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+               "spawn_component_idx": 0}
         
         print(f"\n[REVERSE ENGAGE] Dynasty entity {entity_id} engaging Legacy target {target_id}")
         
@@ -436,7 +445,10 @@ class TestStealthAction:
             "weapon_engagement": 0,
             "stealth_enabled": 1,
             "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
@@ -470,7 +482,8 @@ class TestSensingAction:
                        "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                        "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                        "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-                       "refuel_target_id": 0}
+                       "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+                       "spawn_component_idx": 0}
         
         agent_dynasty = PassiveDynastyAgent(Faction.DYNASTY, config)
         env.set_agents(agent_legacy, agent_dynasty)
@@ -495,7 +508,8 @@ class TestSensingAction:
                "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
                "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
                "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
-               "refuel_target_id": 0}
+               "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+               "spawn_component_idx": 0}
         
         # Step 1: Initial observation - baseline
         actions = {"legacy": noop, "dynasty": noop}
@@ -519,7 +533,8 @@ class TestSensingAction:
             "move_axis_angle": 0, "target_group_id": 0, "weapon_selection": 0,
             "weapon_usage": 0, "weapon_engagement": 0, "stealth_enabled": 0,
             "sensing_position_grid": 15,  # Specific grid position
-            "refuel_target_id": 0
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         
         actions = {"legacy": sensing_action, "dynasty": noop}
@@ -585,7 +600,10 @@ class TestCaptureAction:
             "weapon_engagement": 0,
             "stealth_enabled": 0,
             "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
 
         action_dynasty = agent_dynasty.select_action(observations["dynasty"])
@@ -608,7 +626,10 @@ class TestCaptureAction:
             "weapon_engagement": 0,
             "stealth_enabled": 0,
             "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         
         actions = {"legacy": action_legacy, "dynasty": action_dynasty}
@@ -666,7 +687,10 @@ class TestRTBAction:
             "weapon_engagement": 0,
             "stealth_enabled": 0,
             "sensing_position_grid": 0,
-            "refuel_target_id": 0
+            "refuel_target_id": 0,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
@@ -735,7 +759,10 @@ class TestRefuelAction:
             "weapon_engagement": 0,
             "stealth_enabled": 0,
             "sensing_position_grid": 0,
-            "refuel_target_id": provider_id
+            "refuel_target_id": provider_id,
+            "entity_to_protect_id": 0,
+            "jam_target_grid": 0,
+            "spawn_component_idx": 0
         }
         action_dynasty = agent_dynasty.select_action(observations["dynasty"])
         
@@ -748,6 +775,217 @@ class TestRefuelAction:
         
         print(f"[REFUEL] Refuel action executed for entity {receiver_id}")
         print(f"[REFUEL] Action recorded in intent: {found}")
+        
+        env.close()
+
+
+class TestSpawnAction:
+    """Test spawn action (type 9) and spawn_components mask"""
+    
+    def test_spawn_components_mask_matches_entity_state(self):
+        """Test that spawn_components mask accurately reflects active_spawn_components"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Get spawn_components mask
+        spawn_mask = infos["legacy"]["valid_masks"]["spawn_components"]
+        
+        print(f"\n[SPAWN MASK] spawn_components mask: {spawn_mask}")
+        
+        # Verify mask matches actual entity state for each spawning entity
+        for entity_id, valid_indices in spawn_mask.items():
+            entity = agent_legacy._sim_agent.controllable_entities.get(entity_id)
+            assert entity is not None, f"Entity {entity_id} in mask should exist"
+            assert entity.is_alive, f"Entity {entity_id} in mask should be alive"
+            assert entity.can_spawn, f"Entity {entity_id} in mask should be spawn-capable"
+            
+            actual_components = len(entity.active_spawn_components)
+            expected_indices = set(range(actual_components))
+            
+            print(f"  Entity {entity_id}: active_spawn_components={actual_components}, mask={valid_indices}")
+            
+            assert valid_indices == expected_indices, \
+                f"Entity {entity_id}: mask {valid_indices} should match expected {expected_indices}"
+        
+        # Also verify no spawn-capable entities are missing from mask
+        for entity_id, entity in agent_legacy._sim_agent.controllable_entities.items():
+            if entity.is_alive and entity.can_spawn:
+                assert entity_id in spawn_mask, \
+                    f"Spawn-capable entity {entity_id} should be in spawn_components mask"
+        
+        print(f"[SPAWN MASK] Mask correctly reflects entity spawn state")
+        
+        env.close()
+    
+    def test_spawn_action_validates_component_index(self):
+        """Test that spawn action validation rejects invalid component indices"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Check if spawn action is available
+        action_types = infos["legacy"]["valid_masks"]["action_types"]
+        spawn_mask = infos["legacy"]["valid_masks"]["spawn_components"]
+        
+        if 9 not in action_types or len(spawn_mask) == 0:
+            print("\n[SPAWN] Spawn action not available or no spawn entities, skipping test")
+            env.close()
+            pytest.skip("Spawn action not available")
+            return
+        
+        # Get a spawn-capable entity
+        entity_id = list(spawn_mask.keys())[0]
+        valid_indices = spawn_mask[entity_id]
+        entity = agent_legacy._sim_agent.controllable_entities[entity_id]
+        
+        print(f"\n[SPAWN VALIDATE] Entity {entity_id} has {len(entity.active_spawn_components)} active spawn components")
+        print(f"  Valid indices: {valid_indices}")
+        
+        noop = {
+            "action_type": 0, "entity_id": 0, "move_center_grid": 0,
+            "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
+            "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
+            "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
+        }
+        
+        # Test valid spawn action (index 0 should always be valid if entity can spawn)
+        if 0 in valid_indices:
+            valid_spawn_action = {
+                "action_type": 9, "entity_id": entity_id, "move_center_grid": 0,
+                "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
+                "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
+                "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
+                "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+                "spawn_component_idx": 0
+            }
+            
+            actions = {"legacy": valid_spawn_action, "dynasty": noop}
+            observations, rewards, terminations, truncations, infos = env.step(actions)
+            
+            # Verify action was recorded in intent
+            intent = infos["legacy"]["last_action_intent_by_entity"]
+            found = any(v["entity_id"] == entity_id and v["action_type"] == 9 for v in intent.values())
+            
+            print(f"  Valid spawn action (idx=0) recorded: {found}")
+        
+        # Test invalid spawn action (index 4 is likely out of bounds)
+        # This should be rejected by validation and treated as noop
+        invalid_idx = 4  # Max is 5, so if entity has fewer components this is invalid
+        if invalid_idx not in valid_indices:
+            invalid_spawn_action = {
+                "action_type": 9, "entity_id": entity_id, "move_center_grid": 0,
+                "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
+                "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
+                "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
+                "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+                "spawn_component_idx": invalid_idx
+            }
+            
+            # This should fail validation and return empty events (noop)
+            from w4a.envs import actions as actions_module
+            events = actions_module.execute_action(
+                invalid_spawn_action,
+                agent_legacy._sim_agent.controllable_entities,
+                agent_legacy._sim_agent.target_groups,
+                env.flags,
+                config
+            )
+            
+            print(f"  Invalid spawn action (idx={invalid_idx}): returned {len(events)} events (expected 0)")
+            assert len(events) == 0, f"Invalid spawn index should be rejected, got {len(events)} events"
+        
+        print(f"[SPAWN VALIDATE] Validation correctly handles component indices")
+        
+        env.close()
+    
+    def test_spawn_mask_updates_after_spawn(self):
+        """Test that spawn_components mask updates after spawning a unit"""
+        config = Config()
+        env = TridentIslandMultiAgentEnv(config=config)
+        
+        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        env.set_agents(agent_legacy, agent_dynasty)
+        
+        observations, infos = env.reset()
+        
+        # Check if spawn action is available
+        action_types = infos["legacy"]["valid_masks"]["action_types"]
+        spawn_mask = infos["legacy"]["valid_masks"]["spawn_components"]
+        
+        if 9 not in action_types or len(spawn_mask) == 0:
+            print("\n[SPAWN UPDATE] Spawn action not available, skipping test")
+            env.close()
+            pytest.skip("Spawn action not available")
+            return
+        
+        # Get a spawn-capable entity with multiple components
+        entity_id = None
+        initial_count = 0
+        for eid, indices in spawn_mask.items():
+            if len(indices) > 1:  # Need at least 2 to see the change
+                entity_id = eid
+                initial_count = len(indices)
+                break
+        
+        if entity_id is None:
+            print("\n[SPAWN UPDATE] No entity with multiple spawn components, skipping")
+            env.close()
+            pytest.skip("Need entity with multiple spawn components")
+            return
+        
+        print(f"\n[SPAWN UPDATE] Entity {entity_id} has {initial_count} spawn components before spawn")
+        
+        noop = {
+            "action_type": 0, "entity_id": 0, "move_center_grid": 0,
+            "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
+            "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
+            "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
+        }
+        
+        # Execute spawn action
+        spawn_action = {
+            "action_type": 9, "entity_id": entity_id, "move_center_grid": 0,
+            "move_short_axis_km": 0, "move_long_axis_km": 0, "move_axis_angle": 0,
+            "target_group_id": 0, "weapon_selection": 0, "weapon_usage": 0,
+            "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
+            "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
+            "spawn_component_idx": 0
+        }
+        
+        actions = {"legacy": spawn_action, "dynasty": noop}
+        observations, rewards, terminations, truncations, infos = env.step(actions)
+        
+        # Check updated mask
+        updated_spawn_mask = infos["legacy"]["valid_masks"]["spawn_components"]
+        
+        if entity_id in updated_spawn_mask:
+            new_count = len(updated_spawn_mask[entity_id])
+            print(f"  After spawn: entity {entity_id} has {new_count} spawn components")
+            
+            # The count should decrease by 1 after spawning
+            assert new_count == initial_count - 1, \
+                f"Spawn component count should decrease: {initial_count} -> {new_count}"
+            
+            print(f"[SPAWN UPDATE] Mask correctly updated after spawn")
+        else:
+            # Entity no longer has spawn components (used last one)
+            print(f"  After spawn: entity {entity_id} no longer in spawn mask (all used)")
         
         env.close()
 

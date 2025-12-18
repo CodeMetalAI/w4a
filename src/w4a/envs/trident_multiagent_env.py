@@ -136,6 +136,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
             "entity_to_protect_id": spaces.Discrete(self.config.max_entities),
             "jam_target_grid": spaces.Discrete(self.max_grid_positions + 1),
+            "spawn_component_idx": spaces.Discrete(5),
         })
         
         # Flags (shared resource, both agents can see)
@@ -245,7 +246,9 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         Args:
             seed: Random seed for reproducible episodes
-            options: Additional reset options
+            options: Additional reset options. Supported options:
+                - legacy_force_laydown: Path to Legacy faction force laydown JSON
+                - dynasty_force_laydown: Path to Dynasty faction force laydown JSON
             
         Returns:
             Tuple of (observations, infos) where each is a dict keyed by agent name
@@ -281,14 +284,16 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         mission_metrics.reset_mission_metrics(self)
         
         # Setup simulation with both agents
-        #legacy_entity_list = self.scenario_path / "force_composition" / "LegacyEntityList.json"
-        #dynasty_entity_list = self.scenario_path / "force_composition" / "DynastyEntityList.json"
-        #legacy_spawn_data = self.scenario_path / "laydown" / "LegacyEntitySpawnData.json"
-        #dynasty_spawn_data = self.scenario_path / "laydown" / "DynastyEntitySpawnData.json"
-
-        # @Sanjna: this needs to be configured externally. Could we use the reset options for this?
-        legacy_force_laydown = self.config.legacy_force_laydown_path
-        dynasty_force_laydown = self.config.dynasty_force_laydown_path
+        # Allow per-episode force laydown override via reset options
+        if options and "legacy_force_laydown" in options:
+            legacy_force_laydown = options["legacy_force_laydown"]
+        else:
+            legacy_force_laydown = self.config.legacy_force_laydown_path
+        
+        if options and "dynasty_force_laydown" in options:
+            dynasty_force_laydown = options["dynasty_force_laydown"]
+        else:
+            dynasty_force_laydown = self.config.dynasty_force_laydown_path
         
         simulation_utils.setup_simulation_from_json(
             self,
@@ -556,7 +561,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 'action_types': self._get_valid_action_types(agent),
                 'controllable_entities': controllable,
                 'visible_targets': detected,
-                'entity_target_matrix': self._get_entity_target_engagement_matrix(agent)
+                'entity_target_matrix': self._get_entity_target_engagement_matrix(agent),
+                'spawn_components': self._get_spawn_components_mask(agent)
             },
             
             'controllable_entities': list(controllable),
@@ -662,6 +668,22 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 providers.add(entity_id)
         return providers
     
+    def _get_spawn_components_mask(self, agent) -> dict:
+        """Get valid spawn component indices for each spawning entity.
+        
+        Args:
+            agent: CompetitionAgent instance
+        
+        Returns:
+            Dict mapping entity_id -> set of valid spawn component indices (0 to len-1)
+        """
+        spawn_mask = {}
+        for entity_id, entity in agent._sim_agent.controllable_entities.items():
+            if entity.is_alive and entity.can_spawn:
+                num_components = len(entity.active_spawn_components)
+                spawn_mask[entity_id] = set(range(num_components))
+        return spawn_mask
+    
     def _get_capturing_entities_dict(self, agent) -> dict:
         """Get dict of RL ID -> entity pointer for entities currently capturing flags."""
         # Filter out dead entities
@@ -710,6 +732,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             'refuel_target_id': 0,
             'entity_to_protect_id': 0,
             'jam_target_grid': 0,
+            'spawn_component_idx': 0,
         }
     
     def render(self):

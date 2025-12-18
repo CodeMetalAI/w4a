@@ -35,6 +35,9 @@ action = {
     # Jamming action parameters (used when action_type=8)
     'entity_to_protect_id': int,     # Friendly entity to protect with jamming
     'jam_target_grid': int,          # Grid position to jam (max_grid_positions = disable)
+    
+    # Spawn action parameters (used when action_type=9)
+    'spawn_component_idx': int,      # Which spawn component to use (0-4, check spawn_components mask)
 }
 ```
 
@@ -76,7 +79,8 @@ action = {
     'sensing_position_grid': 0,
     'refuel_target_id': 0,
     'entity_to_protect_id': 0,
-    'jam_target_grid': 0
+    'jam_target_grid': 0,
+    'spawn_component_idx': 0
 }
 ```
 
@@ -111,7 +115,8 @@ action = {
     'sensing_position_grid': 0,
     'refuel_target_id': 0,
     'entity_to_protect_id': 0,
-    'jam_target_grid': 0
+    'jam_target_grid': 0,
+    'spawn_component_idx': 0
 }
 ```
 
@@ -186,7 +191,8 @@ action = {
     'sensing_position_grid': 0,
     'refuel_target_id': 0,
     'entity_to_protect_id': 2,
-    'jam_target_grid': 500
+    'jam_target_grid': 500,
+    'spawn_component_idx': 0
 }
 
 # Disable jamming (set jam_target_grid to max_grid_positions)
@@ -204,8 +210,11 @@ Launch new units from a carrier or spawn-capable platform.
 
 **Parameters used**:
 - `entity_id`: Which carrier/platform to spawn from
+- `spawn_component_idx`: Which spawn component to use (0-4). Check `spawn_components` mask for valid indices.
 
 **Valid for**: Entities with spawn capability (`can_spawn=True`)
+
+**Note**: As units are spawned, the number of available spawn components decreases. Use the `spawn_components` mask to determine valid indices for each entity.
 
 **Example**:
 ```python
@@ -224,7 +233,8 @@ action = {
     'sensing_position_grid': 0,
     'refuel_target_id': 0,
     'entity_to_protect_id': 0,
-    'jam_target_grid': 0
+    'jam_target_grid': 0,
+    'spawn_component_idx': 0  # Spawn first available component
 }
 ```
 
@@ -242,6 +252,10 @@ info['valid_masks'] = {
     'entity_target_matrix': {                  # Entity-target engagement matrix
         0: {1, 4},    # Entity 0 can engage targets 1 and 4
         3: {4},       # Entity 3 can only engage target 4
+    },
+    'spawn_components': {                      # Valid spawn component indices per entity
+        0: {0, 1, 2},  # Entity 0 has 3 spawn components available
+        5: {0},        # Entity 5 has 1 spawn component left
     }
 }
 ```
@@ -252,6 +266,7 @@ info['valid_masks'] = {
 - **controllable_entities**: Only these entity IDs are alive and controllable
 - **visible_targets**: Only these target group IDs are detected by your sensors
 - **entity_target_matrix**: Maps which entities can engage which targets (weapon range check)
+- **spawn_components**: Maps which spawn component indices are valid for each spawning entity
 
 Invalid actions (not matching masks) will be rejected and treated as no-ops.
 
@@ -276,5 +291,6 @@ spaces.Dict({
     "refuel_target_id": spaces.Discrete(config.max_entities),
     "entity_to_protect_id": spaces.Discrete(config.max_entities),
     "jam_target_grid": spaces.Discrete(grid_size * grid_size + 1),
+    "spawn_component_idx": spaces.Discrete(5),
 })
 ```

@@ -344,20 +344,20 @@ def execute_spawn_action(entity_id: int, action: Dict, entities: Dict) -> bool:
     """Execute spawn action to launch new units.
     
     Args:
-        entity_id: ID of entity that needs fuel
-        action: Action dictionary with refuel parameters
+        entity_id: ID of entity to spawn from
+        action: Action dictionary with spawn parameters
         entities: Dict of entity objects
-        config: Environment configuration
         
     Returns:
         PlayerEvent for spawn operation
     """
     entity_id = action["entity_id"]
+    spawn_component_idx = action["spawn_component_idx"]
 
     entity = entities[entity_id]
     event = PlayerEvent_SpawnEntity()
     event.entity = entity
-    event.component = entity.active_spawn_components[0] # @Sanjna: technically we could select which entity we would like to spawn, but it's difficult to expose that in a meaningful way. Any ideas?
+    event.component = entity.active_spawn_components[spawn_component_idx]
     
     return event
 
@@ -655,18 +655,23 @@ def validate_spawn_action(action: Dict, entities: Dict) -> bool:
     """Validate spawn action parameters and entity capabilities.
     
     Args:
-        action: Action dictionary with refuel parameters
+        action: Action dictionary with spawn parameters
         entities: Dict of entity objects
         
     Returns:
-        True if refuel action is valid
+        True if spawn action is valid
     """
     entity_id = action["entity_id"]
+    spawn_component_idx = action["spawn_component_idx"]
 
     entity = entities[entity_id]
 
     if not entity.can_spawn:
-        return False    
+        return False
+    
+    # Check spawn component index is valid
+    if spawn_component_idx >= len(entity.active_spawn_components):
+        return False
     
     return True
 

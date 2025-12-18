@@ -13,8 +13,14 @@ env.set_agent_classes(
     lambda: SimpleAgent(Faction.DYNASTY, config)
 )
 
-# Run episode
+# Run episode (using default force laydowns from config)
 observations, infos = env.reset()
+
+# Custom force laydowns:
+# observations, infos = env.reset(options={
+#     "legacy_force_laydown": "path/to/custom_legacy.json",
+#     "dynasty_force_laydown": "path/to/custom_dynasty.json"
+# })
 
 for step in range(1000):
     actions = {

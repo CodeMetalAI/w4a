@@ -211,7 +211,7 @@ class _SimulationAgentImpl(SimAgent):
         assert entity.faction == self.faction, f"Agent {self.faction.name} got an entity spawn of faction {entity.faction} {entity.identifier}"
                 
         # Only track entities that are actually controllable (not stationary/carriers)
-        if not entity.Controllable: # @Sanjna: I think this is always true in the current setup.
+        if not entity.Controllable:
             return
         
         # Assign stable ID (reuse freed ID if available)
