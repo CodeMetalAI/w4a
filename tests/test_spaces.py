@@ -82,8 +82,8 @@ class TestObservationSpace:
         
         observations, infos = env.reset()
         
-        # 11 global + (max_entities * 36 friendly) + (max_target_groups * 12 enemy)
-        expected_size = 11 + (config.max_entities * 36) + (config.max_target_groups * 12)
+        # 11 global + (max_entities * 49 friendly) + (max_target_groups * 12 enemy)
+        expected_size = 11 + (config.max_entities * 49) + (config.max_target_groups * 12)
         
         for agent_name, obs in observations.items():
             assert obs.shape == (expected_size,), f"{agent_name}: Expected shape ({expected_size},), got {obs.shape}"

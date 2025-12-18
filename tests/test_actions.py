@@ -516,8 +516,8 @@ class TestSensingAction:
         observations, rewards, terminations, truncations, infos = env.step(actions)
         
         # Get entity features from observation
-        # Entity features start at index 10, each entity has 36 features
-        entity_start_idx = 10 + (sensing_entity_id * 36)
+        # Entity features start at index 11, each entity has 49 features
+        entity_start_idx = 11 + (sensing_entity_id * 49)
         # Feature 29-30 are radar_focus_x, radar_focus_y (normalized)
         # Feature 31 is radar_enabled (binary)
         initial_radar_enabled = observations["legacy"][entity_start_idx + 31]
