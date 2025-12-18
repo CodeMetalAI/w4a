@@ -1,21 +1,21 @@
 """
 Simple rule-based agent for testing and as adversary.
 
-Matches the original SimpleAgent2 behavior exactly while extending CompetitionAgent.
+Matches the original SimpleAgent behavior exactly while extending CompetitionAgent.
 """
 
-from w4a import CompetitionAgent
+from . import CompetitionAgent
 from SimulationInterface import (
     Faction, PlayerEventCommit, AdversaryContact, EntitySpawned, 
     ComponentSpawned, ControllableEntity, UnitEngagement, UnitWeaponUsage
 )
 
 
-class SimpleAgent2(CompetitionAgent):
+class SimpleAgent(CompetitionAgent):
     """
     Simple heuristic agent that auto-engages detected enemies.
     
-    This agent matches the original SimpleAgent2 behavior:
+    This agent matches the original SimpleAgent behavior:
     - Automatically commits weapons when enemies are detected  
     - Logs simulation events
     - Uses aggressive engagement parameters
@@ -50,7 +50,7 @@ class SimpleAgent2(CompetitionAgent):
     
     def select_action(self, observation):
         """
-        SimpleAgent2 doesn't use RL actions - it responds via events.
+        SimpleAgent doesn't use RL actions - it responds via events.
         Return noop action for PettingZoo compatibility.
         """
         return {

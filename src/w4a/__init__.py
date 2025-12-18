@@ -10,7 +10,7 @@ __version__ = "0.1.0"
 from .constants import *
 from .config import Config
 from .envs.trident_multiagent_env import TridentIslandMultiAgentEnv
-from .agents import CompetitionAgent#, SimpleAgent
+from .agents import CompetitionAgent, SimpleAgent
 from .replay import ReplayRecorder, visualize_replay, record_multiagent_episode
 from .training.evaluation import evaluate, print_evaluation_results
 
@@ -21,7 +21,7 @@ __all__ = [
     "Config",
     "TridentIslandMultiAgentEnv",
     "CompetitionAgent",
-    #"SimpleAgent",
+    "SimpleAgent",
     "ReplayRecorder",
     "visualize_replay",
     "record_multiagent_episode",
