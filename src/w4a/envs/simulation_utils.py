@@ -15,8 +15,7 @@ from SimulationInterface import (
 from ..entities import w4a_entities
 
 
-def _load_scenario_data(legacy_entity_list_path, dynasty_entity_list_path, 
-                       legacy_spawn_data_path, dynasty_spawn_data_path):
+def _load_scenario_data(legacy_force_laydown_path, dynasty_force_laydown_path):
     """
     Load scenario data from JSON files
     
@@ -27,7 +26,7 @@ def _load_scenario_data(legacy_entity_list_path, dynasty_entity_list_path,
         dynasty_spawn_data_path: Path to Dynasty faction spawn data JSON
         
     Returns:
-        tuple: (mission_events_data, faction_entity_spawn_data, faction_entity_data)
+        tuple: (mission_events_data, force_laydown_data)
     """
     scenario_path = Path(__file__).parent.parent / "scenarios" / "trident_island"
 
@@ -35,23 +34,14 @@ def _load_scenario_data(legacy_entity_list_path, dynasty_entity_list_path,
     with open(scenario_path / "MissionEvents.json") as f:
         mission_events_data = f.read()
 
-    faction_entity_spawn_data = {}
-    with open(legacy_spawn_data_path) as f:
-        faction_entity_spawn_data[Faction.LEGACY] = EntitySpawnData.import_json(f.read())
+    force_laydown_data = {}
+    with open(legacy_force_laydown_path) as f:
+        force_laydown_data[Faction.LEGACY] = FactionConfiguration.import_json(f.read())
 
-    with open(dynasty_spawn_data_path) as f:
-        faction_entity_spawn_data[Faction.DYNASTY] = EntitySpawnData.import_json(f.read())
+    with open(dynasty_force_laydown_path) as f:
+        force_laydown_data[Faction.DYNASTY] = FactionConfiguration.import_json(f.read())
 
-    # Load entities lists that have emerged from the auction
-    faction_entity_data = {}
-
-    with open(legacy_entity_list_path) as f:
-        faction_entity_data[Faction.LEGACY] = EntityList().load_json(f.read())
-
-    with open(dynasty_entity_list_path) as f:
-        faction_entity_data[Faction.DYNASTY] = EntityList().load_json(f.read())
-    
-    return mission_events_data, faction_entity_spawn_data, faction_entity_data
+    return mission_events_data, force_laydown_data
 
 
 def _create_simulation_config(env, seed):
@@ -106,14 +96,13 @@ def _setup_mission_events(env, mission_events_data):
     pre_simulation_tick(env)
 
 
-def _create_force_laydowns(env, faction_entity_spawn_data, faction_entity_data):
+def _create_force_laydowns(env, faction_force_laydown_data):
     """
     Create force laydowns for all factions
     
     Args:
         env: The environment instance (TridentIslandEnv)
-        faction_entity_spawn_data: Spawn data for each faction
-        faction_entity_data: Entity data for each faction
+        faction_force_laydown_data: Spawn data for each faction
         
     Returns:
         dict: Force laydowns keyed by faction
@@ -123,8 +112,7 @@ def _create_force_laydowns(env, faction_entity_spawn_data, faction_entity_data):
 
     for faction in [Faction.LEGACY, Faction.DYNASTY]:
         force_laydown = ForceLaydown()
-        force_laydown.entity_spawn_data = faction_entity_spawn_data[faction]
-        force_laydown.entity_data = FactionConfiguration().create_entities(faction_entity_data[faction], lambda type: env.simulation.create_mission_event(w4a_entities.get_entity(type)))
+        force_laydown.entity_data = faction_force_laydown_data[faction]
 
         force_laydowns[faction] = force_laydown
         
@@ -203,18 +191,15 @@ def _execute_force_laydown(env, force_laydowns):
     process_simulation_events(env, env.sim_data.simulation_events)
 
 
-def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list_path, 
-                              legacy_spawn_data_path, dynasty_spawn_data_path, 
+def setup_simulation_from_json(env, legacy_force_laydown, dynasty_force_laydown, 
                               legacy_agent=None, dynasty_agent=None, seed=None):
     """
     Set up simulation using JSON files for force composition and spawn data
     
     Args:
         env: The environment instance (TridentIslandEnv or TridentIslandMultiAgentEnv)
-        legacy_entity_list_path: Path to Legacy faction entity list JSON
-        dynasty_entity_list_path: Path to Dynasty faction entity list JSON  
-        legacy_spawn_data_path: Path to Legacy faction spawn data JSON
-        dynasty_spawn_data_path: Path to Dynasty faction spawn data JSON
+        legacy_force_laydown: Path to Legacy faction faction configuration JSON
+        dynasty_force_laydown: Path to Dynasty faction configuration JSON
         legacy_agent: Optional _SimulationAgentImpl for Legacy faction
         dynasty_agent: Optional _SimulationAgentImpl for Dynasty faction
         seed: Optional random seed for simulation
@@ -223,9 +208,8 @@ def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list
         Nothing (simulation is being injected into the environment)
     """
     # Load all scenario data from JSON files
-    mission_events_data, faction_entity_spawn_data, faction_entity_data = _load_scenario_data(
-        legacy_entity_list_path, dynasty_entity_list_path, 
-        legacy_spawn_data_path, dynasty_spawn_data_path
+    mission_events_data, faction_force_laydown_data = _load_scenario_data(
+        legacy_force_laydown, dynasty_force_laydown
     )
     
     # Create and configure the simulation
@@ -239,7 +223,7 @@ def setup_simulation_from_json(env, legacy_entity_list_path, dynasty_entity_list
     _setup_mission_events(env, mission_events_data)
     
     # Create force laydowns for all factions
-    force_laydowns = _create_force_laydowns(env, faction_entity_spawn_data, faction_entity_data)
+    force_laydowns = _create_force_laydowns(env, faction_force_laydown_data)
     
     # Execute the force laydown phase
     _execute_force_laydown(env, force_laydowns)

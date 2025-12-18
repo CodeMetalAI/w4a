@@ -11,11 +11,11 @@ Each agent receives observations from their own perspective, filtered by fog-of-
 
 Observations are returned as **normalized numpy arrays** with values in [0, 1].
 
-**Total Size**: 11 global features + (max_entities × 36) + (max_target_groups × 12)
+**Total Size**: 11 global features + (max_entities × 52) + (max_target_groups × 12)
 
 The observation space consists of three components:
 1. **Global features** (11): Mission state, time, objectives, casualties, flag status
-2. **Friendly entity features** (max_entities × 36): Per-entity capabilities, kinematics, status, engagement
+2. **Friendly entity features** (max_entities × 52): Per-entity capabilities, kinematics, status, engagement, unit stats, extended status
 3. **Enemy target group features** (max_target_groups × 12): Per-group position, velocity, domain, count
 
 ## Structure
@@ -23,14 +23,14 @@ The observation space consists of three components:
 ```python
 observation = np.concatenate([
     global_features,      # Shape: (11,)
-    friendly_features,    # Shape: (max_entities * 36,)
+    friendly_features,    # Shape: (max_entities * 52,)
     enemy_features        # Shape: (max_target_groups * 12,)
 ])
 ```
 
 ### ID-Indexed Layout
 Entity and target group features use **stable ID indexing**:
-- Entity features at index `i * 36` correspond to entity ID `i`
+- Entity features at index `i * 52` correspond to entity ID `i`
 - Target group features correspond to target group ID `j`
 - Unassigned/invisible IDs have zero-filled rows
 - This keeps observation indices aligned with action space IDs across timesteps
@@ -262,15 +262,18 @@ class MyAgent(CompetitionAgent):
         return obs
 ```
 
-## Friendly Entity Features (36 per entity)
+## Friendly Entity Features (52 per entity)
 
-Each friendly entity (units you control) has 36 features organized as:
+Each friendly entity (units you control) has 52 features organized as:
 
-### Identity & Intent (7 features)
+### Identity & Intent (10 features)
 - `can_engage`: Can fire weapons (0.0 or 1.0)
 - `can_sense`: Has radar/sensors (0.0 or 1.0)
-- `can_refuel`: Can refuel others (0.0 or 1.0)
+- `can_refuel`: Can receive fuel (0.0 or 1.0)
+- `can_refuel_others`: Can provide fuel to others (tanker) (0.0 or 1.0)
 - `can_capture`: Can capture objectives (0.0 or 1.0)
+- `has_jammer`: Has electronic warfare capability (0.0 or 1.0)
+- `has_parent`: Has a parent entity (0.0 or 1.0)
 - `domain_air`, `domain_sea`, `domain_ground`: One-hot domain encoding
 
 ### Kinematics (7 features)
@@ -284,12 +287,14 @@ Each friendly entity (units you control) has 36 features organized as:
 - `distance_to_island_norm`: Distance to objective [0,1]
 - `bearing_to_island_norm`: Bearing to objective [0,1]
 
-### Status (6 features)
-- `health_norm`: Health/hit points [0,1]
+### Status (7 features)
+- `health_ok`: Entity is alive (0.0 or 1.0)
+- `radar_on`: Radar enabled (0.0 or 1.0)
+- `radar_focus_grid_norm`: Radar focus position as grid index [0,1]
 - `fuel_norm`: Fuel level [0,1]
-- `radar_enabled`: Radar on/off (0.0 or 1.0)
-- `radar_focus_x`, `radar_focus_y`: Radar focus position [0,1]
-- `selected_flag`: Currently selected entity (0.0 or 1.0)
+- `is_refueling`: Currently in refueling operation (0.0 or 1.0)
+- `has_reached_base`: Entity is at base (0.0 or 1.0)
+- `estimated_range_left_norm`: Estimated range remaining [0,1] (TODO: confirm max range for normalization)
 
 ### Weapons (4 features)
 - `has_air_weapons`: Can engage air targets (0.0 or 1.0)
@@ -297,16 +302,28 @@ Each friendly entity (units you control) has 36 features organized as:
 - `air_ammo_norm`: Air weapon ammo [0,1]
 - `surface_ammo_norm`: Surface weapon ammo [0,1]
 
-### Engagement (10 features)
-- `is_engaging`: Currently engaging target (0.0 or 1.0)
-- `target_id_norm`: Current target ID normalized
-- `target_grid_x`, `target_grid_y`: Target position [0,1]
-- `target_distance_norm`: Distance to target [0,1]
+### Engagement (13 features)
+- `currently_engaging`: Currently engaging target (0.0 or 1.0)
+- `shots_fired_this_commit`: Number of shots fired this engagement
+- `target_range_norm`: Distance to target [0,1]
 - `target_bearing_norm`: Bearing to target [0,1]
-- `target_domain_air`, `target_domain_sea`, `target_domain_ground`: Target domain
-- `can_engage_target`: Weapon range check (0.0 or 1.0)
+- `target_domain_air`, `target_domain_surface`, `target_domain_land`: Target domain one-hot
+- `time_until_shoot_norm`: Estimated time until next shot [0,1]
+- `weapons_tight`, `weapons_selective`, `weapons_free`: Weapons mode one-hot
+- `engagement_level_norm`: Current engagement level [0,1] (TODO: confirm how to normalize)
+- `is_idle`: Entity has no orders (NO_MANOUVER state) (0.0 or 1.0)
 
-**Total**: 36 features per entity
+### Unit Stats (8 features)
+- `role_attack`: Entity has ATTACK role (0.0 or 1.0)
+- `role_defense`: Entity has DEFENSE role (0.0 or 1.0)
+- `role_support`: Entity has SUPPORT role (0.0 or 1.0)
+- `meta_value_norm`: Entity's relative value normalized [0,1] using exponential decay
+- `offensive`: Offensive capabilities [0,1]
+- `defensive`: Defensive capabilities [0,1]
+- `endurance`: Endurance capabilities [0,1]
+- `scouting`: Scouting capabilities [0,1]
+
+**Total**: 52 features per entity
 
 ## Enemy Target Group Features (12 per target group)
 
@@ -334,11 +351,11 @@ Each detected enemy target group has 12 features:
 spaces.Box(
     low=0.0,
     high=1.0,
-    shape=(11 + max_entities*36 + max_target_groups*12,),
+    shape=(11 + max_entities*52 + max_target_groups*12,),
     dtype=np.float32
 )
 ```
 
-Example with default config (max_entities=100, max_target_groups=50):
-- Shape: `(3711,)` = 11 + (100×36) + (50×12)
+Example with default config (max_entities=60, max_target_groups=20):
+- Shape: `(3371,)` = 11 + (60×52) + (20×12)
 

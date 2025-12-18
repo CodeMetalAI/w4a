@@ -4,10 +4,10 @@ Simple rule-based agent for testing and as adversary.
 Matches the original SimpleAgent behavior exactly while extending CompetitionAgent.
 """
 
-from .competition_agent import CompetitionAgent
+from . import CompetitionAgent
 from SimulationInterface import (
     Faction, PlayerEventCommit, AdversaryContact, EntitySpawned, 
-    ComponentSpawned, ControllableEntity
+    ComponentSpawned, ControllableEntity, UnitEngagement, UnitWeaponUsage
 )
 
 
@@ -67,6 +67,9 @@ class SimpleAgent(CompetitionAgent):
             'stealth_enabled': 0,
             'sensing_position_grid': 0,
             'refuel_target_id': 0,
+            'entity_to_protect_id': 0,
+            'jam_target_grid': 0,
+            'spawn_component_idx': 0,
         }
     
     def __entity_spawned(self, event):
@@ -104,8 +107,8 @@ class SimpleAgent(CompetitionAgent):
         commit.entity = event.entity
         commit.target_group = event.target_group
         commit.manouver_data.throttle = 1.0
-        commit.manouver_data.engagement = 2
-        commit.manouver_data.weapon_usage = 2
+        commit.manouver_data.engagement = UnitEngagement(2)
+        commit.manouver_data.weapon_usage = UnitWeaponUsage(2)
         commit.manouver_data.weapons = selected_weapons.keys()
         commit.manouver_data.wez_scale = 1
         

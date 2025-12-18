@@ -1,9 +1,17 @@
 [
     {
         "EventName": "SimSetSimulationSettings",
-        "VisualRangeMeters": 5000.0,
-        "RadarTier2Threshold": 0.00004199999966658652,
-        "RadarTier3Threshold": 0.0006799999973736703,
+        "RadarConfig": {
+            "SNRTiers": [
+                9.999999974752427e-7,
+                0.000004999999873689376,
+                0.000009999999747378752,
+                0.0005000000237487257
+            ],
+            "BaseNoise": 1.000000013351432e-10,
+            "CutoffRCS": 5.0,
+            "VisualRange": 5000.0
+        },
         "TargetGroupDeathTimerSeconds": 180.0,
         "FrameIndex": 0
     },
@@ -23,9 +31,9 @@
         },
         "SpawnComponents": [],
         "Location": {
-            "X": 500000.0,
-            "Y": -0.01216796413064003,
-            "Z": 575.0
+            "X": 816072.75,
+            "Y": 0.0,
+            "Z": 15000.0
         },
         "FrameIndex": 0
     },
@@ -45,9 +53,9 @@
         },
         "SpawnComponents": [],
         "Location": {
-            "X": -500000.0,
-            "Y": 0.01216796413064003,
-            "Z": 2387.0
+            "X": -816072.75,
+            "Y": 0.0,
+            "Z": 15000.0
         },
         "FrameIndex": 0
     },
@@ -69,7 +77,7 @@
         "Location": {
             "X": 0.0,
             "Y": 0.0,
-            "Z": 1305.4000244140625
+            "Z": 15000.0
         },
         "FrameIndex": 0
     },
@@ -125,6 +133,7 @@
         "ForceRatio": {
             "Ratio": -1.0
         },
+        "MaxSimulationTime": 648000,
         "FrameIndex": 0
     },
     {
@@ -145,6 +154,7 @@
         "ForceRatio": {
             "Ratio": -1.0
         },
+        "MaxSimulationTime": 648000,
         "FrameIndex": 0
     },
     {
@@ -163,8 +173,8 @@
         },
         "SpawnComponents": [],
         "Pos": {
-            "X": -413900.09375,
-            "Y": 0.010072643868625164,
+            "X": -783632.9375,
+            "Y": -128831.1015625,
             "Z": 15000.0
         },
         "Rot": {
@@ -187,7 +197,7 @@
                     "EventName": "SimSpawnSquadron",
                     "EntityId": 0,
                     "Faction": 0,
-                    "Identifier": "Melon",
+                    "Identifier": "C-130",
                     "DISEntityType": {
                         "Kind": 0,
                         "Domain": 2,
@@ -200,7 +210,8 @@
                     "SpawnComponents": [
                         {
                             "EventName": "SimSpawnCaptureFlagComponent",
-                            "ComponentId": 0
+                            "ComponentId": 0,
+                            "DataAssetPath": ""
                         }
                     ],
                     "Pos": {
@@ -242,10 +253,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -330,10 +342,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -407,7 +420,7 @@
                     "EventName": "SimSpawnSquadron",
                     "EntityId": 0,
                     "Faction": 0,
-                    "Identifier": "Welby",
+                    "Identifier": "C-130",
                     "DISEntityType": {
                         "Kind": 0,
                         "Domain": 2,
@@ -420,7 +433,8 @@
                     "SpawnComponents": [
                         {
                             "EventName": "SimSpawnCaptureFlagComponent",
-                            "ComponentId": 0
+                            "ComponentId": 0,
+                            "DataAssetPath": ""
                         }
                     ],
                     "Pos": {
@@ -462,10 +476,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -550,10 +565,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -641,8 +657,8 @@
         },
         "SpawnComponents": [],
         "Pos": {
-            "X": 428610.0,
-            "Y": -0.010430621914565563,
+            "X": 783632.9375,
+            "Y": 128831.1015625,
             "Z": 15000.0
         },
         "Rot": {
@@ -665,7 +681,7 @@
                     "EventName": "SimSpawnSquadron",
                     "EntityId": 0,
                     "Faction": 1,
-                    "Identifier": "Yangtze",
+                    "Identifier": "Y-9",
                     "DISEntityType": {
                         "Kind": 0,
                         "Domain": 2,
@@ -678,7 +694,8 @@
                     "SpawnComponents": [
                         {
                             "EventName": "SimSpawnCaptureFlagComponent",
-                            "ComponentId": 0
+                            "ComponentId": 0,
+                            "DataAssetPath": ""
                         }
                     ],
                     "Pos": {
@@ -720,10 +737,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -808,10 +826,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -885,7 +904,7 @@
                     "EventName": "SimSpawnSquadron",
                     "EntityId": 0,
                     "Faction": 1,
-                    "Identifier": "Tai",
+                    "Identifier": "Y-9",
                     "DISEntityType": {
                         "Kind": 0,
                         "Domain": 2,
@@ -898,7 +917,8 @@
                     "SpawnComponents": [
                         {
                             "EventName": "SimSpawnCaptureFlagComponent",
-                            "ComponentId": 0
+                            "ComponentId": 0,
+                            "DataAssetPath": ""
                         }
                     ],
                     "Pos": {
@@ -940,10 +960,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],
@@ -1028,10 +1049,11 @@
                                     {
                                         "EventName": "SimSpawnRadarComponent",
                                         "ComponentId": 0,
+                                        "DataAssetPath": "",
                                         "Specifications": {
-                                            "Strength": 10000.0,
+                                            "Strength": 2350.0,
                                             "FOV": 1.5707963705062866,
-                                            "RotationRange": 2.094395160675049
+                                            "RotationRange": 0.0
                                         }
                                     }
                                 ],

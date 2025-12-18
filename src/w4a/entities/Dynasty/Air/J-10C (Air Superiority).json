@@ -1,12 +1,12 @@
 {
     "EventName": "SimSpawnSquadron",
     "EntityId": 0,
-    "Faction": 0,
+    "Faction": 1,
     "Identifier": "",
     "DISEntityType": {
         "Kind": 0,
         "Domain": 2,
-        "Country": 225,
+        "Country": 45,
         "Category": 0,
         "SubCategory": 0,
         "Specific": 0,
@@ -37,25 +37,26 @@
             "Event": {
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
-                "Faction": 0,
-                "Identifier": "F-16CM_Strike",
+                "Faction": 1,
+                "Identifier": "J-10C (S)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
-                    "Country": 225,
+                    "Country": 45,
                     "Category": 1,
-                    "SubCategory": 3,
-                    "Specific": 10,
+                    "SubCategory": 5,
+                    "Specific": 6,
                     "Extra": 2
                 },
                 "SpawnComponents": [
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -87,67 +88,15 @@
                 },
                 "Loadout": {
                     "Weapons": {
-                        "/Game/Simulation/Projectiles/Legacy/Air/AGM-158B_JASSM.AGM-158B_JASSM": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 9,
-                                    "Country": 255,
-                                    "Category": 1,
-                                    "SubCategory": 26,
-                                    "Specific": 3,
-                                    "Extra": 3
-                                },
-                                "Specifications": {
-                                    "Range": 925000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 295.0,
-                                    "AutonomousDistance": 800000.0,
-                                    "BlastRadius": 80.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 3849.4443359375,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 1,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-120D_AMRAAM.AIM-120D_AMRAAM": {
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-10.PL-10": {
                             "Projectile": {
                                 "DISEntityType": {
                                     "Kind": 2,
                                     "Domain": 1,
-                                    "Country": 225,
+                                    "Country": 45,
                                     "Category": 1,
-                                    "SubCategory": 2,
-                                    "Specific": 4,
-                                    "Extra": 0
-                                },
-                                "Specifications": {
-                                    "Range": 180000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 1372.0,
-                                    "AutonomousDistance": 90000.0,
-                                    "BlastRadius": 15.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 24059.025390625,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 2,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-9X_Sidewinder.AIM-9X_Sidewinder": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 1,
-                                    "Country": 225,
-                                    "Category": 1,
-                                    "SubCategory": 1,
-                                    "Specific": 6,
+                                    "SubCategory": 21,
+                                    "Specific": 0,
                                     "Extra": 0
                                 },
                                 "Specifications": {
@@ -164,6 +113,32 @@
                                 }
                             },
                             "Ammo": 2
+                        },
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-12.PL-12": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 20,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 4
                         }
                     }
                 },
@@ -208,25 +183,26 @@
             "Event": {
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
-                "Faction": 0,
-                "Identifier": "F-16CM_Strike",
+                "Faction": 1,
+                "Identifier": "J-10C (S)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
-                    "Country": 225,
+                    "Country": 45,
                     "Category": 1,
-                    "SubCategory": 3,
-                    "Specific": 10,
+                    "SubCategory": 5,
+                    "Specific": 6,
                     "Extra": 2
                 },
                 "SpawnComponents": [
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -258,67 +234,15 @@
                 },
                 "Loadout": {
                     "Weapons": {
-                        "/Game/Simulation/Projectiles/Legacy/Air/AGM-158B_JASSM.AGM-158B_JASSM": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 9,
-                                    "Country": 255,
-                                    "Category": 1,
-                                    "SubCategory": 26,
-                                    "Specific": 3,
-                                    "Extra": 3
-                                },
-                                "Specifications": {
-                                    "Range": 925000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 295.0,
-                                    "AutonomousDistance": 800000.0,
-                                    "BlastRadius": 80.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 3849.4443359375,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 1,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-120D_AMRAAM.AIM-120D_AMRAAM": {
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-10.PL-10": {
                             "Projectile": {
                                 "DISEntityType": {
                                     "Kind": 2,
                                     "Domain": 1,
-                                    "Country": 225,
+                                    "Country": 45,
                                     "Category": 1,
-                                    "SubCategory": 2,
-                                    "Specific": 4,
-                                    "Extra": 0
-                                },
-                                "Specifications": {
-                                    "Range": 180000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 1372.0,
-                                    "AutonomousDistance": 90000.0,
-                                    "BlastRadius": 15.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 24059.025390625,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 2,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-9X_Sidewinder.AIM-9X_Sidewinder": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 1,
-                                    "Country": 225,
-                                    "Category": 1,
-                                    "SubCategory": 1,
-                                    "Specific": 6,
+                                    "SubCategory": 21,
+                                    "Specific": 0,
                                     "Extra": 0
                                 },
                                 "Specifications": {
@@ -335,6 +259,32 @@
                                 }
                             },
                             "Ammo": 2
+                        },
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-12.PL-12": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 20,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 4
                         }
                     }
                 },
@@ -379,25 +329,26 @@
             "Event": {
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
-                "Faction": 0,
-                "Identifier": "F-16CM_Strike",
+                "Faction": 1,
+                "Identifier": "J-10C (S)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
-                    "Country": 225,
+                    "Country": 45,
                     "Category": 1,
-                    "SubCategory": 3,
-                    "Specific": 10,
+                    "SubCategory": 5,
+                    "Specific": 6,
                     "Extra": 2
                 },
                 "SpawnComponents": [
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -429,67 +380,15 @@
                 },
                 "Loadout": {
                     "Weapons": {
-                        "/Game/Simulation/Projectiles/Legacy/Air/AGM-158B_JASSM.AGM-158B_JASSM": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 9,
-                                    "Country": 255,
-                                    "Category": 1,
-                                    "SubCategory": 26,
-                                    "Specific": 3,
-                                    "Extra": 3
-                                },
-                                "Specifications": {
-                                    "Range": 925000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 295.0,
-                                    "AutonomousDistance": 800000.0,
-                                    "BlastRadius": 80.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 3849.4443359375,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 1,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-120D_AMRAAM.AIM-120D_AMRAAM": {
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-10.PL-10": {
                             "Projectile": {
                                 "DISEntityType": {
                                     "Kind": 2,
                                     "Domain": 1,
-                                    "Country": 225,
+                                    "Country": 45,
                                     "Category": 1,
-                                    "SubCategory": 2,
-                                    "Specific": 4,
-                                    "Extra": 0
-                                },
-                                "Specifications": {
-                                    "Range": 180000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 1372.0,
-                                    "AutonomousDistance": 90000.0,
-                                    "BlastRadius": 15.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 24059.025390625,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 2,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-9X_Sidewinder.AIM-9X_Sidewinder": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 1,
-                                    "Country": 225,
-                                    "Category": 1,
-                                    "SubCategory": 1,
-                                    "Specific": 6,
+                                    "SubCategory": 21,
+                                    "Specific": 0,
                                     "Extra": 0
                                 },
                                 "Specifications": {
@@ -506,6 +405,32 @@
                                 }
                             },
                             "Ammo": 2
+                        },
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-12.PL-12": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 20,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 4
                         }
                     }
                 },
@@ -550,25 +475,26 @@
             "Event": {
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
-                "Faction": 0,
-                "Identifier": "F-16CM_Strike",
+                "Faction": 1,
+                "Identifier": "J-10C (S)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
-                    "Country": 225,
+                    "Country": 45,
                     "Category": 1,
-                    "SubCategory": 3,
-                    "Specific": 10,
+                    "SubCategory": 5,
+                    "Specific": 6,
                     "Extra": 2
                 },
                 "SpawnComponents": [
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -600,67 +526,15 @@
                 },
                 "Loadout": {
                     "Weapons": {
-                        "/Game/Simulation/Projectiles/Legacy/Air/AGM-158B_JASSM.AGM-158B_JASSM": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 9,
-                                    "Country": 255,
-                                    "Category": 1,
-                                    "SubCategory": 26,
-                                    "Specific": 3,
-                                    "Extra": 3
-                                },
-                                "Specifications": {
-                                    "Range": 925000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 295.0,
-                                    "AutonomousDistance": 800000.0,
-                                    "BlastRadius": 80.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 3849.4443359375,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 1,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-120D_AMRAAM.AIM-120D_AMRAAM": {
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-10.PL-10": {
                             "Projectile": {
                                 "DISEntityType": {
                                     "Kind": 2,
                                     "Domain": 1,
-                                    "Country": 225,
+                                    "Country": 45,
                                     "Category": 1,
-                                    "SubCategory": 2,
-                                    "Specific": 4,
-                                    "Extra": 0
-                                },
-                                "Specifications": {
-                                    "Range": 180000.0,
-                                    "Damage": 100.0,
-                                    "Speed": 1372.0,
-                                    "AutonomousDistance": 90000.0,
-                                    "BlastRadius": 15.0,
-                                    "Accuracy": 0.8999999761581421,
-                                    "MaxAcceleration": 24059.025390625,
-                                    "RadarCrossSection": 0.05000000074505806,
-                                    "TargetPlatformDomains": 2,
-                                    "TargetProjectileDomains": 0
-                                }
-                            },
-                            "Ammo": 2
-                        },
-                        "/Game/Simulation/Projectiles/Legacy/Air/AIM-9X_Sidewinder.AIM-9X_Sidewinder": {
-                            "Projectile": {
-                                "DISEntityType": {
-                                    "Kind": 2,
-                                    "Domain": 1,
-                                    "Country": 225,
-                                    "Category": 1,
-                                    "SubCategory": 1,
-                                    "Specific": 6,
+                                    "SubCategory": 21,
+                                    "Specific": 0,
                                     "Extra": 0
                                 },
                                 "Specifications": {
@@ -677,6 +551,32 @@
                                 }
                             },
                             "Ammo": 2
+                        },
+                        "/Game/Simulation/Projectiles/Dynasty/Air/PL-12.PL-12": {
+                            "Projectile": {
+                                "DISEntityType": {
+                                    "Kind": 2,
+                                    "Domain": 1,
+                                    "Country": 45,
+                                    "Category": 1,
+                                    "SubCategory": 20,
+                                    "Specific": 0,
+                                    "Extra": 0
+                                },
+                                "Specifications": {
+                                    "Range": 180000.0,
+                                    "Damage": 100.0,
+                                    "Speed": 1372.0,
+                                    "AutonomousDistance": 90000.0,
+                                    "BlastRadius": 15.0,
+                                    "Accuracy": 0.8999999761581421,
+                                    "MaxAcceleration": 24059.025390625,
+                                    "RadarCrossSection": 0.05000000074505806,
+                                    "TargetPlatformDomains": 2,
+                                    "TargetProjectileDomains": 0
+                                }
+                            },
+                            "Ammo": 4
                         }
                     }
                 },

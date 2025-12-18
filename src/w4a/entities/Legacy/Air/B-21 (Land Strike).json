@@ -12,7 +12,14 @@
         "Specific": 0,
         "Extra": 0
     },
-    "SpawnComponents": [],
+    "SpawnComponents": [
+        {
+            "EventName": "SimSpawnRefuelComponent",
+            "ComponentId": 0,
+            "DataAssetPath": "/Game/Experiment/Refuel/DA_Refuel_Tanker_Only.DA_Refuel_Tanker_Only",
+            "RefuelCompatibility": 4
+        }
+    ],
     "Pos": {
         "X": 0.0,
         "Y": 0.0,
@@ -38,7 +45,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "B-21_LandStrike",
+                "Identifier": "B-21 (LS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -52,10 +59,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],
@@ -153,7 +161,7 @@
                 "EventName": "SimSpawnFlight",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "B-21_LandStrike",
+                "Identifier": "B-21 (LS)",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 2,
@@ -167,10 +175,11 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 290000.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 2.7925267219543457
                         }
                     }
                 ],

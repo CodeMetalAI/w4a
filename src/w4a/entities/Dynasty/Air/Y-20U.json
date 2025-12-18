@@ -50,16 +50,23 @@
                 },
                 "SpawnComponents": [
                     {
-                        "EventName": "SimSpawnRefuelingComponent",
-                        "ComponentId": 0
-                    },
-                    {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 2350.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 0.0
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnRefuelingComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "/Game/Experiment/Refueling/DA_Refueling_Tanker.DA_Refueling_Tanker",
+                        "Specifications": {
+                            "Fuel": 94198.0,
+                            "FlowRate": 30.0,
+                            "RefuelingCompatibility": 2
                         }
                     }
                 ],
@@ -142,16 +149,23 @@
                 },
                 "SpawnComponents": [
                     {
-                        "EventName": "SimSpawnRefuelingComponent",
-                        "ComponentId": 0
-                    },
-                    {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 10000.0,
+                            "Strength": 2350.0,
                             "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "RotationRange": 0.0
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnRefuelingComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "/Game/Experiment/Refueling/DA_Refueling_Tanker.DA_Refueling_Tanker",
+                        "Specifications": {
+                            "Fuel": 94198.0,
+                            "FlowRate": 30.0,
+                            "RefuelingCompatibility": 2
                         }
                     }
                 ],

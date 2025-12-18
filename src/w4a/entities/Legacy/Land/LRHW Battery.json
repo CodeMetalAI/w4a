@@ -38,7 +38,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "LRHW-TEL",
+                "Identifier": "LRHW TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -126,7 +126,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "LRHW-TEL",
+                "Identifier": "LRHW TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -214,7 +214,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "LRHW-TEL",
+                "Identifier": "LRHW TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -302,7 +302,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "LRHW-TEL",
+                "Identifier": "LRHW TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,

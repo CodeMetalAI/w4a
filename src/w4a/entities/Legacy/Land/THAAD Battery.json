@@ -52,8 +52,9 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
-                            "Strength": 25000.0,
+                            "Strength": 1900000.0,
                             "FOV": 6.2831854820251465,
                             "RotationRange": 0.0
                         }

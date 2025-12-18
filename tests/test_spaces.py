@@ -65,7 +65,7 @@ class TestObservationSpace:
         assert "valid_masks" in infos["legacy"]
         assert "valid_masks" in infos["dynasty"]
         
-        required_mask_keys = {"action_types", "controllable_entities", "visible_targets", "entity_target_matrix"}
+        required_mask_keys = {"action_types", "controllable_entities", "visible_targets", "entity_target_matrix", "spawn_components"}
         assert set(infos["legacy"]["valid_masks"].keys()) == required_mask_keys
         assert set(infos["dynasty"]["valid_masks"].keys()) == required_mask_keys
         
@@ -82,8 +82,8 @@ class TestObservationSpace:
         
         observations, infos = env.reset()
         
-        # 11 global + (max_entities * 36 friendly) + (max_target_groups * 12 enemy)
-        expected_size = 11 + (config.max_entities * 36) + (config.max_target_groups * 12)
+        # 11 global + (max_entities * 52 friendly) + (max_target_groups * 12 enemy)
+        expected_size = 11 + (config.max_entities * 52) + (config.max_target_groups * 12)
         
         for agent_name, obs in observations.items():
             assert obs.shape == (expected_size,), f"{agent_name}: Expected shape ({expected_size},), got {obs.shape}"
@@ -160,7 +160,8 @@ class TestActionSpace:
             "action_type", "entity_id", "move_center_grid", "move_short_axis_km",
             "move_long_axis_km", "move_axis_angle", "target_group_id", 
             "weapon_selection", "weapon_usage", "weapon_engagement",
-            "stealth_enabled", "sensing_position_grid", "refuel_target_id"
+            "stealth_enabled", "sensing_position_grid", "refuel_target_id",
+            "entity_to_protect_id", "jam_target_grid", "spawn_component_idx"
         }
         
         assert set(action_spaces["legacy"].spaces.keys()) == expected_keys
@@ -187,7 +188,7 @@ class TestActionSpace:
         for agent_name in ["legacy", "dynasty"]:
             action_space = env.action_spaces[agent_name]
             
-            assert action_space["action_type"].n == 8
+            assert action_space["action_type"].n == 10
             assert action_space["entity_id"].n == config.max_entities
             assert action_space["stealth_enabled"].n == 2
             

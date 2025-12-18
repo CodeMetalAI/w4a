@@ -1,14 +1,14 @@
 {
     "EventName": "SimSpawnPackage",
     "EntityId": 0,
-    "Faction": 0,
+    "Faction": 1,
     "Identifier": "",
     "DISEntityType": {
-        "Kind": 0,
-        "Domain": 0,
-        "Country": 0,
-        "Category": 0,
-        "SubCategory": 0,
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 45,
+        "Category": 4,
+        "SubCategory": 30,
         "Specific": 0,
         "Extra": 0
     },
@@ -38,7 +38,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -126,7 +126,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -214,7 +214,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,
@@ -302,7 +302,7 @@
                 "EventName": "SimSpawnGroundUnit",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "DF-16_TEL",
+                "Identifier": "DF-16 TEL",
                 "DISEntityType": {
                     "Kind": 1,
                     "Domain": 1,

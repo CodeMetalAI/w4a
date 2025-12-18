@@ -52,10 +52,21 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
+                        "Specifications": {
+                            "Strength": 290000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.7925267219543457
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnJammerComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
                             "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "FOV": 0.5235987901687622,
+                            "RotationRange": 6.2831854820251465
                         }
                     }
                 ],
@@ -197,10 +208,21 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
+                        "Specifications": {
+                            "Strength": 290000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.7925267219543457
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnJammerComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
                             "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "FOV": 0.5235987901687622,
+                            "RotationRange": 6.2831854820251465
                         }
                     }
                 ],
@@ -342,10 +364,21 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
+                        "Specifications": {
+                            "Strength": 290000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.7925267219543457
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnJammerComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
                             "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "FOV": 0.5235987901687622,
+                            "RotationRange": 6.2831854820251465
                         }
                     }
                 ],
@@ -487,10 +520,21 @@
                     {
                         "EventName": "SimSpawnRadarComponent",
                         "ComponentId": 0,
+                        "DataAssetPath": "",
+                        "Specifications": {
+                            "Strength": 290000.0,
+                            "FOV": 1.5707963705062866,
+                            "RotationRange": 2.7925267219543457
+                        }
+                    },
+                    {
+                        "EventName": "SimSpawnJammerComponent",
+                        "ComponentId": 0,
+                        "DataAssetPath": "",
                         "Specifications": {
                             "Strength": 10000.0,
-                            "FOV": 1.5707963705062866,
-                            "RotationRange": 2.094395160675049
+                            "FOV": 0.5235987901687622,
+                            "RotationRange": 6.2831854820251465
                         }
                     }
                 ],
