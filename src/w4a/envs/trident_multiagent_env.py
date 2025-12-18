@@ -838,24 +838,16 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         """
         enemy_faction = Faction.DYNASTY if my_faction == Faction.LEGACY else Faction.LEGACY
         return self.capture_possible_by_faction[enemy_faction]
+
+    def export_replay(self):
+        assert self.enable_replay
+
+        return self.simulation.export_json()
+
     
-    def close(self, save_replay = False):
+    def close(self):
         """Clean up environment resources."""
         if self.simulation:
-
-            if save_replay:
-                save_dir = Path("./replays")
-                save_dir.mkdir(exist_ok=True)
-
-                simulation_json = self.simulation.export_json()
-
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_path = save_dir / f"{timestamp}.json"
-
-                with open(output_path, 'w') as f:
-                    f.write(simulation_json)
-
-
             SimulationInterface.destroy_simulation(self.simulation)
             self.simulation = None
 
