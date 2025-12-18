@@ -121,7 +121,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         # Build action space template (same for both agents)
         self._action_space_template = spaces.Dict({
-            "action_type": spaces.Discrete(8),
+            "action_type": spaces.Discrete(10),
             "entity_id": spaces.Discrete(self.config.max_entities),
             "move_center_grid": spaces.Discrete(self.max_grid_positions),
             "move_short_axis_km": spaces.Discrete(patrol_steps),
@@ -134,6 +134,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             "stealth_enabled": spaces.Discrete(2),
             "sensing_position_grid": spaces.Discrete(self.max_grid_positions + 1),
             "refuel_target_id": spaces.Discrete(self.config.max_entities),
+            "entity_to_protect_id": spaces.Discrete(self.config.max_entities),
+            "jam_target_grid": spaces.Discrete(self.max_grid_positions + 1),
         })
         
         # Flags (shared resource, both agents can see)
@@ -617,6 +619,10 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
                 valid_actions.update({3, 4})  # stealth, sense
             if entity.can_refuel:
                 valid_actions.add(7)  # refuel
+            if entity.has_jammer:
+                valid_actions.add(8)  # jam
+            if entity.can_spawn:
+                valid_actions.add(9)  # spawn
         
         return valid_actions
     
@@ -702,6 +708,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             'stealth_enabled': 0,
             'sensing_position_grid': 0,
             'refuel_target_id': 0,
+            'entity_to_protect_id': 0,
+            'jam_target_grid': 0,
         }
     
     def render(self):

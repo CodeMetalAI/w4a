@@ -8,7 +8,7 @@ The W4A environment uses a **hierarchical action space** where agents select an 
 
 ```python
 action = {
-    'action_type': int,              # Primary action selector (0-7)
+    'action_type': int,              # Primary action selector (0-9)
     'entity_id': int,                # Which entity to command
     
     # Move action parameters (used when action_type=1)
@@ -31,6 +31,10 @@ action = {
     
     # Refuel action parameters (used when action_type=7)
     'refuel_target_id': int,         # Entity to refuel from/to
+    
+    # Jamming action parameters (used when action_type=8)
+    'entity_to_protect_id': int,     # Friendly entity to protect with jamming
+    'jam_target_grid': int,          # Grid position to jam (max_grid_positions = disable)
 }
 ```
 
@@ -70,7 +74,9 @@ action = {
     'weapon_engagement': 0,
     'stealth_enabled': 0,
     'sensing_position_grid': 0,
-    'refuel_target_id': 0
+    'refuel_target_id': 0,
+    'entity_to_protect_id': 0,
+    'jam_target_grid': 0
 }
 ```
 
@@ -103,7 +109,9 @@ action = {
     'weapon_engagement': 3,
     'stealth_enabled': 0,
     'sensing_position_grid': 0,
-    'refuel_target_id': 0
+    'refuel_target_id': 0,
+    'entity_to_protect_id': 0,
+    'jam_target_grid': 0
 }
 ```
 
@@ -150,6 +158,76 @@ Initiate refueling between tanker and receiver aircraft.
 
 **Valid for**: Air units with refueling capability
 
+### 8: Jam
+Activate electronic jamming to protect a friendly entity by disrupting enemy sensors at a target location.
+
+**Parameters used**:
+- `entity_id`: Which jammer platform to command
+- `entity_to_protect_id`: Friendly entity to protect with jamming
+- `jam_target_grid`: Grid position to focus jamming on. Set to `max_grid_positions` to disable jamming.
+
+**Valid for**: Entities with jamming capability (`has_jammer=True`)
+
+**Example**:
+```python
+# Enable jamming to protect entity 2 at grid position 500
+action = {
+    'action_type': 8,
+    'entity_id': 7,
+    'move_center_grid': 0,
+    'move_short_axis_km': 0,
+    'move_long_axis_km': 0,
+    'move_axis_angle': 0,
+    'target_group_id': 0,
+    'weapon_selection': 0,
+    'weapon_usage': 0,
+    'weapon_engagement': 0,
+    'stealth_enabled': 0,
+    'sensing_position_grid': 0,
+    'refuel_target_id': 0,
+    'entity_to_protect_id': 2,
+    'jam_target_grid': 500
+}
+
+# Disable jamming (set jam_target_grid to max_grid_positions)
+action = {
+    'action_type': 8,
+    'entity_id': 7,
+    # ... other fields ...
+    'entity_to_protect_id': 0,
+    'jam_target_grid': 2500  # Assuming max_grid_positions = 2500
+}
+```
+
+### 9: Spawn
+Launch new units from a carrier or spawn-capable platform.
+
+**Parameters used**:
+- `entity_id`: Which carrier/platform to spawn from
+
+**Valid for**: Entities with spawn capability (`can_spawn=True`)
+
+**Example**:
+```python
+action = {
+    'action_type': 9,
+    'entity_id': 0,  # Carrier entity ID
+    'move_center_grid': 0,
+    'move_short_axis_km': 0,
+    'move_long_axis_km': 0,
+    'move_axis_angle': 0,
+    'target_group_id': 0,
+    'weapon_selection': 0,
+    'weapon_usage': 0,
+    'weapon_engagement': 0,
+    'stealth_enabled': 0,
+    'sensing_position_grid': 0,
+    'refuel_target_id': 0,
+    'entity_to_protect_id': 0,
+    'jam_target_grid': 0
+}
+```
+
 ## Action Masking
 
 The environment provides action masks in the `info` dict to indicate valid actions. These masks are useful for ensuring agents only select valid actions based on current game state.
@@ -158,7 +236,7 @@ The environment provides action masks in the `info` dict to indicate valid actio
 obs, reward, terminated, truncated, info = env.step(action)
 
 info['valid_masks'] = {
-    'action_types': {0, 1, 2, 5, 6},           # Valid action types this step
+    'action_types': {0, 1, 2, 5, 6, 8, 9},    # Valid action types this step
     'controllable_entities': {0, 3, 5, 7},     # Valid entity IDs (alive entities)
     'visible_targets': {1, 4},                 # Valid target group IDs (detected enemies)
     'entity_target_matrix': {                  # Entity-target engagement matrix
@@ -183,7 +261,7 @@ The action space is defined as:
 
 ```python
 spaces.Dict({
-    "action_type": spaces.Discrete(8),
+    "action_type": spaces.Discrete(10),
     "entity_id": spaces.Discrete(config.max_entities),
     "move_center_grid": spaces.Discrete(grid_size * grid_size),
     "move_short_axis_km": spaces.Discrete(patrol_steps),
@@ -196,5 +274,7 @@ spaces.Dict({
     "stealth_enabled": spaces.Discrete(2),
     "sensing_position_grid": spaces.Discrete(grid_size * grid_size + 1),
     "refuel_target_id": spaces.Discrete(config.max_entities),
+    "entity_to_protect_id": spaces.Discrete(config.max_entities),
+    "jam_target_grid": spaces.Discrete(grid_size * grid_size + 1),
 })
 ```

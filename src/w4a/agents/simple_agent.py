@@ -67,6 +67,8 @@ class SimpleAgent(CompetitionAgent):
             'stealth_enabled': 0,
             'sensing_position_grid': 0,
             'refuel_target_id': 0,
+            'entity_to_protect_id': 0,
+            'jam_target_grid': 0,
         }
     
     def __entity_spawned(self, event):

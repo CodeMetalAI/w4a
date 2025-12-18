@@ -15,6 +15,8 @@ Action types supported:
 - Sensing: Radar direction and stealth modes
 - Additional: Refueling and return-to-base operations
 - Objectives: Capture and hold operations
+- Electronic Warfare: Jamming to protect friendly units
+- Spawning: Launch new units from carriers
 """
 
 import math
@@ -28,7 +30,8 @@ from SimulationInterface import (
     PlayerEventCommit, NonCombatManouverQueue, MoveManouver, CAPManouver, RTBManouver,
     SetRadarFocus, ClearRadarFocus, SetRadarEnabled, CaptureFlag, Refuel,
     RefuelComponent, CaptureFlagComponent,
-    Vector3, Formation, ControllableEntity, PlatformDomain, ProjectileDomain, Faction, UnitEngagement, UnitWeaponUsage
+    Vector3, Formation, ControllableEntity, PlatformDomain, ProjectileDomain, Faction, UnitEngagement, UnitWeaponUsage,
+    PlayerEvent_SetJammerFocus, PlayerEvent_SpawnEntity
 )
 
 def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dict, config: Config) -> List:
@@ -326,7 +329,7 @@ def execute_jamming_action(entity_id: int, action: Dict, entities: Dict, config:
     event.entity = entity
 
     max_grid_positions = calculate_max_grid_positions(config)
-    if jam_target_grid == max_grid_positions or entity_to_protect_id == 0:
+    if jam_target_grid == max_grid_positions:  # Disable jamming
          return event
 
     jam_x, jam_y = grid_to_position(jam_target_grid, config)  # Technically we support multiple positions, but let's focus on one right now. 
@@ -630,7 +633,7 @@ def validate_jamming_action(action: Dict, entities: Dict, config: Config) -> boo
     # Check grid position is within map bounds
     max_grid_positions = calculate_max_grid_positions(config)
 
-    if jam_target_grid == max_grid_positions or entity_to_protect_id == 0: # This is a disable action
+    if jam_target_grid == max_grid_positions:  # This is a disable action
         return True
 
     
