@@ -79,7 +79,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
-        self.max_ammo = 150.0
+        self.max_ammo = 300.0 # TODO: Sanjna, check this.
         self.max_velocity = 1029.0  # 3x 343 m/s
         self.max_entities = self.config.max_entities
 

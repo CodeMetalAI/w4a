@@ -22,8 +22,6 @@ from w4a.envs.utils import calculate_max_grid_positions
 
 from SimulationInterface import Faction, PlatformDomain, ProjectileDomain, ControllableEntityManouver, UnitTargetGroup, Role
 
-# TODO: Add support for target_projectile_domains (point defense capability)
-
 def build_observation_space(config) -> spaces.Box:
     """Build the complete observation space for the environment.
 
@@ -389,10 +387,10 @@ def compute_friendly_status_features(entity: Any, env: Any) -> np.ndarray:
     is_refueling = 1.0 if entity.is_refueling else 0.0
     has_reached_base = 1.0 if entity.has_reached_base else 0.0
     
-    # Estimated range left
-    # TODO: Determine max range to normalize estimated_range_left
+    # Estimated range left (normalized by max fuel range of 10,000 km) TODO: Finalize this
     estimated_range = entity.estimated_range_left if hasattr(entity, 'estimated_range_left') else 0.0
-    estimated_range_left_norm = 0.0  # Placeholder until normalization is determined
+    max_fuel_range_km = 10000.0
+    estimated_range_left_norm = min(float(estimated_range) / max_fuel_range_km, 1.0)
     
     return np.array([
         health_ok, radar_on, radar_focus_grid_norm, fuel_norm,
