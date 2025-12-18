@@ -844,7 +844,12 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
 
         return self.simulation.export_json()
 
-    
+    def save_replay(self, file_path):
+        simulation_json = self.export_replay()
+
+        with open(file_path, 'w') as f:
+            f.write(simulation_json)
+                
     def close(self):
         """Clean up environment resources."""
         if self.simulation:

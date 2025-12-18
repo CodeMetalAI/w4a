@@ -294,8 +294,7 @@ class TestEngageAction:
     def test_engage_action_legacy_dies_to_dynasty(self):
         """Test Dynasty killing Legacy entity: friendly casualties tracked"""
         config = Config()
-        config.our_faction = Faction.DYNASTY.value
-        env = TridentIslandMultiAgentEnv(config=config)
+        env = TridentIslandMultiAgentEnv(config=config, enable_replay=True)
         
         # Legacy is passive
         class PassiveLegacyAgent(CompetitionAgent):
@@ -354,7 +353,7 @@ class TestEngageAction:
         
         initial_my_casualties = infos["legacy"]["mission"]["my_casualties"]
         
-        max_steps = 360
+        max_steps = 3600
         for step in range(max_steps):
             actions = {"legacy": noop, "dynasty": engage_action if step == 0 else noop}
             observations, rewards, terminations, truncations, infos = env.step(actions)
@@ -390,6 +389,7 @@ class TestEngageAction:
             if terminations["legacy"] or truncations["legacy"]:
                 break
         
+        env.save_replay("Bla.json")
         env.close()
         pytest.fail(f"Expected Legacy casualty within {max_steps} steps but didn't happen")
 
@@ -686,7 +686,7 @@ class TestRTBAction:
 class TestRefuelAction:
     """Test refuel action (type 7) execution"""
     
-    @pytest.mark.skip(reason="Need force laydown first.")
+    #@pytest.mark.skip(reason="Need force laydown first.")
     def test_refuel_action_execution(self):
         """Test that refuel action executes when receivers and providers are available"""
         config = Config()

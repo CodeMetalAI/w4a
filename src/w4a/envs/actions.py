@@ -77,6 +77,12 @@ def execute_action(action: Dict, entities: Dict, target_groups: Dict, flags: Dic
     elif action_type == 7:  # Refuel
         event = execute_refuel_action(entity_id, action, entities)
         return [event]
+    elif action_type == 8:  # Jam
+        event = execute_jamming_action(entity_id, action, entities, config)
+        return [event]
+    elif action_type == 9:  # Spawn
+        event = execute_spawn_action(entity_id, action, entities)
+        return [event]
     
     return []
 
@@ -118,9 +124,12 @@ def is_valid_action(action: Dict, entities: Dict, target_groups: Dict, flags: Di
         return validate_rtb_action(action, entities, flags)
     elif action_type == 7:  # Refuel
         return validate_refuel_action(action, entities)
+    elif action_type == 8:  # RTB
+        return validate_jamming_action(action, entities, config)
+    elif action_type == 9:  # Refuel
+        return validate_spawn_action(action, entities)
     
     return False
-
 
 def execute_move_action(entity_id: int, action: Dict, entities: Dict, config: Config):
     """Execute move action by creating a CAP (Combat Air Patrol) maneuver.
@@ -295,6 +304,60 @@ def execute_refuel_action(entity_id: int, action: Dict, entities: Dict):
     
     return event
 
+def execute_jamming_action(entity_id: int, action: Dict, entities: Dict, config: Config):
+    """Execute jamming action to block sensing in a particular area.
+    
+    Args:
+        entity_id: ID of entity that needs fuel
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        PlayerEvent for jamming operation
+    """
+    entity_id = action["entity_id"]
+    entity_to_protect_id = action["entity_to_protect_id"]
+    jam_target_grid = action["jam_target_grid"]
+
+    entity = entities[entity_id]
+
+    event = PlayerEvent_SetJammerFocus()
+    event.entity = entity
+
+    max_grid_positions = calculate_max_grid_positions(config)
+    if jam_target_grid == max_grid_positions or entity_to_protect_id == 0:
+         return event
+
+    jam_x, jam_y = grid_to_position(jam_target_grid, config)  # Technically we support multiple positions, but let's focus on one right now. 
+    
+    event.entity_to_protect = entity_to_protect = entities[entity_to_protect_id]
+    event.positions = [Vector3(jam_x, jam_y, entity.pos.z)]
+    
+    return event
+
+
+def execute_spawn_action(entity_id: int, action: Dict, entities: Dict) -> bool:
+    """Execute spawn action to launch new units.
+    
+    Args:
+        entity_id: ID of entity that needs fuel
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        PlayerEvent for spawn operation
+    """
+    entity_id = action["entity_id"]
+
+    entity = entities[entity_id]
+    event = PlayerEvent_SpawnEntity()
+    event.entity = entity
+    event.component = entity.active_spawn_components[0] # @Sanjna: technically we could select which entity we would like to spawn, but it's difficult to expose that in a meaningful way. Any ideas?
+    
+    return event
+
 def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
     """Validate that the target entity exists and is controllable.
     
@@ -317,10 +380,6 @@ def validate_entity(action: Dict, entities: Dict, config: Config) -> bool:
  
     # Check entity is alive
     if not entity.is_alive:
-        return False
- 
-    # Check entity belongs to our faction
-    if entity.faction.value != config.our_faction:
         return False
         
     return True
@@ -542,6 +601,69 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
     # Check refuel target can provide fuel
     if not refuel_target.can_refuel_others:
         return False
+    
+    return True
+
+def validate_jamming_action(action: Dict, entities: Dict, config: Config) -> bool:
+    """Validate jamming action parameters and entity capabilities.
+    
+    Args:
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        config: Environment configuration
+        
+    Returns:
+        True if jamming action is valid
+    """
+    entity_id = action["entity_id"]
+    entity_to_protect_id = action["entity_to_protect_id"]
+    jam_target_grid = action["jam_target_grid"]  # Technically we support multiple positions, but let's focus on one right now. 
+
+    entity = entities[entity_id]
+
+    if entity_id == entity_to_protect_id:
+        return False
+
+    if not entity.has_jammer:
+        return False
+
+    # Check grid position is within map bounds
+    max_grid_positions = calculate_max_grid_positions(config)
+
+    if jam_target_grid == max_grid_positions or entity_to_protect_id == 0: # This is a disable action
+        return True
+
+    
+    if entity_to_protect_id not in entities:
+        return False
+    
+    entity_to_protect = entities[entity_to_protect_id]
+    
+    # Check both entities are same faction
+    if entity.faction.value != entity_to_protect.faction.value:
+        return False
+
+    if jam_target_grid > max_grid_positions:
+        return False
+     
+    return True
+
+def validate_spawn_action(action: Dict, entities: Dict) -> bool:
+    """Validate spawn action parameters and entity capabilities.
+    
+    Args:
+        action: Action dictionary with refuel parameters
+        entities: Dict of entity objects
+        
+    Returns:
+        True if refuel action is valid
+    """
+    entity_id = action["entity_id"]
+
+    entity = entities[entity_id]
+
+    if not entity.can_spawn:
+        return False    
     
     return True
 
