@@ -28,7 +28,7 @@ class Config:
 
     # Kill ratio threshold (friendly advantage). Win if ratio >= threshold, lose if ratio <= 1/threshold
     # Ratio is defined as enemy_losses / max(1, friendly_losses)
-    kill_ratio_threshold: float = 1.2
+    kill_ratio_threshold: float = 1.2 # @Sanjna: we don't use this anymore
 
     # Environment setup (uses constants but can be overridden)
     map_size_km: tuple[int, int] = TRIDENT_ISLAND_MAP_SIZE
@@ -36,12 +36,13 @@ class Config:
     
     # Action space parameters
     max_entities: int = 60  # Maximum entities per faction in observation/action space 
-    max_target_groups: int = 20  # Maximum target groups in scenario
+    max_target_groups: int = 30  # Maximum target groups in scenario
     max_weapons: int = 5  # Maximum weapons any entity can have across all domains (typically 2)
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
     
     # Faction configuration
-    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY
+    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY @Sanjna: should be removed?
+
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
     max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  
@@ -51,7 +52,7 @@ class Config:
     # Runtime settings
     render_mode: str = "rgb_array"
     debug: bool = False
-    seed: Optional[int] = None
+    seed: Optional[int] = None # We override this during adjudication
     
     # RL-specific settings
     reward_scale: float = 1.0
@@ -60,6 +61,7 @@ class Config:
 
     scenario_path = Path(__file__).parent / "scenarios"
 
+    # We override these two during adjudication
     legacy_force_laydown_path: str = scenario_path / "force_laydown" / "W4A_ForceLaydown_Legacy.json"
     dynasty_force_laydown_path: str = scenario_path / "force_laydown" / "W4A_ForceLaydown_Dynasty.json"
     
