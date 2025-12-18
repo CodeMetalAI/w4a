@@ -25,8 +25,10 @@ def try_adjudicate(adjudication_config):
 def adjudicate(adjudication_config):
     # Create environment
     config = Config()
+    config.legacy_force_laydown_path = adjudication_config.legacy_force_laydown_path
+    config.dynasty_force_laydown_path = adjudication_config.dynasty_force_laydown_path
 
-    if hasattr(adjudication_config, "random_seed"):
+    if adjudication_config.random_seed:
         config.seed = adjudication_config.random_seed
 
     env = TridentIslandMultiAgentEnv(config=config, enable_replay=True)
@@ -76,9 +78,9 @@ class AdjudicationConfig:
     def __init__(self):
         self.random_seed = None
         self.legacy_agent_class = None
-        self.legacy_entity_force_laydown_path = None
+        self.legacy_force_laydown_path = None
         self.dynasty_agent_class = None
-        self.dynasty_entity_force_laydown_path = None
+        self.dynasty_force_laydown_path = None
 
         self.replay_path = None
         self.outcome_path = None
@@ -103,9 +105,9 @@ def create_config(args):
     adjudication_config = AdjudicationConfig()
     adjudication_config.random_seed = args.random_seed
     adjudication_config.legacy_agent_class = import_agent_class(args.legacy_agent_package, args.legacy_agent_module, args.legacy_agent_class)
-    adjudication_config.legacy_entity_force_laydown_path = args.legacy_entity_force_laydown_path
+    adjudication_config.legacy_force_laydown_path = Path(args.legacy_force_laydown_path)
     adjudication_config.dynasty_agent_class = import_agent_class(args.dynasty_agent_package, args.dynasty_agent_module, args.dynasty_agent_class)
-    adjudication_config.legacy_entity_force_laydown_path = args.legacy_entity_force_laydown_path
+    adjudication_config.dynasty_force_laydown_path = Path(args.dynasty_force_laydown_path)
     adjudication_config.replay_path = args.replay_path
     adjudication_config.outcome_path = args.outcome_path
     adjudication_config.log_path = args.log_path
@@ -117,11 +119,11 @@ if __name__ == "__main__":
     parser.add_argument("--legacy_agent_package", type=str, required=True)
     parser.add_argument("--legacy_agent_module", type=str, required=True)
     parser.add_argument("--legacy_agent_class", type=str, required=True)
-    parser.add_argument("--legacy_entity_force_laydown_path", type=str)
+    parser.add_argument("--legacy_force_laydown_path", type=str, required=True)
     parser.add_argument("--dynasty_agent_package", type=str, required=True)
     parser.add_argument("--dynasty_agent_module", type=str, required=True)
     parser.add_argument("--dynasty_agent_class", type=str, required=True)
-    parser.add_argument("--dynasty_entity_force_laydown_path", type=str)
+    parser.add_argument("--dynasty_force_laydown_path", type=str, required=True)
     parser.add_argument("--replay_path", type=str, required=True)
     parser.add_argument("--outcome_path", type=str, required=True)
     parser.add_argument("--log_path", type=str) # Not currently in use
