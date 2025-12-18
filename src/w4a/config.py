@@ -17,7 +17,7 @@ class Config:
     """User-configurable settings for W4A environment"""
     
     # Training parameters  
-    max_game_time: float = 9000.0  # Maximum mission time in seconds (2.5 hours)
+    max_game_time: float = 100000.0  # @Sanjna: we cap this now in the simulation
     capture_required_seconds: float = CAPTURE_REQUIRED_SECONDS
 
     # Early termination for training efficiency (optional)
@@ -40,9 +40,6 @@ class Config:
     max_weapons: int = 5  # Maximum weapons any entity can have across all domains (typically 2)
     max_weapon_combinations: int = 2**5 - 1  # 31 combinations for action space
     
-    # Faction configuration
-    our_faction: int = 0  # 0=LEGACY, 1=DYNASTY @Sanjna: should be removed?
-
     # CAP route parameters
     min_patrol_axis_km: int = 100  # Minimum CAP route long axis length
     max_patrol_axis_km: int = 1000  # Maximum CAP route long axis length  

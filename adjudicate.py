@@ -42,7 +42,7 @@ def adjudicate(adjudication_config):
     # Run episode
     observations, infos = env.reset()
 
-    for step in range(1000):
+    for step in range(10000):
         actions = {
             "legacy": env.agent_legacy.select_action(observations["legacy"]),
             "dynasty": env.agent_dynasty.select_action(observations["dynasty"])
@@ -55,11 +55,9 @@ def adjudicate(adjudication_config):
             
             break
 
-    replay = env.export_replay()
+    simulation_json = env.export_replay()
     replay_path = Path("adjudication_config.replay_path")
     replay_path.parent.mkdir(exist_ok=True)
-
-    simulation_json = env.export_replay()
 
     with open(adjudication_config.replay_path, 'w') as f:
         f.write(simulation_json)
