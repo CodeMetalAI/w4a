@@ -1,14 +1,14 @@
 {
     "EventName": "SimSpawnPackage",
     "EntityId": 0,
-    "Faction": 0,
+    "Faction": 1,
     "Identifier": "",
     "DISEntityType": {
-        "Kind": 0,
-        "Domain": 0,
-        "Country": 0,
-        "Category": 0,
-        "SubCategory": 0,
+        "Kind": 1,
+        "Domain": 1,
+        "Country": 45,
+        "Category": 4,
+        "SubCategory": 30,
         "Specific": 0,
         "Extra": 0
     },
@@ -151,7 +151,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 1.0,
-                    "Y": 0.19999998807907104,
+                    "Y": 0.20000000298023224,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,
@@ -239,7 +239,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 2.0,
-                    "Y": -0.19999998807907104,
+                    "Y": -0.20000000298023224,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,
@@ -327,7 +327,7 @@
                 "Controllable": true,
                 "FormationOffset": {
                     "X": 3.0,
-                    "Y": 0.19999998807907104,
+                    "Y": 0.20000000298023224,
                     "Z": 0.0
                 },
                 "DefaultRadarsEnabled": 1,

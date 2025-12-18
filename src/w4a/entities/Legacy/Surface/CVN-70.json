@@ -41,7 +41,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "Mach",
+                "Identifier": "Thermal",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -609,7 +609,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "Blacksky",
+                "Identifier": "Overcast",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -1281,7 +1281,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "Vapor",
+                "Identifier": "Cirrus",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -1540,7 +1540,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 0,
-                "Identifier": "Afterburner",
+                "Identifier": "Updraft",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,

@@ -41,7 +41,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "Stratus",
+                "Identifier": "Storm",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -602,7 +602,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "Cumulus",
+                "Identifier": "Gale",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -1267,7 +1267,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "Nebula",
+                "Identifier": "Cyclone",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
@@ -1972,7 +1972,7 @@
                 "EventName": "SimSpawnPackage",
                 "EntityId": 0,
                 "Faction": 1,
-                "Identifier": "Comet",
+                "Identifier": "Nimbus",
                 "DISEntityType": {
                     "Kind": 0,
                     "Domain": 2,
