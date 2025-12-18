@@ -11,11 +11,11 @@ Each agent receives observations from their own perspective, filtered by fog-of-
 
 Observations are returned as **normalized numpy arrays** with values in [0, 1].
 
-**Total Size**: 11 global features + (max_entities × 49) + (max_target_groups × 12)
+**Total Size**: 11 global features + (max_entities × 52) + (max_target_groups × 12)
 
 The observation space consists of three components:
 1. **Global features** (11): Mission state, time, objectives, casualties, flag status
-2. **Friendly entity features** (max_entities × 49): Per-entity capabilities, kinematics, status, engagement, unit stats, extended status
+2. **Friendly entity features** (max_entities × 52): Per-entity capabilities, kinematics, status, engagement, unit stats, extended status
 3. **Enemy target group features** (max_target_groups × 12): Per-group position, velocity, domain, count
 
 ## Structure
@@ -23,14 +23,14 @@ The observation space consists of three components:
 ```python
 observation = np.concatenate([
     global_features,      # Shape: (11,)
-    friendly_features,    # Shape: (max_entities * 49,)
+    friendly_features,    # Shape: (max_entities * 52,)
     enemy_features        # Shape: (max_target_groups * 12,)
 ])
 ```
 
 ### ID-Indexed Layout
 Entity and target group features use **stable ID indexing**:
-- Entity features at index `i * 49` correspond to entity ID `i`
+- Entity features at index `i * 52` correspond to entity ID `i`
 - Target group features correspond to target group ID `j`
 - Unassigned/invisible IDs have zero-filled rows
 - This keeps observation indices aligned with action space IDs across timesteps
@@ -262,9 +262,9 @@ class MyAgent(CompetitionAgent):
         return obs
 ```
 
-## Friendly Entity Features (49 per entity)
+## Friendly Entity Features (52 per entity)
 
-Each friendly entity (units you control) has 49 features organized as:
+Each friendly entity (units you control) has 52 features organized as:
 
 ### Identity & Intent (10 features)
 - `can_engage`: Can fire weapons (0.0 or 1.0)
@@ -313,14 +313,17 @@ Each friendly entity (units you control) has 49 features organized as:
 - `engagement_level_norm`: Current engagement level [0,1] (TODO: confirm how to normalize)
 - `is_idle`: Entity has no orders (NO_MANOUVER state) (0.0 or 1.0)
 
-### Unit Stats (5 features)
+### Unit Stats (8 features)
 - `role_attack`: Entity has ATTACK role (0.0 or 1.0)
 - `role_defense`: Entity has DEFENSE role (0.0 or 1.0)
 - `role_support`: Entity has SUPPORT role (0.0 or 1.0)
-- `meta_value_norm`: Entity's relative value normalized [0,1] (TODO: confirm max value for normalization)
-- `stats_value`: Entity's stat value [0,1] (TODO: confirm semantics and normalization)
+- `meta_value_norm`: Entity's relative value normalized [0,1] using exponential decay
+- `offensive`: Offensive capabilities [0,1]
+- `defensive`: Defensive capabilities [0,1]
+- `endurance`: Endurance capabilities [0,1]
+- `scouting`: Scouting capabilities [0,1]
 
-**Total**: 49 features per entity
+**Total**: 52 features per entity
 
 ## Enemy Target Group Features (12 per target group)
 
@@ -348,11 +351,11 @@ Each detected enemy target group has 12 features:
 spaces.Box(
     low=0.0,
     high=1.0,
-    shape=(11 + max_entities*49 + max_target_groups*12,),
+    shape=(11 + max_entities*52 + max_target_groups*12,),
     dtype=np.float32
 )
 ```
 
 Example with default config (max_entities=60, max_target_groups=20):
-- Shape: `(3191,)` = 11 + (60×49) + (20×12)
+- Shape: `(3371,)` = 11 + (60×52) + (20×12)
 

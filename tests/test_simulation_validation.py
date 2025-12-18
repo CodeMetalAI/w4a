@@ -228,8 +228,8 @@ class TestSimulationIsActuallyRunning:
         
         observations, infos = env.reset()
         
-        # 11 global + (max_entities * 49) + (max_target_groups * 12)
-        expected_size = 11 + (config.max_entities * 49) + (config.max_target_groups * 12)
+        # 11 global + (max_entities * 52) + (max_target_groups * 12)
+        expected_size = 11 + (config.max_entities * 52) + (config.max_target_groups * 12)
         
         assert observations["legacy"].shape == (expected_size,), f"Observation should be {expected_size} features"
         assert observations["dynasty"].shape == (expected_size,), f"Observation should be {expected_size} features"
