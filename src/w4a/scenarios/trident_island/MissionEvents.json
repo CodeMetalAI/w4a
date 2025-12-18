@@ -31,7 +31,7 @@
         },
         "SpawnComponents": [],
         "Location": {
-            "X": 816072.6875,
+            "X": 816072.75,
             "Y": 0.0,
             "Z": 15000.0
         },
@@ -53,7 +53,7 @@
         },
         "SpawnComponents": [],
         "Location": {
-            "X": -816072.6875,
+            "X": -816072.75,
             "Y": 0.0,
             "Z": 15000.0
         },
@@ -133,7 +133,7 @@
         "ForceRatio": {
             "Ratio": -1.0
         },
-        "MaxSimulationTime": 432000,
+        "MaxSimulationTime": 648000,
         "FrameIndex": 0
     },
     {
@@ -154,7 +154,7 @@
         "ForceRatio": {
             "Ratio": -1.0
         },
-        "MaxSimulationTime": 432000,
+        "MaxSimulationTime": 648000,
         "FrameIndex": 0
     },
     {
@@ -174,7 +174,7 @@
         "SpawnComponents": [],
         "Pos": {
             "X": -783632.9375,
-            "Y": -128831.09375,
+            "Y": -128831.1015625,
             "Z": 15000.0
         },
         "Rot": {
@@ -658,7 +658,7 @@
         "SpawnComponents": [],
         "Pos": {
             "X": 783632.9375,
-            "Y": 128831.09375,
+            "Y": 128831.1015625,
             "Z": 15000.0
         },
         "Rot": {
