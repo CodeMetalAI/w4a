@@ -3,7 +3,7 @@ from importlib import import_module
 
 from w4a import Config
 from w4a.envs import TridentIslandMultiAgentEnv
-from w4a.agents import CompetitionAgent, SimpleAgent
+from w4a.agents import CompetitionAgent#, SimpleAgent
 from SimulationInterface import Faction
 
 def import_agent_class(class_name):
@@ -13,7 +13,11 @@ def import_agent_class(class_name):
 
     module = import_module(module_name, package = package)
 
+    assert module
+
     agent_class = getattr(module, class_name)
+
+    assert agent_class
 
     return agent_class
 
@@ -24,13 +28,12 @@ def adjudicate(adjudication_config):
     if hasattr(adjudication_config, "random_seed"):
         config.seed = adjudication_config.random_seed
 
-
     env = TridentIslandMultiAgentEnv(config=config)
 
     # Register agent classes
     env.set_agent_classes(
-        lambda: CompetitionAgent(Faction.LEGACY, config),
-        lambda: SimpleAgent(Faction.DYNASTY, config)
+        lambda: adjudication_config.legacy_agent_class(Faction.LEGACY, config),
+        lambda: adjudication_config.dynasty_agent_class(Faction.DYNASTY, config)
     )
 
     # Run episode
@@ -49,7 +52,7 @@ def adjudicate(adjudication_config):
             observations, infos = env.reset()
 
     env.close()
-    
+
     print("Adjudication completed!")
 
 class AdjudicationConfig:
@@ -73,6 +76,8 @@ def create_config(args):
     adjudication_config.legacy_entity_force_laydown_path = args.legacy_entity_force_laydown_path
     adjudication_config.replay_filename = args.replay_filename
     adjudication_config.log_filename = args.log_filename
+
+    return adjudication_config
 
 if __name__ == "__main__":
     parser = ArgumentParser()

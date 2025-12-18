@@ -4,7 +4,7 @@ Simple rule-based agent for testing and as adversary.
 Matches the original SimpleAgent behavior exactly while extending CompetitionAgent.
 """
 
-from .competition_agent import CompetitionAgent
+from w4a import CompetitionAgent
 from SimulationInterface import (
     Faction, PlayerEventCommit, AdversaryContact, EntitySpawned, 
     ComponentSpawned, ControllableEntity, UnitEngagement, UnitWeaponUsage
