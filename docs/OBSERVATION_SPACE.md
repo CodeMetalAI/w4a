@@ -42,7 +42,7 @@ global_features = [
     time_remaining_norm,           # [0]  Mission time remaining (1.0 = full, 0.0 = expired)
     my_casualties_norm,            # [1]  Your casualties / max_entities
     enemy_casualties_norm,         # [2]  Enemy casualties / max_entities
-    kill_ratio_norm,               # [3]  Your kill ratio / threshold
+    force_ratio_norm,              # [3]  Your force strength ratio / victory threshold
     capture_progress_norm,         # [4]  Your capture progress / required_seconds
     capture_possible_flag,         # [5]  1.0 if you can capture, 0.0 otherwise
     enemy_capture_progress_norm,   # [6]  Enemy capture progress / required_seconds
@@ -76,13 +76,13 @@ Number of enemy units you've destroyed, normalized by max entities
 
 Note: Detailed enemy casualties available in `info['mission']['enemy_casualties']`
 
-### kill_ratio_norm
-Your kill ratio (enemy kills / your casualties) normalized by the win threshold
-- `0.0`: Poor kill ratio
-- `1.0`: At or above win threshold (default: 1.2×)
-- Formula: `(enemy_casualties / my_casualties) / kill_ratio_threshold`
+### force_ratio_norm
+Your force strength ratio (my_strength / enemy_strength) normalized by the victory threshold
+- `0.0`: Equal or weaker forces
+- `1.0`: At or above victory threshold (default: 3.0×)
+- Formula: `(my_force_strength / enemy_force_strength) / victory_force_ratio`
 
-Note: Raw kill ratio available in `info['mission']['kill_ratio']`
+Note: Raw force ratio available in `info['mission']['force_ratio']`
 
 ### flag_faction
 Which faction currently controls the center island flag
@@ -180,7 +180,7 @@ info = {
     'mission': {
         'my_casualties': 8,                    # Your losses
         'enemy_casualties': 12,                # Enemy losses
-        'kill_ratio': 1.5,                     # Your kill ratio
+        'force_ratio': 1.5,                    # Your force strength ratio
         'my_capture_progress': 0.4,            # Your capture progress (seconds)
         'my_capture_possible': True,           # Can you still capture?
         'enemy_capture_progress': 0.1,         # Enemy capture progress (seconds)
@@ -310,7 +310,7 @@ Each friendly entity (units you control) has 52 features organized as:
 - `target_domain_air`, `target_domain_surface`, `target_domain_land`: Target domain one-hot
 - `time_until_shoot_norm`: Estimated time until next shot [0,1]
 - `weapons_tight`, `weapons_selective`, `weapons_free`: Weapons mode one-hot
-- `engagement_level_norm`: Current engagement level [0,1] (TODO: confirm how to normalize)
+- `engagement_level_norm`: Current engagement level [0,1] (NONE=0.0, DEFENSIVE=0.25, CAUTIOUS=0.5, ASSERTIVE=0.75, OFFENSIVE=1.0)
 - `is_idle`: Entity has no orders (NO_MANOUVER state) (0.0 or 1.0)
 
 ### Unit Stats (8 features)

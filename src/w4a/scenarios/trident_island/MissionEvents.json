@@ -131,7 +131,7 @@
             }
         ],
         "ForceRatio": {
-            "Ratio": -1.0
+            "Ratio": 3.0
         },
         "MaxSimulationTime": 648000,
         "FrameIndex": 0

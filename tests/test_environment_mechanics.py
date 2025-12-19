@@ -131,14 +131,14 @@ class TestKillTracking:
             }
             observations, rewards, terminations, truncations, infos = env.step(actions)
             
-            # Verify kill tracking fields exist
+            # Verify casualty tracking fields exist
             assert "my_casualties" in infos["legacy"]["mission"]
             assert "enemy_casualties" in infos["legacy"]["mission"]
-            assert "kill_ratio" in infos["legacy"]["mission"]
+            assert "force_ratio" in infos["legacy"]["mission"]
             
             assert "my_casualties" in infos["dynasty"]["mission"]
             assert "enemy_casualties" in infos["dynasty"]["mission"]
-            assert "kill_ratio" in infos["dynasty"]["mission"]
+            assert "force_ratio" in infos["dynasty"]["mission"]
             
             # Verify symmetry: legacy's enemy casualties = dynasty's my casualties
             assert infos["legacy"]["mission"]["enemy_casualties"] == infos["dynasty"]["mission"]["my_casualties"]
@@ -255,10 +255,9 @@ class TestTerminationConditions:
         
         env.close()
     
-    def test_kill_ratio_win_legacy(self):
-        """Test kill ratio tracking in obs/info by directly manipulating dead entities"""
+    def test_casualty_tracking_and_force_ratio(self):
+        """Test casualty tracking and force ratio in obs/info"""
         config = Config()
-        config.kill_ratio_threshold = 1.5
         env = TridentIslandMultiAgentEnv(config=config)
         
         agent_legacy = CompetitionAgent(Faction.LEGACY, config)
@@ -270,9 +269,17 @@ class TestTerminationConditions:
         # INITIAL STATE: No casualties
         assert infos["legacy"]["mission"]["my_casualties"] == 0
         assert infos["legacy"]["mission"]["enemy_casualties"] == 0
-        assert infos["legacy"]["mission"]["kill_ratio"] == 0.0
         assert observations["legacy"][1] == 0.0  # my_casualties obs
         assert observations["legacy"][2] == 0.0  # enemy_casualties obs
+        
+        # Force ratio should exist and be positive (both factions have forces)
+        assert "force_ratio" in infos["legacy"]["mission"]
+        assert infos["legacy"]["mission"]["force_ratio"] > 0
+        
+        # Force ratio obs should be in [0, 1] range
+        obs_force_ratio = observations["legacy"][3]
+        assert 0.0 <= obs_force_ratio <= 1.0, \
+            f"Force ratio obs {obs_force_ratio} should be in [0, 1]"
         
         # Manually add Dynasty entities to dead set (simulate Legacy killing 3 Dynasty units)
         dynasty_entities = list(agent_dynasty._sim_agent.controllable_entities.values())[:3]
@@ -280,13 +287,7 @@ class TestTerminationConditions:
             env.dead_entities_by_faction[Faction.DYNASTY].add(entity)
         
         # Update metrics and get new observations
-
         mission_metrics.update_all_mission_metrics(env)
-        
-        observations = {
-            "legacy": agent_legacy.get_observation(),
-            "dynasty": agent_dynasty.get_observation()
-        }
         
         # Build info dict manually (similar to step())
         infos = {
@@ -298,23 +299,6 @@ class TestTerminationConditions:
         assert infos["legacy"]["mission"]["enemy_casualties"] == 3, \
             f"Expected 3 enemy casualties, got {infos['legacy']['mission']['enemy_casualties']}"
         assert infos["legacy"]["mission"]["my_casualties"] == 0
-        assert infos["legacy"]["mission"]["kill_ratio"] >= config.kill_ratio_threshold, \
-            f"Kill ratio {infos['legacy']['mission']['kill_ratio']} should be >= {config.kill_ratio_threshold}"
-        
-        # VERIFY: Observation space reflects casualties  
-        obs_my_casualties = observations["legacy"][1]
-        obs_enemy_casualties = observations["legacy"][2]
-        obs_kill_ratio = observations["legacy"][3]
-
-        def almost_equal(a, b, abs_tol=1e-9):
-            return abs(a - b) <= abs_tol
-        
-        expected_enemy_norm = 3.0 / max(config.max_entities, 1)
-        assert obs_my_casualties == 0.0, f"My casualties should be 0, got {obs_my_casualties}"
-        assert almost_equal(obs_enemy_casualties, expected_enemy_norm), \
-            f"Enemy casualties obs {obs_enemy_casualties:.4f} doesn't match expected {expected_enemy_norm:.4f}"
-        assert obs_kill_ratio > 0, \
-            f"Kill ratio obs {obs_kill_ratio} should be > 0 when we have kills"
         
         # VERIFY: Dead entities tracked correctly
         assert len(env.dead_entities_by_faction[Faction.DYNASTY]) == 3

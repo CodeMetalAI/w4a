@@ -99,7 +99,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     - time_remaining_norm: Mission time remaining [0,1]
     - my_casualties_norm: Our casualties normalized by max entities
     - enemy_casualties_norm: Enemy casualties normalized by max entities
-    - kill_ratio_norm: Our kill ratio (enemy kills / our casualties) normalized by threshold
+    - force_ratio_norm: Our force strength ratio (my_strength / enemy_strength) normalized by victory threshold
     - capture_progress_norm: Our objective capture progress [0,1]
     - enemy_capture_progress_norm: Enemy objective capture progress [0,1]
     - capture_possible_flag: Our capture capability status [0,1]
@@ -132,10 +132,11 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
     my_casualties_norm = my_casualties / denom
     enemy_casualties_norm = enemy_casualties / denom
     
-    # Kill ratio normalized by threshold (for win condition awareness)
-    kill_ratio = env.kill_ratio_by_faction[my_faction]
-    threshold = env.config.kill_ratio_threshold
-    kill_ratio_norm = kill_ratio / threshold
+    # Force ratio normalized by victory threshold (for win condition)
+    # Force ratio = my_strength / enemy_strength, win when >= victory_force_ratio
+    force_ratio = env._compute_force_ratio_for_faction(my_faction)
+    victory_threshold = env.victory_force_ratio
+    force_ratio_norm = min(force_ratio / victory_threshold, 1.0)
 
     # Capture progress normalized by required capture time (agent-specific)
     required_capture_time = env.config.capture_required_seconds
@@ -180,7 +181,7 @@ def _compute_global_features(env: Any, agent: Any) -> np.ndarray:
         time_remaining_norm,
         my_casualties_norm,
         enemy_casualties_norm,
-        kill_ratio_norm,
+        force_ratio_norm,
         capture_progress_norm,
         enemy_capture_progress_norm,
         capture_possible_flag,
@@ -508,10 +509,10 @@ def compute_friendly_engagement_features(env: Any, entity: Any) -> np.ndarray:
     weapons_selective = 1.0 if weapons_mode == 1 else 0.0  # selective
     weapons_free = 1.0 if weapons_mode == 2 else 0.0 # free
 
-    # Engagement level
-    # TODO: Determine how to normalize engagement_level
+    # Engagement level (ordinal enum normalized to [0, 1])
+    # NONE(-1)→0.0, DEFENSIVE(0)→0.25, CAUTIOUS(1)→0.5, ASSERTIVE(2)→0.75, OFFENSIVE(3)→1.0
     engagement_level = entity.engagement_level if hasattr(entity, 'engagement_level') else -1
-    engagement_level_norm = 0.0  # Placeholder until normalization is determined
+    engagement_level_norm = (float(engagement_level) + 1.0) / 4.0
     
     # Is idle (NO_MANOUVER state - entity has no orders)
     is_idle = 1.0 if entity.current_manouver == ControllableEntityManouver.NO_MANOUVER else 0.0

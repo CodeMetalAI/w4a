@@ -120,13 +120,11 @@ def update_capture_possible(env: Any) -> None:
     env.capture_possible_by_faction[Faction.DYNASTY] = dynasty_has_settlers and flag_can_be_captured
 
 
-def update_kill_ratios(env: Any) -> None:
-    """Update kill ratios for both factions.
+def update_casualty_counts(env: Any) -> None:
+    """Update casualty and kill counts for both factions.
     
-    Calculates and caches kill ratios (enemy kills / own casualties) for each
-    faction. These are used for win/loss conditions and observations.
-    
-    Kill ratio = (enemy units killed) / (own units lost)
+    Calculates and caches casualties and kills for each faction.
+    These are used for observations.
     
     Args:
         env: Environment instance with kill tracking
@@ -138,10 +136,6 @@ def update_kill_ratios(env: Any) -> None:
     # Kills are the enemy's casualties
     legacy_kills = dynasty_casualties  # Legacy killed Dynasty units
     dynasty_kills = legacy_casualties  # Dynasty killed Legacy units
-    
-    # Calculate kill ratios (avoid division by zero)
-    env.kill_ratio_by_faction[Faction.LEGACY] = float(legacy_kills) / max(1, legacy_casualties)
-    env.kill_ratio_by_faction[Faction.DYNASTY] = float(dynasty_kills) / max(1, dynasty_casualties)
     
     # Cache the individual counts for observations
     env.casualties_by_faction[Faction.LEGACY] = legacy_casualties
@@ -162,7 +156,7 @@ def update_all_mission_metrics(env: Any) -> None:
     """
     # Order matters: some functions depend on others
     update_dead_entities(env)
-    update_kill_ratios(env)           # Depends on: dead_entities_by_faction
+    update_casualty_counts(env)        # Depends on: dead_entities_by_faction
     update_capture_possible(env)       # Depends on: alive entities
     update_capture_progress(env)       # Depends on: capture_possible_by_faction
 
@@ -182,11 +176,7 @@ def reset_mission_metrics(env: Any) -> None:
         Faction.DYNASTY: set()
     }
     
-    # Reset per-faction kill tracking (derived from dead_entities_by_faction)
-    env.kill_ratio_by_faction = {
-        Faction.LEGACY: 0.0,
-        Faction.DYNASTY: 0.0
-    }
+    # Reset per-faction casualty tracking (derived from dead_entities_by_faction)
     env.casualties_by_faction = {
         Faction.LEGACY: 0,
         Faction.DYNASTY: 0

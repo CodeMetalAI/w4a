@@ -79,9 +79,11 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
-        self.max_ammo = 300.0 # TODO: Sanjna, check this.
+        self.max_ammo = 280.0
         self.max_velocity = 1029.0  # 3x 343 m/s
         self.max_entities = self.config.max_entities
+
+        self.victory_force_ratio = 3.0
 
         # Set up paths
         self.scenario_path = self.config.scenario_path
@@ -161,11 +163,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             Faction.DYNASTY: set()
         }
         
-        # Per-faction kill tracking (cached in mission_metrics)
-        self.kill_ratio_by_faction = {
-            Faction.LEGACY: 0.0,
-            Faction.DYNASTY: 0.0
-        }
+        # Per-faction casualty tracking (cached in mission_metrics)
         self.casualties_by_faction = {
             Faction.LEGACY: 0,
             Faction.DYNASTY: 0
@@ -303,6 +301,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             dynasty_agent=self.agent_dynasty._get_sim_agent(),
             seed=seed
         )
+        
+        self.victory_force_ratio = self.simulation.victory_force_ratio or 3.0
         
         # Get observations for both agents
         observations = {
@@ -592,7 +592,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
             'mission': {
                 'my_casualties': self._get_casualties_count_for_faction(agent.faction),
                 'enemy_casualties': self._get_casualties_count_for_enemy(agent.faction),
-                'kill_ratio': self._compute_kill_ratio_for_faction(agent.faction),
+                'force_ratio': self._compute_force_ratio_for_faction(agent.faction),
                 'my_capture_progress': float(self.capture_progress_by_faction[agent.faction]),
                 'my_capture_possible': bool(self.capture_possible_by_faction[agent.faction]),
                 'enemy_capture_progress': float(self._get_enemy_capture_progress(agent.faction)),
@@ -710,9 +710,16 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         """Get enemy casualty count from a faction's perspective (cached in mission_metrics)."""
         return self.kills_by_faction[faction]
     
-    def _compute_kill_ratio_for_faction(self, faction: Faction) -> float:
-        """Get kill ratio for a specific faction (cached in mission_metrics)."""
-        return self.kill_ratio_by_faction[faction]
+    def _compute_force_ratio_for_faction(self, faction: Faction) -> float:
+        """Compute force strength ratio for a specific faction.
+        
+        Returns the ratio of this faction's strength to the enemy's strength.
+        Force ratio = my_strength / enemy_strength
+        """
+        enemy_faction = Faction.DYNASTY if faction == Faction.LEGACY else Faction.LEGACY
+        my_strength = self.simulation.get_force_strength(faction)
+        enemy_strength = self.simulation.get_force_strength(enemy_faction)
+        return my_strength / max(enemy_strength, 0.001)  # Avoid division by zero
     
     def _get_noop_action(self) -> Dict:
         """Get a no-op action."""

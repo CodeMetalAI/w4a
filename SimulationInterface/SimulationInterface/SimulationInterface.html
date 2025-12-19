@@ -4427,6 +4427,10 @@ Add&nbsp;an&nbsp;agent&nbsp;to&nbsp;the&nbsp;simulation.</tt></dd></dl>
 &nbsp;<br>
 Finalize&nbsp;the&nbsp;force&nbsp;laydown&nbsp;phase.</tt></dd></dl>
 
+<dl><dt><a name="Simulation-get_force_strength"><strong>get_force_strength</strong></a>(...)</dt><dd><tt><a href="#Simulation-get_force_strength">get_force_strength</a>(self:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#Faction">Faction</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;current&nbsp;force&nbsp;strength&nbsp;for&nbsp;a&nbsp;faction.</tt></dd></dl>
+
 <dl><dt><a name="Simulation-pre_simulation_tick"><strong>pre_simulation_tick</strong></a>(...)</dt><dd><tt><a href="#Simulation-pre_simulation_tick">pre_simulation_tick</a>(self:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#SimulationData">SimulationData</a>)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Tick&nbsp;on&nbsp;the&nbsp;pre-simulation&nbsp;phase.</tt></dd></dl>
@@ -4460,6 +4464,9 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>max_num_controllable_entities</strong></dt>
 <dd><tt>The&nbsp;maximum&nbsp;number&nbsp;of&nbsp;controllable&nbsp;entities&nbsp;the&nbsp;simulation&nbsp;will&nbsp;have.</tt></dd>
+</dl>
+<dl><dt><strong>victory_force_ratio</strong></dt>
+<dd><tt>Gets&nbsp;the&nbsp;force&nbsp;ratio&nbsp;to&nbsp;declare&nbsp;victory&nbsp;(or&nbsp;None&nbsp;if&nbsp;is&nbsp;not&nbsp;set)</tt></dd>
 </dl>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>

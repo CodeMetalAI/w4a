@@ -12,6 +12,8 @@ from unittest.mock import Mock
 from pettingzoo.test import parallel_api_test
 
 from w4a.config import Config
+from w4a.agents.competition_agent import CompetitionAgent
+from w4a.agents.simple_agent import SimpleAgent
 from SimulationInterface import Faction
 
 
@@ -245,10 +247,13 @@ def test_info_dict_structure():
     config = Config()
     env = TridentIslandMultiAgentEnv(config=config)
     
-    # Create and register agents
-    agent_legacy = MockCompetitionAgent(Faction.LEGACY, config)
-    agent_dynasty = MockCompetitionAgent(Faction.DYNASTY, config)
+    # Create and register agents (use real agents since we need simulation)
+    agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+    agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
     env.set_agents(agent_legacy, agent_dynasty)
+    
+    # Reset to initialize simulation
+    env.reset()
     
     # Build info dict
     info = env._build_info_for_agent(agent_legacy)
@@ -293,7 +298,7 @@ def test_info_dict_structure():
     mission = info['mission']
     assert 'my_casualties' in mission
     assert 'enemy_casualties' in mission
-    assert 'kill_ratio' in mission
+    assert 'force_ratio' in mission
     assert 'my_capture_progress' in mission
     assert 'my_capture_possible' in mission
     assert 'enemy_capture_progress' in mission
@@ -309,10 +314,13 @@ def test_both_agents_get_separate_info():
     config = Config()
     env = TridentIslandMultiAgentEnv(config=config)
     
-    # Create and register agents
-    agent_legacy = MockCompetitionAgent(Faction.LEGACY, config)
-    agent_dynasty = MockCompetitionAgent(Faction.DYNASTY, config)
+    # Create and register agents (use real agents since we need simulation)
+    agent_legacy = CompetitionAgent(Faction.LEGACY, config)
+    agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
     env.set_agents(agent_legacy, agent_dynasty)
+    
+    # Reset to initialize simulation
+    env.reset()
     
     # Build info dicts
     info_legacy = env._build_info_for_agent(agent_legacy)

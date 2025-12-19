@@ -391,7 +391,7 @@ class TestCaptureProgress:
         
         # VERIFY: Initial observation space - flag is neutral, not captured
         # Observation space indices:
-        # [0] time_remaining, [1] my_casualties, [2] enemy_casualties, [3] kill_ratio,
+        # [0] time_remaining, [1] my_casualties, [2] enemy_casualties, [3] force_ratio,
         # [4] capture_progress, [5] enemy_capture_progress, [6] capture_possible_flag,
         # [7] flag_faction, [8] enemy_capture_possible_flag, [9] island_center_x, [10] island_center_y
         obs_legacy = observations["legacy"]
