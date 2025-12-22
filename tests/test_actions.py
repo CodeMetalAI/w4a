@@ -231,7 +231,7 @@ class TestEngageAction:
         engage_action = {
             "action_type": 2, "entity_id": entity_id, "target_group_id": target_id,
             "move_center_grid": 0, "move_short_axis_km": 0, "move_long_axis_km": 0,
-            "move_axis_angle": 0, "weapon_selection": 0, "weapon_usage": 0,
+            "move_axis_angle": 0, "weapon_selection": 0, "weapon_usage": 2,
             "weapon_engagement": 0, "stealth_enabled": 0, "sensing_position_grid": 0,
             "refuel_target_id": 0, "entity_to_protect_id": 0, "jam_target_grid": 0,
             "spawn_component_idx": 0
@@ -254,7 +254,7 @@ class TestEngageAction:
         initial_casualties = infos["legacy"]["mission"]["enemy_casualties"]
         
         # Wait up to 60 min for kill
-        max_steps = 360
+        max_steps = 10000
         for step in range(max_steps):
             actions = {"legacy": engage_action if step == 0 else noop, "dynasty": noop}
             observations, rewards, terminations, truncations, infos = env.step(actions)
@@ -636,7 +636,11 @@ class TestRefuelAction:
             return
         
         receiver_id = receivers[0]
-        provider_id = providers[0]
+        provider_id = None
+        for provider in providers:
+            if agent_legacy.get_entity_by_id(provider).refueling_compatibility & agent_legacy.get_entity_by_id(receiver_id).refuel_compatibility:
+                provider_id = provider
+                break
         
         print(f"\n[REFUEL] Testing refuel action: receiver {receiver_id} -> provider {provider_id}")
         

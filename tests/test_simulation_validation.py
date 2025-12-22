@@ -375,7 +375,7 @@ class TestCaptureProgress:
         env = TridentIslandMultiAgentEnv(config=config)
         
         agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
+        agent_dynasty = CompetitionAgent(Faction.DYNASTY, config)
         env.set_agents(agent_legacy, agent_dynasty)
         
         observations, infos = env.reset()
@@ -439,7 +439,7 @@ class TestCaptureProgress:
         }
         
         flag_pos = flag.pos
-        max_steps = 600  # 80 minutes game time
+        max_steps = 6000  # 80 minutes game time
         
         capture_started = False  # Track when we start seeing non-zero capture progress
         

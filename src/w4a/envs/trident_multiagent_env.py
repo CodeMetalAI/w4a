@@ -79,8 +79,8 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         self.possible_agents = ["legacy", "dynasty"]
         self.agents = self.possible_agents[:]  # Active agents (copy)
         
-        self.max_ammo = 280.0
-        self.max_velocity = 1029.0  # 3x 343 m/s
+        self.max_ammo = 500.0 #@Sanjna: we probably want to move this to the config
+        self.max_velocity = 1029.0  # 3x 343 m/s #@Sanjna: we probably want to move this to the config
         self.max_entities = self.config.max_entities
 
         self.victory_force_ratio = 3.0
