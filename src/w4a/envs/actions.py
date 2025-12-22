@@ -604,6 +604,9 @@ def validate_refuel_action(action: Dict, entities: Dict) -> bool:
     # Check refuel target can provide fuel
     if not refuel_target.can_refuel_others:
         return False
+
+    if (entity.refuel_compatibility & refuel_target.refueling_compatibility) == 0:
+        return False
     
     return True
 

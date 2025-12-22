@@ -90,21 +90,21 @@
                 "DefaultRadarsEnabled": 1,
                 "DefaultJammersEnabled": 0,
                 "Specifications": {
-                    "CruisingSpeed": 260.0,
-                    "MaxSpeed": 290.0,
+                    "CruisingSpeed": 270.0,
+                    "MaxSpeed": 300.0,
                     "RadarCrossSection": 70.0,
                     "RadarCrossSectionWithRadar": 70.0,
-                    "FuelCapacity": 96300.0
+                    "FuelCapacity": 14000.0
                 },
                 "Loadout": {
                     "Weapons": {}
                 },
                 "Stats": {
-                    "Values[0]": 0.20000000298023224,
-                    "Values[1]": 0.20000000298023224,
-                    "Values[2]": 0.20000000298023224,
-                    "Values[3]": 0.20000000298023224,
-                    "MetaValue": 600,
+                    "Values[0]": 0.0,
+                    "Values[1]": 0.0,
+                    "Values[2]": 0.2605400085449219,
+                    "Values[3]": 1.0,
+                    "MetaValue": 400,
                     "Role": 3
                 },
                 "Vel": {
@@ -113,20 +113,20 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 178300.0,
-                    "CrossSectionalArea": 16.0,
+                    "Mass": 94198.0,
+                    "CrossSectionalArea": 21.399999618530273,
                     "WingArea": 120.0,
-                    "DragCoefficient": 0.052000001072883606,
+                    "DragCoefficient": 0.017000000923871994,
                     "LiftCoefficient": 0.8500000238418579,
                     "MaxBankAngle": 60.0,
                     "MaxGForce": 2.5,
-                    "MaxDryThrust": 552000.0,
-                    "MaxAfterburnThrust": 0.0,
+                    "MaxDryThrust": 551600.0,
+                    "MaxAfterburnThrust": 200000.0,
                     "HasAfterburner": false,
                     "FuelConsumptionMilitary": [
-                        0.00001700000029813964,
-                        1.0629999991351724e-7,
-                        1.5900000205348874e-9
+                        0.00008078639802988619,
+                        4.847199761570664e-7,
+                        7.27099980224466e-9
                     ],
                     "FuelConsumptionAfterburn": []
                 }
@@ -189,21 +189,21 @@
                 "DefaultRadarsEnabled": 1,
                 "DefaultJammersEnabled": 0,
                 "Specifications": {
-                    "CruisingSpeed": 260.0,
-                    "MaxSpeed": 290.0,
+                    "CruisingSpeed": 270.0,
+                    "MaxSpeed": 300.0,
                     "RadarCrossSection": 70.0,
                     "RadarCrossSectionWithRadar": 70.0,
-                    "FuelCapacity": 96300.0
+                    "FuelCapacity": 14000.0
                 },
                 "Loadout": {
                     "Weapons": {}
                 },
                 "Stats": {
-                    "Values[0]": 0.20000000298023224,
-                    "Values[1]": 0.20000000298023224,
-                    "Values[2]": 0.20000000298023224,
-                    "Values[3]": 0.20000000298023224,
-                    "MetaValue": 600,
+                    "Values[0]": 0.0,
+                    "Values[1]": 0.0,
+                    "Values[2]": 0.2605400085449219,
+                    "Values[3]": 1.0,
+                    "MetaValue": 400,
                     "Role": 3
                 },
                 "Vel": {
@@ -212,20 +212,20 @@
                     "Z": 0.0
                 },
                 "FlightSpecifications": {
-                    "Mass": 178300.0,
-                    "CrossSectionalArea": 16.0,
+                    "Mass": 94198.0,
+                    "CrossSectionalArea": 21.399999618530273,
                     "WingArea": 120.0,
-                    "DragCoefficient": 0.052000001072883606,
+                    "DragCoefficient": 0.017000000923871994,
                     "LiftCoefficient": 0.8500000238418579,
                     "MaxBankAngle": 60.0,
                     "MaxGForce": 2.5,
-                    "MaxDryThrust": 552000.0,
-                    "MaxAfterburnThrust": 0.0,
+                    "MaxDryThrust": 551600.0,
+                    "MaxAfterburnThrust": 200000.0,
                     "HasAfterburner": false,
                     "FuelConsumptionMilitary": [
-                        0.00001700000029813964,
-                        1.0629999991351724e-7,
-                        1.5900000205348874e-9
+                        0.00008078639802988619,
+                        4.847199761570664e-7,
+                        7.27099980224466e-9
                     ],
                     "FuelConsumptionAfterburn": []
                 }
