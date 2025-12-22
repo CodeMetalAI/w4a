@@ -48,7 +48,7 @@
         "MaxSpeed": 15.5,
         "RadarCrossSection": 10000.0,
         "RadarCrossSectionWithRadar": 10000.0,
-        "FuelCapacity": 1200.0
+        "FuelCapacity": 99999.0
     },
     "Loadout": {
         "Weapons": {
@@ -159,12 +159,12 @@
         }
     },
     "Stats": {
-        "Values[0]": 0.20000000298023224,
-        "Values[1]": 0.20000000298023224,
-        "Values[2]": 0.20000000298023224,
-        "Values[3]": 0.20000000298023224,
-        "MetaValue": 100,
-        "Role": 1
+        "Values[0]": 0.9327861666679382,
+        "Values[1]": 0.8213972449302673,
+        "Values[2]": 1.0,
+        "Values[3]": 1.0,
+        "MetaValue": 2100,
+        "Role": 2
     },
     "Vel": {
         "X": 0.0,
