@@ -29,7 +29,7 @@ Automatically added when episode ends:
 ### Win Conditions
 An agent wins if:
 1. **Capture Victory**: Complete capture of the objective flag (progress reaches required duration)
-2. **Kill Ratio Victory**: Achieve favorable kill ratio above threshold (default: 1.2×, configurable)
+2. **Force Ratio Victory**: Achieve favorable force ratio above threshold (default: 3.0)
 
 ### Loss Conditions  
 An agent loses if the opponent achieves a win condition.

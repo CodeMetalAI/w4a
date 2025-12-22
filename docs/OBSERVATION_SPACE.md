@@ -44,8 +44,8 @@ global_features = [
     enemy_casualties_norm,         # [2]  Enemy casualties / max_entities
     force_ratio_norm,              # [3]  Your force strength ratio / victory threshold
     capture_progress_norm,         # [4]  Your capture progress / required_seconds
-    capture_possible_flag,         # [5]  1.0 if you can capture, 0.0 otherwise
-    enemy_capture_progress_norm,   # [6]  Enemy capture progress / required_seconds
+    enemy_capture_progress_norm,   # [5]  Enemy capture progress / required_seconds
+    capture_possible_flag,         # [6]  1.0 if you can capture, 0.0 otherwise
     flag_faction,                  # [7]  0.0=neutral, 0.33=Legacy, 0.66=Dynasty
     enemy_capture_possible_flag,   # [8]  1.0 if enemy can capture, 0.0 otherwise
     island_center_x_norm,          # [9]  Center island X coordinate [0,1]
@@ -116,7 +116,6 @@ Enemy's progress toward capturing the objective (normalized 0-1)
 - Formula: `enemy_capture_progress / capture_required_seconds`
 
 Note: Detailed enemy capture progress available in `info['mission']['enemy_capture_progress']`
-
 
 ### capture_possible_flag
 Whether you still have units capable of capturing
@@ -274,14 +273,12 @@ Each friendly entity (units you control) has 52 features organized as:
 - `can_capture`: Can capture objectives (0.0 or 1.0)
 - `has_jammer`: Has electronic warfare capability (0.0 or 1.0)
 - `has_parent`: Has a parent entity (0.0 or 1.0)
-- `domain_air`, `domain_sea`, `domain_ground`: One-hot domain encoding
+- `domain_air`, `domain_surface`, `domain_land`: One-hot domain encoding
 
-### Kinematics (7 features)
+### Kinematics (9 features)
 - `grid_x`, `grid_y`: Normalized grid position [0,1]
-- `heading_sin`, `heading_cos`: Heading direction encoding
-- `speed_norm`: Speed normalized by max speed
-- `altitude_norm`: Altitude normalized (air units only)
-- `manoeuver`: Current maneuver type (patrol, engage, RTB, etc.)
+- `vel_x`, `vel_y`, `vel_z`: Velocity components normalized by max_velocity
+- `rot_x`, `rot_y`, `rot_z`, `rot_w`: Rotation quaternion components
 
 ### Egocentric (2 features)
 - `distance_to_island_norm`: Distance to objective [0,1]
@@ -294,13 +291,12 @@ Each friendly entity (units you control) has 52 features organized as:
 - `fuel_norm`: Fuel level [0,1]
 - `is_refueling`: Currently in refueling operation (0.0 or 1.0)
 - `has_reached_base`: Entity is at base (0.0 or 1.0)
-- `estimated_range_left_norm`: Estimated range remaining [0,1] (TODO: confirm max range for normalization)
+- `estimated_range_left_norm`: Estimated range remaining [0,1]
 
-### Weapons (4 features)
+### Weapons (3 features)
 - `has_air_weapons`: Can engage air targets (0.0 or 1.0)
 - `has_surface_weapons`: Can engage surface targets (0.0 or 1.0)
-- `air_ammo_norm`: Air weapon ammo [0,1]
-- `surface_ammo_norm`: Surface weapon ammo [0,1]
+- `ammo_norm`: Total ammo normalized by max_ammo [0,1]
 
 ### Engagement (13 features)
 - `currently_engaging`: Currently engaging target (0.0 or 1.0)
@@ -323,27 +319,35 @@ Each friendly entity (units you control) has 52 features organized as:
 - `endurance`: Endurance capabilities [0,1]
 - `scouting`: Scouting capabilities [0,1]
 
-**Total**: 52 features per entity
+**Total**: 10 + 9 + 2 + 7 + 3 + 13 + 8 = 52 features per entity
 
 ## Enemy Target Group Features (12 per target group)
 
 Each detected enemy target group has 12 features:
 
-### Detection & Identity (4 features)
+### Detection (1 feature)
 - `is_detected`: Target visible to sensors (0.0 or 1.0)
-- `domain_air`, `domain_sea`, `domain_ground`: One-hot domain encoding
 
-### Position & Velocity (6 features)
-- `grid_x`, `grid_y`: Normalized grid position [0,1]
-- `velocity_x`, `velocity_y`: Velocity components [0,1]
-- `speed_norm`: Speed magnitude [0,1]
-- `heading_norm`: Heading direction [0,1]
+### Position (2 features)
+- `pos_x_norm`, `pos_y_norm`: Normalized grid position [0,1]
 
-### Count & Egocentric (2 features)
-- `entity_count_norm`: Number of units in group [0,1]
-- `distance_to_island_norm`: Distance to objective [0,1]
+### Velocity (2 features)
+- `speed_x_norm`, `speed_y_norm`: Velocity components normalized by max_velocity [0,1]
 
-**Total**: 12 features per target group
+### Domain (3 features)
+- `domain_air`, `domain_surface`, `domain_land`: One-hot domain encoding
+
+### Count (1 feature)
+- `num_units_norm`: Number of known alive units in group [0,1]
+
+### Egocentric (2 features)
+- `enemy_island_range_norm`: Distance to objective [0,1]
+- `enemy_island_bearing_norm`: Bearing to objective [0,1]
+
+### Uncertainty (1 feature)
+- `is_ghost`: Detection indicator (1.0 if on stealth mode, 0.0 if confirmed)
+
+**Total**: 1 + 2 + 2 + 3 + 1 + 2 + 1 = 12 features per target group
 
 ## Gymnasium Space Definition
 
@@ -356,6 +360,6 @@ spaces.Box(
 )
 ```
 
-Example with default config (max_entities=60, max_target_groups=20):
-- Shape: `(3371,)` = 11 + (60×52) + (20×12)
+Example with default config (max_entities=100, max_target_groups=50):
+- Shape: `(5811,)` = 11 + (100×52) + (50×12)
 
