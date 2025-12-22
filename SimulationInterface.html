@@ -124,6 +124,7 @@
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="SimulationInterface.html#CaptureFlag">CaptureFlag</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#PlayerEvent_SpawnEntity">PlayerEvent_SpawnEntity</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#Refuel">Refuel</a>
 </font></dt></dl>
 </dd>
@@ -152,7 +153,8 @@
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#PlayerEventCommitSprint">PlayerEventCommitSprint</a>
 </font></dt></dl>
 </dd>
-<dt><font face="helvetica, arial"><a href="SimulationInterface.html#SatelliteSweep">SatelliteSweep</a>
+<dt><font face="helvetica, arial"><a href="SimulationInterface.html#PlayerEvent_SetJammerFocus">PlayerEvent_SetJammerFocus</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#SatelliteSweep">SatelliteSweep</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#SetRadarEnabled">SetRadarEnabled</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#SetRadarFocus">SetRadarFocus</a>
 </font></dt></dl>
@@ -171,10 +173,14 @@
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityCompleteReattach">EntityCompleteReattach</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityDespawned">EntityDespawned</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityDetach">EntityDetach</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityFinishedSpawning">EntityFinishedSpawning</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityMerge">EntityMerge</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntitySpawned">EntitySpawned</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntitySplit">EntitySplit</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#EntityStartReattach">EntityStartReattach</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#FlagCaptureFinished">FlagCaptureFinished</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#FlagCaptureStarted">FlagCaptureStarted</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#ManouverChanged">ManouverChanged</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#ProjectileExploded">ProjectileExploded</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupAdversaryAdded">TargetGroupAdversaryAdded</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupAdversaryRemoved">TargetGroupAdversaryRemoved</a>
@@ -207,10 +213,12 @@
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#TargetGroupState">TargetGroupState</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#Triangle">Triangle</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitCombatManouverData">UnitCombatManouverData</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitEngagement">UnitEngagement</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitLoadout">UnitLoadout</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitProjectileData">UnitProjectileData</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitStats">UnitStats</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitWeaponData">UnitWeaponData</a>
+</font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#UnitWeaponUsage">UnitWeaponUsage</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#Vector3">Vector3</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#VictoryCaptureData">VictoryCaptureData</a>
 </font></dt><dt><font face="helvetica, arial"><a href="SimulationInterface.html#VictoryConditionData">VictoryConditionData</a>
@@ -575,11 +583,11 @@ Constructor</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="CAPManouver-create_circle"><strong>create_circle</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#CAPManouver-create_circle">create_circle</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;typing.SupportsFloat,&nbsp;arg2:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
+<dl><dt><a name="CAPManouver-create_circle"><strong>create_circle</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#CAPManouver-create_circle">create_circle</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;typing.SupportsFloat,&nbsp;arg2:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
 
-<dl><dt><a name="CAPManouver-create_from_spline_points"><strong>create_from_spline_points</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#CAPManouver-create_from_spline_points">create_from_spline_points</a>(arg0:&nbsp;collections.abc.Sequence[SimulationInterface.<a href="#Vector3">Vector3</a>])&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
+<dl><dt><a name="CAPManouver-create_from_spline_points"><strong>create_from_spline_points</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#CAPManouver-create_from_spline_points">create_from_spline_points</a>(arg0:&nbsp;collections.abc.Sequence[SimulationInterface.<a href="#Vector3">Vector3</a>])&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
 
-<dl><dt><a name="CAPManouver-create_race_track"><strong>create_race_track</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#CAPManouver-create_race_track">create_race_track</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;typing.SupportsFloat,&nbsp;arg2:&nbsp;typing.SupportsFloat,&nbsp;arg3:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg4:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
+<dl><dt><a name="CAPManouver-create_race_track"><strong>create_race_track</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#CAPManouver-create_race_track">create_race_track</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;typing.SupportsFloat,&nbsp;arg2:&nbsp;typing.SupportsFloat,&nbsp;arg3:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg4:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#CAPManouver">CAPManouver</a></tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -975,6 +983,9 @@ Readonly properties defined here:<br>
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -989,6 +1000,9 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -1040,6 +1054,12 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -1257,6 +1277,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -1271,6 +1294,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -1322,6 +1348,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -1571,6 +1603,35 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="EntityFinishedSpawning">class <strong>EntityFinishedSpawning</strong></a>(<a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#EntityFinishedSpawning">EntityFinishedSpawning</a></dd>
+<dd><a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="EntityFinishedSpawning-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>entity</strong></dt>
+<dd><tt>TODO.</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="EntityFinishedSpawning-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="EntityList">class <strong>EntityList</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -1718,7 +1779,7 @@ Methods defined here:<br>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="EntitySpawnData-import_json"><strong>import_json</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#EntitySpawnData-import_json">import_json</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#EntitySpawnData">EntitySpawnData</a><br>
+<dl><dt><a name="EntitySpawnData-import_json"><strong>import_json</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#EntitySpawnData-import_json">import_json</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#EntitySpawnData">EntitySpawnData</a><br>
 &nbsp;<br>
 Import&nbsp;data&nbsp;from&nbsp;json.</tt></dd></dl>
 
@@ -2004,6 +2065,12 @@ Add&nbsp;an&nbsp;entity&nbsp;to&nbsp;the&nbsp;faction.</tt></dd></dl>
 Create&nbsp;entities&nbsp;based&nbsp;on&nbsp;an&nbsp;entity&nbsp;list.</tt></dd></dl>
 
 <hr>
+Static methods defined here:<br>
+<dl><dt><a name="FactionConfiguration-import_json"><strong>import_json</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#FactionConfiguration-import_json">import_json</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#FactionConfiguration">FactionConfiguration</a><br>
+&nbsp;<br>
+Import&nbsp;data&nbsp;from&nbsp;json.</tt></dd></dl>
+
+<hr>
 Readonly properties defined here:<br>
 <dl><dt><strong>entities</strong></dt>
 <dd><tt>The&nbsp;entities&nbsp;in&nbsp;this&nbsp;faction.</tt></dd>
@@ -2086,6 +2153,73 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FlagCaptureFinished">class <strong>FlagCaptureFinished</strong></a>(<a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#FlagCaptureFinished">FlagCaptureFinished</a></dd>
+<dd><a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="FlagCaptureFinished-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>entity_capturing</strong></dt>
+<dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>flag</strong></dt>
+<dd><tt>TODO.</tt></dd>
+</dl>
+<dl><dt><strong>success</strong></dt>
+<dd><tt>TODO</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="FlagCaptureFinished-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="FlagCaptureStarted">class <strong>FlagCaptureStarted</strong></a>(<a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#FlagCaptureStarted">FlagCaptureStarted</a></dd>
+<dd><a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="FlagCaptureStarted-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>entity_capturing</strong></dt>
+<dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>flag</strong></dt>
+<dd><tt>TODO.</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="FlagCaptureStarted-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="Flight">class <strong>Flight</strong></a>(<a href="SimulationInterface.html#Unit">Unit</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
@@ -2163,6 +2297,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -2177,6 +2314,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -2228,6 +2368,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -2300,6 +2446,10 @@ Methods defined here:<br>
 &nbsp;<br>
 Add&nbsp;an&nbsp;event&nbsp;to&nbsp;the&nbsp;force&nbsp;laydown.</tt></dd></dl>
 
+<dl><dt><a name="ForceLaydown-get_entities"><strong>get_entities</strong></a>(...)</dt><dd><tt><a href="#ForceLaydown-get_entities">get_entities</a>(self:&nbsp;SimulationInterface.<a href="#ForceLaydown">ForceLaydown</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#PlatformDomain">PlatformDomain</a>)&nbsp;-&gt;&nbsp;list[SimSpawnControllableEntity]<br>
+&nbsp;<br>
+Get&nbsp;entities&nbsp;for&nbsp;a&nbsp;domain.</tt></dd></dl>
+
 <dl><dt><a name="ForceLaydown-get_random_air_force_spawn_location"><strong>get_random_air_force_spawn_location</strong></a>(...)</dt><dd><tt><a href="#ForceLaydown-get_random_air_force_spawn_location">get_random_air_force_spawn_location</a>(self:&nbsp;SimulationInterface.<a href="#ForceLaydown">ForceLaydown</a>)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#EntitySpawnLocation">EntitySpawnLocation</a><br>
 &nbsp;<br>
 Gets&nbsp;a&nbsp;random&nbsp;spawn&nbsp;location.</tt></dd></dl>
@@ -2336,6 +2486,12 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>ground_forces_entities</strong></dt>
 <dd><tt>All&nbsp;available&nbsp;ground&nbsp;forces.</tt></dd>
+</dl>
+<dl><dt><strong>max_deployed_forces</strong></dt>
+<dd><tt>Maximum&nbsp;of&nbsp;forces&nbsp;to&nbsp;deploy.</tt></dd>
+</dl>
+<dl><dt><strong>min_deployed_forces</strong></dt>
+<dd><tt>Minimum&nbsp;of&nbsp;forces&nbsp;to&nbsp;deploy.</tt></dd>
 </dl>
 <dl><dt><strong>sea_forces_entities</strong></dt>
 <dd><tt>All&nbsp;available&nbsp;sea&nbsp;forces.</tt></dd>
@@ -2485,6 +2641,38 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ManouverChanged">class <strong>ManouverChanged</strong></a>(<a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#ManouverChanged">ManouverChanged</a></dd>
+<dd><a href="SimulationInterface.html#SimulationEvent">SimulationEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ManouverChanged-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>entity</strong></dt>
+<dd><tt>TODO.</tt></dd>
+</dl>
+<dl><dt><strong>manouver</strong></dt>
+<dd><tt>TODO</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="ManouverChanged-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="MissionConfiguration">class <strong>MissionConfiguration</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
@@ -2505,6 +2693,14 @@ Add&nbsp;a&nbsp;faction&nbsp;and&nbsp;its&nbsp;data&nbsp;to&nbsp;the&nbsp;missio
 Readonly properties defined here:<br>
 <dl><dt><strong>factions</strong></dt>
 <dd><tt>The&nbsp;factions&nbsp;in&nbsp;this&nbsp;mission&nbsp;configuration&nbsp;and&nbsp;their&nbsp;data.</tt></dd>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>max_deployed_forces</strong></dt>
+<dd><tt>Max&nbsp;deployed&nbsp;forces</tt></dd>
+</dl>
+<dl><dt><strong>min_deployed_forces</strong></dt>
+<dd><tt>Min&nbsp;deployed&nbsp;forces</tt></dd>
 </dl>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
@@ -2610,7 +2806,7 @@ Constructor</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="NonCombatManouverQueue-create"><strong>create</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#NonCombatManouverQueue-create">create</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;collections.abc.Callable)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#NonCombatManouverQueue">NonCombatManouverQueue</a><br>
+<dl><dt><a name="NonCombatManouverQueue-create"><strong>create</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#NonCombatManouverQueue-create">create</a>(arg0:&nbsp;SimulationInterface.<a href="#Vector3">Vector3</a>,&nbsp;arg1:&nbsp;collections.abc.Callable)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#NonCombatManouverQueue">NonCombatManouverQueue</a><br>
 &nbsp;<br>
 Create&nbsp;a&nbsp;queue&nbsp;containing&nbsp;an&nbsp;initial&nbsp;move&nbsp;to&nbsp;and&nbsp;a&nbsp;configurable&nbsp;'real'&nbsp;manouver.</tt></dd></dl>
 
@@ -2709,6 +2905,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -2723,6 +2922,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -2774,6 +2976,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -3090,6 +3298,83 @@ Data descriptors inherited from <a href="SimulationInterface.html#PlayerEvent">P
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="PlayerEventCommitSprint-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PlayerEvent_SetJammerFocus">class <strong>PlayerEvent_SetJammerFocus</strong></a>(<a href="SimulationInterface.html#PlayerEvent">PlayerEvent</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#PlayerEvent_SetJammerFocus">PlayerEvent_SetJammerFocus</a></dd>
+<dd><a href="SimulationInterface.html#PlayerEvent">PlayerEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PlayerEvent_SetJammerFocus-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt><a href="#PlayerEvent_SetJammerFocus-__init__">__init__</a>(self:&nbsp;SimulationInterface.<a href="#PlayerEvent_SetJammerFocus">PlayerEvent_SetJammerFocus</a>)&nbsp;-&gt;&nbsp;None<br>
+&nbsp;<br>
+Constructor</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>entity_to_protect</strong></dt>
+<dd><tt>The&nbsp;entity&nbsp;to&nbsp;protect.</tt></dd>
+</dl>
+<dl><dt><strong>positions</strong></dt>
+<dd><tt>The&nbsp;positions&nbsp;to&nbsp;jam&nbsp;towards.</tt></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="SimulationInterface.html#PlayerEvent">PlayerEvent</a>:<br>
+<dl><dt><strong>entity</strong></dt>
+<dd><tt>The&nbsp;entity&nbsp;this&nbsp;interaction&nbsp;involves.</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="PlayerEvent_SetJammerFocus-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="PlayerEvent_SpawnEntity">class <strong>PlayerEvent_SpawnEntity</strong></a>(<a href="SimulationInterface.html#ActivateAbility">ActivateAbility</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>TODO<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#PlayerEvent_SpawnEntity">PlayerEvent_SpawnEntity</a></dd>
+<dd><a href="SimulationInterface.html#ActivateAbility">ActivateAbility</a></dd>
+<dd><a href="SimulationInterface.html#ComponentPlayerEvent">ComponentPlayerEvent</a></dd>
+<dd><a href="SimulationInterface.html#PlayerEvent">PlayerEvent</a></dd>
+<dd><a href="SimulationInterface.html#Event">Event</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="PlayerEvent_SpawnEntity-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt><a href="#PlayerEvent_SpawnEntity-__init__">__init__</a>(self:&nbsp;SimulationInterface.<a href="#PlayerEvent_SpawnEntity">PlayerEvent_SpawnEntity</a>)&nbsp;-&gt;&nbsp;None<br>
+&nbsp;<br>
+Constructor</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="SimulationInterface.html#ComponentPlayerEvent">ComponentPlayerEvent</a>:<br>
+<dl><dt><strong>component</strong></dt>
+<dd><tt>The&nbsp;component&nbsp;we're&nbsp;addressing.</tt></dd>
+</dl>
+<hr>
+Data descriptors inherited from <a href="SimulationInterface.html#PlayerEvent">PlayerEvent</a>:<br>
+<dl><dt><strong>entity</strong></dt>
+<dd><tt>The&nbsp;entity&nbsp;this&nbsp;interaction&nbsp;involves.</tt></dd>
+</dl>
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="PlayerEvent_SpawnEntity-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -3462,8 +3747,8 @@ Constructor</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
-<dl><dt><strong>flag</strong></dt>
-<dd><tt>The&nbsp;flag&nbsp;to&nbsp;move&nbsp;to.</tt></dd>
+<dl><dt><strong>base</strong></dt>
+<dd><tt>The&nbsp;base&nbsp;to&nbsp;move&nbsp;to.</tt></dd>
 </dl>
 <dl><dt><strong>formation</strong></dt>
 <dd><tt>The&nbsp;identifier&nbsp;for&nbsp;the&nbsp;formation.</tt></dd>
@@ -3629,6 +3914,11 @@ Methods defined here:<br>
 <dl><dt><a name="RefuelComponent-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>TODO</tt></dd>
+</dl>
+<hr>
 Readonly properties inherited from <a href="SimulationInterface.html#AbilityComponent">AbilityComponent</a>:<br>
 <dl><dt><strong>can_activate</strong></dt>
 <dd><tt>Checks&nbsp;if&nbsp;this&nbsp;component&nbsp;can&nbsp;be&nbsp;activated.</tt></dd>
@@ -3670,7 +3960,10 @@ Readonly properties defined here:<br>
 <dd><tt>The&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(in&nbsp;kg).</tt></dd>
 </dl>
 <dl><dt><strong>flow_rate</strong></dt>
-<dd><tt>Kg/s&nbsp;of&nbsp;fuel&nbsp;flow&nbsp;capacity.</tt></dd>
+<dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>TODO</tt></dd>
 </dl>
 <hr>
 Readonly properties inherited from <a href="SimulationInterface.html#Component">Component</a>:<br>
@@ -4011,6 +4304,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -4025,6 +4321,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -4076,6 +4375,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -4152,6 +4457,10 @@ Add&nbsp;an&nbsp;agent&nbsp;to&nbsp;the&nbsp;simulation.</tt></dd></dl>
 &nbsp;<br>
 Finalize&nbsp;the&nbsp;force&nbsp;laydown&nbsp;phase.</tt></dd></dl>
 
+<dl><dt><a name="Simulation-get_force_strength"><strong>get_force_strength</strong></a>(...)</dt><dd><tt><a href="#Simulation-get_force_strength">get_force_strength</a>(self:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#Faction">Faction</a>)&nbsp;-&gt;&nbsp;float<br>
+&nbsp;<br>
+Get&nbsp;the&nbsp;current&nbsp;force&nbsp;strength&nbsp;for&nbsp;a&nbsp;faction.</tt></dd></dl>
+
 <dl><dt><a name="Simulation-pre_simulation_tick"><strong>pre_simulation_tick</strong></a>(...)</dt><dd><tt><a href="#Simulation-pre_simulation_tick">pre_simulation_tick</a>(self:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>,&nbsp;arg0:&nbsp;SimulationInterface.<a href="#SimulationData">SimulationData</a>)&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Tick&nbsp;on&nbsp;the&nbsp;pre-simulation&nbsp;phase.</tt></dd></dl>
@@ -4170,11 +4479,11 @@ Tick&nbsp;on&nbsp;the&nbsp;simulation&nbsp;phase.</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="Simulation-create_mission_event"><strong>create_mission_event</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#Simulation-create_mission_event">create_mission_event</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;SimMissionEvent<br>
+<dl><dt><a name="Simulation-create_mission_event"><strong>create_mission_event</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#Simulation-create_mission_event">create_mission_event</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;SimMissionEvent<br>
 &nbsp;<br>
 Creates&nbsp;a&nbsp;mission&nbsp;event&nbsp;from&nbsp;json.</tt></dd></dl>
 
-<dl><dt><a name="Simulation-create_mission_events"><strong>create_mission_events</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19</font></font></dt><dd><tt><a href="#Simulation-create_mission_events">create_mission_events</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;list[SimMissionEvent]<br>
+<dl><dt><a name="Simulation-create_mission_events"><strong>create_mission_events</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug</font></font></dt><dd><tt><a href="#Simulation-create_mission_events">create_mission_events</a>(arg0:&nbsp;str)&nbsp;-&gt;&nbsp;list[SimMissionEvent]<br>
 &nbsp;<br>
 Creates&nbsp;multiple&nbsp;mission&nbsp;events&nbsp;from&nbsp;json.</tt></dd></dl>
 
@@ -4185,6 +4494,9 @@ Readonly properties defined here:<br>
 </dl>
 <dl><dt><strong>max_num_controllable_entities</strong></dt>
 <dd><tt>The&nbsp;maximum&nbsp;number&nbsp;of&nbsp;controllable&nbsp;entities&nbsp;the&nbsp;simulation&nbsp;will&nbsp;have.</tt></dd>
+</dl>
+<dl><dt><strong>victory_force_ratio</strong></dt>
+<dd><tt>Gets&nbsp;the&nbsp;force&nbsp;ratio&nbsp;to&nbsp;declare&nbsp;victory&nbsp;(or&nbsp;None&nbsp;if&nbsp;is&nbsp;not&nbsp;set)</tt></dd>
 </dl>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
@@ -4371,6 +4683,9 @@ Readonly properties defined here:<br>
 </dl>
 <hr>
 Data descriptors defined here:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4522,6 +4837,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4587,6 +4905,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4666,6 +4987,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4731,6 +5055,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4801,6 +5128,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -4865,6 +5195,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#SpawnContro
 </dl>
 <hr>
 Data descriptors inherited from <a href="SimulationInterface.html#SpawnControllableEntity">SpawnControllableEntity</a>:<br>
+<dl><dt><strong>domain</strong></dt>
+<dd><tt>Set&nbsp;the&nbsp;domain</tt></dd>
+</dl>
 <dl><dt><strong>initial_manouver</strong></dt>
 <dd><tt>The&nbsp;initial&nbsp;manouver&nbsp;for&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
@@ -5013,6 +5346,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -5027,6 +5363,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -5078,6 +5417,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -5601,6 +5946,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 <dl><dt><strong>Controllable</strong></dt>
 <dd><tt>Whether&nbsp;this&nbsp;entity&nbsp;is&nbsp;controllable.</tt></dd>
 </dl>
+<dl><dt><strong>active_spawn_components</strong></dt>
+<dd><tt>All&nbsp;components&nbsp;on&nbsp;this&nbsp;entity&nbsp;and&nbsp;its&nbsp;children&nbsp;that&nbsp;can&nbsp;spawn&nbsp;entities.</tt></dd>
+</dl>
 <dl><dt><strong>ammo</strong></dt>
 <dd><tt>The&nbsp;ammo&nbsp;this&nbsp;entity&nbsp;has.</tt></dd>
 </dl>
@@ -5615,6 +5963,9 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>can_refuel_others</strong></dt>
 <dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;refuel&nbsp;friendly&nbsp;entities.</tt></dd>
+</dl>
+<dl><dt><strong>can_spawn</strong></dt>
+<dd><tt>Boolean&nbsp;result&nbsp;on&nbsp;whether&nbsp;this&nbsp;entity&nbsp;can&nbsp;spawn&nbsp;new&nbsp;entities.</tt></dd>
 </dl>
 <dl><dt><strong>current_manouver</strong></dt>
 <dd><tt>The&nbsp;current&nbsp;manouver&nbsp;this&nbsp;entity&nbsp;is&nbsp;performing.</tt></dd>
@@ -5666,6 +6017,12 @@ Readonly properties inherited from <a href="SimulationInterface.html#Controllabl
 </dl>
 <dl><dt><strong>radars_enabled</strong></dt>
 <dd><tt>TODO</tt></dd>
+</dl>
+<dl><dt><strong>refuel_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refuel&nbsp;compatibility.</tt></dd>
+</dl>
+<dl><dt><strong>refueling_compatibility</strong></dt>
+<dd><tt>Get&nbsp;the&nbsp;refueling&nbsp;compatibility.</tt></dd>
 </dl>
 <dl><dt><strong>relative_fuel_left</strong></dt>
 <dd><tt>Retrieve&nbsp;the&nbsp;relative&nbsp;amount&nbsp;of&nbsp;fuel&nbsp;left&nbsp;(0..1)</tt></dd>
@@ -5757,6 +6114,65 @@ Data descriptors defined here:<br>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="UnitCombatManouverData-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UnitEngagement">class <strong>UnitEngagement</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#UnitEngagement">UnitEngagement</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="UnitEngagement-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__eq__">__eq__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__getstate__"><strong>__getstate__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__getstate__">__getstate__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__hash__">__hash__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__index__"><strong>__index__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__index__">__index__</a>(self:&nbsp;SimulationInterface.<a href="#UnitEngagement">UnitEngagement</a>,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__init__">__init__</a>(self:&nbsp;SimulationInterface.<a href="#UnitEngagement">UnitEngagement</a>,&nbsp;value:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__int__"><strong>__int__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__int__">__int__</a>(self:&nbsp;SimulationInterface.<a href="#UnitEngagement">UnitEngagement</a>,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__ne__">__ne__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__repr__">__repr__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__setstate__"><strong>__setstate__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__setstate__">__setstate__</a>(self:&nbsp;SimulationInterface.<a href="#UnitEngagement">UnitEngagement</a>,&nbsp;state:&nbsp;typing.SupportsInt,&nbsp;/)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="UnitEngagement-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt><a href="#UnitEngagement-__str__">__str__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>__members__</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+<dd><tt>name(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>ASSERTIVE</strong> = &lt;UnitEngagement.ASSERTIVE: 2&gt;</dl>
+
+<dl><dt><strong>CAUTIOUS</strong> = &lt;UnitEngagement.CAUTIOUS: 1&gt;</dl>
+
+<dl><dt><strong>DEFENSIVE</strong> = &lt;UnitEngagement.DEFENSIVE: 0&gt;</dl>
+
+<dl><dt><strong>NONE</strong> = &lt;UnitEngagement.NONE: -1&gt;</dl>
+
+<dl><dt><strong>OFFENSIVE</strong> = &lt;UnitEngagement.OFFENSIVE: 3&gt;</dl>
+
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="UnitEngagement-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -5857,14 +6273,23 @@ Methods defined here:<br>
 
 <hr>
 Readonly properties defined here:<br>
+<dl><dt><strong>defensive</strong></dt>
+<dd><tt>Defensive&nbsp;capabilities</tt></dd>
+</dl>
+<dl><dt><strong>endurance</strong></dt>
+<dd><tt>Endurance&nbsp;capabilities</tt></dd>
+</dl>
 <dl><dt><strong>meta_value</strong></dt>
 <dd><tt>The&nbsp;relative&nbsp;value&nbsp;of&nbsp;this&nbsp;entity.</tt></dd>
+</dl>
+<dl><dt><strong>offensive</strong></dt>
+<dd><tt>Offensive&nbsp;capabilities</tt></dd>
 </dl>
 <dl><dt><strong>role</strong></dt>
 <dd><tt>The&nbsp;role&nbsp;of&nbsp;this&nbsp;entity.</tt></dd>
 </dl>
-<dl><dt><strong>values</strong></dt>
-<dd><tt>The&nbsp;stat&nbsp;values</tt></dd>
+<dl><dt><strong>scouting</strong></dt>
+<dd><tt>Scouting&nbsp;capabilities</tt></dd>
 </dl>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
@@ -5982,6 +6407,63 @@ Readonly properties defined here:<br>
 <hr>
 Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <dl><dt><a name="UnitWeaponData-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="UnitWeaponUsage">class <strong>UnitWeaponUsage</strong></a>(pybind11_builtins.pybind11_object)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="SimulationInterface.html#UnitWeaponUsage">UnitWeaponUsage</a></dd>
+<dd>pybind11_builtins.pybind11_object</dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="UnitWeaponUsage-__eq__"><strong>__eq__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__eq__">__eq__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__getstate__"><strong>__getstate__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__getstate__">__getstate__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__hash__"><strong>__hash__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__hash__">__hash__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__index__"><strong>__index__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__index__">__index__</a>(self:&nbsp;SimulationInterface.<a href="#UnitWeaponUsage">UnitWeaponUsage</a>,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__init__">__init__</a>(self:&nbsp;SimulationInterface.<a href="#UnitWeaponUsage">UnitWeaponUsage</a>,&nbsp;value:&nbsp;typing.SupportsInt)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__int__"><strong>__int__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__int__">__int__</a>(self:&nbsp;SimulationInterface.<a href="#UnitWeaponUsage">UnitWeaponUsage</a>,&nbsp;/)&nbsp;-&gt;&nbsp;int</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__ne__"><strong>__ne__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__ne__">__ne__</a>(self:&nbsp;object,&nbsp;other:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;bool</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__repr__">__repr__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__setstate__"><strong>__setstate__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__setstate__">__setstate__</a>(self:&nbsp;SimulationInterface.<a href="#UnitWeaponUsage">UnitWeaponUsage</a>,&nbsp;state:&nbsp;typing.SupportsInt,&nbsp;/)&nbsp;-&gt;&nbsp;None</tt></dd></dl>
+
+<dl><dt><a name="UnitWeaponUsage-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt><a href="#UnitWeaponUsage-__str__">__str__</a>(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>__members__</strong></dt>
+</dl>
+<dl><dt><strong>name</strong></dt>
+<dd><tt>name(self:&nbsp;object,&nbsp;/)&nbsp;-&gt;&nbsp;str</tt></dd>
+</dl>
+<dl><dt><strong>value</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>FREE</strong> = &lt;UnitWeaponUsage.FREE: 2&gt;</dl>
+
+<dl><dt><strong>NONE</strong> = &lt;UnitWeaponUsage.NONE: -1&gt;</dl>
+
+<dl><dt><strong>SELECTIVE</strong> = &lt;UnitWeaponUsage.SELECTIVE: 1&gt;</dl>
+
+<dl><dt><strong>TIGHT</strong> = &lt;UnitWeaponUsage.TIGHT: 0&gt;</dl>
+
+<hr>
+Static methods inherited from pybind11_builtins.pybind11_object:<br>
+<dl><dt><a name="UnitWeaponUsage-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from pybind11_builtins.pybind11_type</font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -6238,9 +6720,9 @@ Methods defined here:<br>
 
 <hr>
 Readonly properties defined here:<br>
-<dl><dt><strong>entity</strong></dt>
-</dl>
 <dl><dt><strong>should_reach_base</strong></dt>
+</dl>
+<dl><dt><strong>units</strong></dt>
 </dl>
 <hr>
 Readonly properties inherited from <a href="SimulationInterface.html#VictoryConditionData">VictoryConditionData</a>:<br>
@@ -6288,29 +6770,29 @@ Static methods inherited from pybind11_builtins.pybind11_object:<br>
 <font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-create_mock_entity"><strong>create_mock_entity</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-create_mock_entity">create_mock_entity</a>(arg0:&nbsp;SimulationInterface.<a href="#SpawnEntity">SpawnEntity</a>)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Entity">Entity</a></tt></dd></dl>
- <dl><dt><a name="-create_simulation"><strong>create_simulation</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-create_simulation">create_simulation</a>(arg0:&nbsp;SimulationInterface.<a href="#SimulationConfig">SimulationConfig</a>)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a><br>
+<td width="100%"><dl><dt><a name="-create_mock_entity"><strong>create_mock_entity</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-create_mock_entity">create_mock_entity</a>(arg0:&nbsp;SimulationInterface.<a href="#SpawnEntity">SpawnEntity</a>)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Entity">Entity</a></tt></dd></dl>
+ <dl><dt><a name="-create_simulation"><strong>create_simulation</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-create_simulation">create_simulation</a>(arg0:&nbsp;SimulationInterface.<a href="#SimulationConfig">SimulationConfig</a>)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a><br>
 &nbsp;<br>
 Create&nbsp;a&nbsp;simulation.</tt></dd></dl>
- <dl><dt><a name="-create_simulation_from_data"><strong>create_simulation_from_data</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-create_simulation_from_data">create_simulation_from_data</a>(arg0:&nbsp;str,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a><br>
+ <dl><dt><a name="-create_simulation_from_data"><strong>create_simulation_from_data</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-create_simulation_from_data">create_simulation_from_data</a>(arg0:&nbsp;str,&nbsp;arg1:&nbsp;bool)&nbsp;-&gt;&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a><br>
 &nbsp;<br>
 Create&nbsp;a&nbsp;simulation&nbsp;from&nbsp;json&nbsp;data.</tt></dd></dl>
- <dl><dt><a name="-deinitialize"><strong>deinitialize</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-deinitialize">deinitialize</a>()&nbsp;-&gt;&nbsp;None<br>
+ <dl><dt><a name="-deinitialize"><strong>deinitialize</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-deinitialize">deinitialize</a>()&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Deinitialize&nbsp;the&nbsp;library.</tt></dd></dl>
- <dl><dt><a name="-destroy_simulation"><strong>destroy_simulation</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-destroy_simulation">destroy_simulation</a>(arg0:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>)&nbsp;-&gt;&nbsp;bool<br>
+ <dl><dt><a name="-destroy_simulation"><strong>destroy_simulation</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-destroy_simulation">destroy_simulation</a>(arg0:&nbsp;SimulationInterface.<a href="#Simulation">Simulation</a>)&nbsp;-&gt;&nbsp;bool<br>
 &nbsp;<br>
 Destroy&nbsp;a&nbsp;simulation.</tt></dd></dl>
- <dl><dt><a name="-get_build_time"><strong>get_build_time</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-get_build_time">get_build_time</a>()&nbsp;-&gt;&nbsp;str<br>
+ <dl><dt><a name="-get_build_time"><strong>get_build_time</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-get_build_time">get_build_time</a>()&nbsp;-&gt;&nbsp;str<br>
 &nbsp;<br>
 Get&nbsp;the&nbsp;timestamp&nbsp;when&nbsp;the&nbsp;library&nbsp;was&nbsp;built.</tt></dd></dl>
- <dl><dt><a name="-get_commit_hash"><strong>get_commit_hash</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-get_commit_hash">get_commit_hash</a>()&nbsp;-&gt;&nbsp;str<br>
+ <dl><dt><a name="-get_commit_hash"><strong>get_commit_hash</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-get_commit_hash">get_commit_hash</a>()&nbsp;-&gt;&nbsp;str<br>
 &nbsp;<br>
 Get&nbsp;the&nbsp;commit&nbsp;hash&nbsp;for&nbsp;the&nbsp;library&nbsp;build.</tt></dd></dl>
- <dl><dt><a name="-initialize"><strong>initialize</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-initialize">initialize</a>()&nbsp;-&gt;&nbsp;None<br>
+ <dl><dt><a name="-initialize"><strong>initialize</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-initialize">initialize</a>()&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Initialize&nbsp;the&nbsp;library.</tt></dd></dl>
- <dl><dt><a name="-test_python"><strong>test_python</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19 instance</font></font></dt><dd><tt><a href="#-test_python">test_python</a>()&nbsp;-&gt;&nbsp;None<br>
+ <dl><dt><a name="-test_python"><strong>test_python</strong></a>(...)<font color="#909090"><font face="helvetica, arial"> method of pybind11_builtins.pybind11_detail_function_record_v1_msvc_md_mscver19_debug instance</font></font></dt><dd><tt><a href="#-test_python">test_python</a>()&nbsp;-&gt;&nbsp;None<br>
 &nbsp;<br>
 Test&nbsp;function.</tt></dd></dl>
 </td></tr></table>
