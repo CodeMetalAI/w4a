@@ -406,7 +406,7 @@ class TridentIslandMultiAgentEnv(ParallelEnv):
         
         # Check termination (same for both agents)
         terminated = self._check_termination()
-        truncated = self.time_elapsed >= self.config.max_game_time
+        truncated = self.time_elapsed > self.config.max_game_time
         
         # Terminal rewards (zero-sum)
         if terminated or truncated:
