@@ -268,7 +268,7 @@ def execute_capture_action(entity_id: int, action: Dict, entities: Dict, flags: 
 
     event = CaptureFlag()
     event.component = entity.find_component_by_class(CaptureFlagComponent)
-    event.entity = entity
+    event.entity = event.component.entity
     event.flag = flag
 
     return event

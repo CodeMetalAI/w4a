@@ -85,14 +85,20 @@ class AdjudicationConfig:
         self.log_path = None
 
 def import_agent_class(package_name, module_name, class_name):
+    print(f"Importing module {module_name} ")
     try:
-        module = import_module(module_name, package = package_name)
-    except:
-        print(F"Error trying to import module {module_name} from package {package_name}")
+        module = import_module(module_name)
+        #module = import_module(module_name)
+    except Exception as e:
+        print(e)
+        print(F"Error trying to import module {module_name}")
 
         return None
 
+    print(f"Importing class {class_name} from module {module.__name__}")
     agent_class = getattr(module, class_name)
+
+    print(f"Imported {agent_class.__name__} from module {agent_class.__module__}")
 
     assert agent_class
 
