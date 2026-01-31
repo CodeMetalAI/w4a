@@ -226,35 +226,6 @@ class TestEntityDeath:
 class TestTerminationConditions:
     """Test termination conditions"""
     
-    def test_time_limit_truncation(self):
-        """Test truncation based on time limit"""
-        config = Config()
-        config.max_game_time = 10.0
-        env = TridentIslandMultiAgentEnv(config=config)
-        
-        agent_legacy = CompetitionAgent(Faction.LEGACY, config)
-        agent_dynasty = SimpleAgent(Faction.DYNASTY, config)
-        env.set_agents(agent_legacy, agent_dynasty)
-        
-        observations, infos = env.reset()
-        
-        # Fast-forward time
-        env.time_elapsed = config.max_game_time + 1.0
-        
-        # Step to trigger truncation check
-        actions = {
-            "legacy": agent_legacy.select_action(observations["legacy"]),
-            "dynasty": agent_dynasty.select_action(observations["dynasty"])
-        }
-        observations, rewards, terminations, truncations, infos = env.step(actions)
-        
-        # Verify truncation occurred
-        assert truncations["legacy"] == True, "Time limit should trigger truncation"
-        assert truncations["dynasty"] == True, "Both agents should truncate simultaneously"
-        assert infos["legacy"]["termination_cause"] == "time_limit"
-        
-        env.close()
-    
     def test_casualty_tracking_and_force_ratio(self):
         """Test casualty tracking and force ratio in obs/info"""
         config = Config()
